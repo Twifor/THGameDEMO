@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/std">
+        <file>bg.bmp</file>
+        <file>loading.png</file>
+    </qresource>
+</RCC>
