@@ -5,8 +5,10 @@
 #include <QKeyEvent>
 #include <QTimer>
 
-void MainWidget::stopLoading()
+void MainWidget::stopLoading()//这里做加载完成后的跳转动画
 {
+	delete loadingThread;
+	loadingWidget->destroy();
 }
 
 MainWidget::MainWidget(QWidget *parent)
@@ -23,10 +25,21 @@ MainWidget::MainWidget(QWidget *parent)
 	setFocusPolicy(Qt::StrongFocus);
 //	showFullScreen();
 //	show();
+
+	loadingThread = new LoadingThread(this);
+	connect(loadingThread, &LoadingThread::done, this, &MainWidget::stopLoading);
+	connect(loadingWidget, &LoadingOpenGLWidget::done, [ = ](){
+		loadingWidget->stop();
+		QTimer::singleShot(1000, [ = ](){
+			delete loadingWidget;
+		});
+	});
+	loadingThread->start();
 }
 
 MainWidget::~MainWidget()
 {
+
 }
 
 void MainWidget::paintEvent(QPaintEvent *event)
@@ -37,6 +50,7 @@ void MainWidget::paintEvent(QPaintEvent *event)
 void MainWidget::keyPressEvent(QKeyEvent *event)
 {
 	if(event->modifiers() == Qt::AltModifier && event->key() == Qt::Key_F4) {//Alt+F4强行退出游戏
+		if(loadingThread->isRunning())loadingThread->exit();
 		close();
 	}
 }

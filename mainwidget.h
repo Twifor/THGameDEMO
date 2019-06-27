@@ -12,6 +12,7 @@ class MainWidget : public QWidget
 	Q_OBJECT
 public slots:
 	void stopLoading();
+
 public:
 	MainWidget(QWidget *parent = 0);
 	~MainWidget()override;
@@ -23,6 +24,7 @@ protected:
 
 private:
 	LoadingOpenGLWidget *loadingWidget;
+	LoadingThread *loadingThread;
 };
 
 #endif // MAINWIDGET_H

@@ -40,3 +40,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 RESOURCES += \
     src.qrc
+
+win32:LIBS += -lOpengl32 \
+                -lglu32 \
+                -lglut
