@@ -7,40 +7,31 @@
 
 void MainWidget::stopLoading()
 {
-	timer->stop();
 }
 
 MainWidget::MainWidget(QWidget *parent)
 	: QWidget(parent)
 {
+	loadingWidget = new LoadingOpenGLWidget(this);
+
+	setFixedSize(800, 600);
 	setCursor(Qt::BlankCursor);
 
-	loadingWidget = new LoadingWidget(this);
-	loadingWidget->setGeometry(620, 500, 150, 80);
+	loadingWidget->setGeometry(0, 0, 800, 600);
 
 	setWindowTitle("THGAMEV1.0");
 	setFocusPolicy(Qt::StrongFocus);
-	showFullScreen();
-
-	timer = new QTimer;
-	timer->setInterval(20);
-	timer->start();
-
-	connect(timer, &QTimer::timeout, [ = ](){
-		update();
-	});
+//	showFullScreen();
+//	show();
 }
 
 MainWidget::~MainWidget()
 {
-	delete timer;
 }
 
 void MainWidget::paintEvent(QPaintEvent *event)
 {
-	QPainter painter(this);
-	painter.drawPixmap(0, 0, 800, 600, QPixmap(":/std/bg.bmp"));
-//	loadingAnimation->start(QAbstractAnimation::DeleteWhenStopped);
+
 }
 
 void MainWidget::keyPressEvent(QKeyEvent *event)
@@ -50,20 +41,3 @@ void MainWidget::keyPressEvent(QKeyEvent *event)
 	}
 }
 
-LoadingWidget::LoadingWidget(QWidget *parent) : QWidget (parent)
-{
-
-}
-
-void LoadingWidget::paintEvent(QPaintEvent *)
-{
-	static int steps = 0;
-	static bool flags = false;
-	steps += 20;
-	steps %= 500;
-	if(steps == 0) flags = !flags;
-	QPainter painter(this);
-	if(!flags) painter.setOpacity(steps / 500.0);
-	else painter.setOpacity(1.0 - steps / 500.0);
-	painter.drawPixmap(0, 0, width(), height(), QPixmap(":/std/loading.png"));
-}

@@ -4,13 +4,8 @@
 #include <QWidget>
 #include <QPropertyAnimation>
 #include <QLabel>
-class LoadingWidget : public QWidget {
-	Q_OBJECT;
-public:
-	LoadingWidget(QWidget *parent = nullptr);
-protected:
-	void paintEvent(QPaintEvent *event) override;
-};
+#include "loadingwidget.h"
+
 
 class MainWidget : public QWidget
 {
@@ -27,8 +22,7 @@ protected:
 	void keyPressEvent(QKeyEvent *event) override;
 
 private:
-	QTimer *timer;
-	LoadingWidget *loadingWidget;
+	LoadingOpenGLWidget *loadingWidget;
 };
 
 #endif // MAINWIDGET_H
