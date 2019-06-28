@@ -5,7 +5,8 @@
 #include <QPropertyAnimation>
 #include <QLabel>
 #include "loadingwidget.h"
-
+#include "menuwidget.h"
+#include "musicfactory.h"
 
 class MainWidget : public QWidget
 {
@@ -21,10 +22,12 @@ public:
 protected:
 	void paintEvent(QPaintEvent *event) override;
 	void keyPressEvent(QKeyEvent *event) override;
+	void closeEvent(QCloseEvent *event) override;
 
 private:
 	LoadingOpenGLWidget *loadingWidget;
 	LoadingThread *loadingThread;
+	MenuWidget *menuWidget;
 };
 
 #endif // MAINWIDGET_H

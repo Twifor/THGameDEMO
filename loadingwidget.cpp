@@ -26,6 +26,7 @@ LoadingOpenGLWidget::~LoadingOpenGLWidget()
 	delete fs;
 	delete program;
 	delete texture1;
+	delete texture2;
 	delete VAO;
 	delete transform;
 
@@ -39,7 +40,6 @@ void LoadingOpenGLWidget::destroy()
 
 void LoadingOpenGLWidget::stop()
 {
-	qDebug() << "stop";
 	timer->stop();
 }
 
@@ -79,6 +79,9 @@ void LoadingOpenGLWidget::initializeGL()
 	texture1 = new QOpenGLTexture(image.mirrored(false, true));
 	texture1->bind();
 
+	texture2 = new QOpenGLTexture(QImage(":/std/menubg.png").mirrored(false, true));
+	texture2->bind();
+
 	vs = new QOpenGLShader(QOpenGLShader::Vertex);
 	vs->compileSourceCode("#version 330 core\n"
 						  "layout (location = 0) in vec3 aPos;\n"
@@ -96,13 +99,15 @@ void LoadingOpenGLWidget::initializeGL()
 						  "in vec2 TexCoord;\n"
 
 						  "uniform sampler2D ourTexture;\n"
+						  "uniform sampler2D ourTexture2;\n"
 						  "uniform vec2 alpha;\n"
 
 						  "void main()\n"
 						  "{\n"
-						  "FragColor = texture(ourTexture, TexCoord);\n"
-						  "FragColor.a *= alpha.x;\n"
+						  "FragColor = mix(texture(ourTexture, TexCoord),texture(ourTexture2, TexCoord),alpha.y);\n"
+//						  "FragColor.a *= alpha.x;\n"
 						  "}");
+
 	program = new QOpenGLShaderProgram;
 	program->addShader(vs);
 	program->addShader(fs);
@@ -116,6 +121,7 @@ void LoadingOpenGLWidget::initializeGL()
 	program->setAttributeBuffer(program->attributeLocation("aTexCoord"), GL_FLOAT, 3 * sizeof(float), 2, sizeof(float) * 5);
 
 	program->setUniformValue("ourTexture", 0);
+	program->setUniformValue("ourTexture2", 2);
 
 	VAO->release();
 	VBO->release();
@@ -144,13 +150,15 @@ void LoadingOpenGLWidget::paintGL()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	texture1->bind(0);
+	texture2->bind(2);
 	VAO->bind();
 	program->bind();
 
-	program->setUniformValue("alpha", totAlpha, 0.0);
+	program->setUniformValue("alpha", 0.0, 1.0 - totAlpha);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 	texture1->release();
+	texture2->release();
 	VAO->release();
 	program->release();
 
@@ -189,12 +197,11 @@ void LoadingOpenGLWidget::paintGL()
 void LoadingOpenGLWidget::loadFile()
 {
 	int at;
-	QFile file("stars");
+	QFile file(":/data/stars");
 	file.open(QIODevice::ReadOnly);
 	QTextStream stream(&file);
 	while(!stream.atEnd()) {
 		QString str = stream.readLine();
-		qDebug() << str;
 		QTextStream stream0(&str);
 		Star::Data data;
 		stream0 >> at >> data.x >> data.y >> data.size >> data.speed;

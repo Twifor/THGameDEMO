@@ -84,7 +84,7 @@ private:
 	QOpenGLBuffer *VBO, *IBO;
 	QOpenGLShader *vs, *fs;
 	QOpenGLShaderProgram *program;
-	QOpenGLTexture *texture1;
+	QOpenGLTexture *texture1, *texture2;
 	QOpenGLVertexArrayObject *VAO;
 	QMatrix4x4 *transform;
 	QMap<int, Star::Data> *map;

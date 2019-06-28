@@ -2,8 +2,8 @@
     <qresource prefix="/std">
         <file>loading.png</file>
         <file>bg.png</file>
-        <file>NowLoading.png</file>
         <file>Star.png</file>
+        <file>menubg.png</file>
     </qresource>
     <qresource prefix="/data">
         <file>stars</file>

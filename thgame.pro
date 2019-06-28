@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui multimedia
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -27,11 +27,15 @@ CONFIG += c++11
 SOURCES += \
         main.cpp \
         mainwidget.cpp \
-    loadingwidget.cpp
+    loadingwidget.cpp \
+    menuwidget.cpp \
+    musicfactory.cpp
 
 HEADERS += \
         mainwidget.h \
-    loadingwidget.h
+    loadingwidget.h \
+    menuwidget.h \
+    musicfactory.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
