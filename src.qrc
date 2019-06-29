@@ -4,8 +4,24 @@
         <file>bg.png</file>
         <file>Star.png</file>
         <file>menubg.png</file>
+        <file>particle.png</file>
+        <file>p.png</file>
+        <file>config.png</file>
+        <file>gamestart.png</file>
+        <file>musicroom.png</file>
+        <file>quit.png</file>
+        <file>config_b.png</file>
+        <file>gamestart_b.png</file>
+        <file>musicroom_b.png</file>
+        <file>quit_b.png</file>
+        <file>select.wav</file>
+        <file>p2.png</file>
+        <file>ok.wav</file>
+        <file>cancel.wav</file>
+        <file>musicroom_bg.png</file>
     </qresource>
     <qresource prefix="/data">
         <file>stars</file>
+        <file>particles</file>
     </qresource>
 </RCC>

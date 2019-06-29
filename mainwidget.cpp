@@ -12,8 +12,8 @@ void MainWidget::stopLoading()//这里做加载完成后的跳转动画
 //	menuWidget->update();
 	loadingWidget->destroy();
 	MusicFactory::getInstance()->setBack(101200);//101413
-	MusicFactory::getInstance()->play("bgm1.wav");//开始放标题曲吧
-//	MusicFactory::getInstance()->seekTO(50000);
+	MusicFactory::getInstance()->play("res/bgm1.wav");//开始放标题曲，无缝循环播放逻辑真心头疼
+//	MusicFactory::getInstance()->seekTO(100000);
 }
 
 MainWidget::MainWidget(QWidget *parent)
@@ -36,15 +36,19 @@ MainWidget::MainWidget(QWidget *parent)
 	menuWidget = new MenuWidget(this);
 	menuWidget->setGeometry(0, 0, 800, 600);
 	menuWidget->hide();
+	connect(menuWidget, &MenuWidget::close, this, &MainWidget::close);
 
 	connect(loadingThread, &LoadingThread::done, this, &MainWidget::stopLoading);
 	connect(loadingWidget, &LoadingOpenGLWidget::done, [ = ](){
 		loadingWidget->stop();
-		QTimer::singleShot(1000, [ = ](){
+		QTimer::singleShot(0, [ = ](){
 			delete loadingWidget;
 			menuWidget->show();
+			status = MENU;
 		});
 	});
+
+	status = START_LOADING;
 	loadingThread->start();
 }
 
@@ -60,6 +64,15 @@ void MainWidget::paintEvent(QPaintEvent *event)
 
 void MainWidget::keyPressEvent(QKeyEvent *event)
 {
+	if(event->key() == Qt::Key_Up) {
+		if(status == MENU && !event->isAutoRepeat()) menuWidget->up();
+	}else if(event->key() == Qt::Key_Down) {
+		if(status == MENU && !event->isAutoRepeat()) menuWidget->down();
+	}else if(event->key() == Qt::Key_Z) {
+		if(status == MENU && !event->isAutoRepeat()) menuWidget->ok();
+	}else if(event->key() == Qt::Key_Escape) {
+		if(status == MENU && !event->isAutoRepeat()) menuWidget->quitWindow();
+	}
 }
 
 void MainWidget::closeEvent(QCloseEvent *event)

@@ -173,7 +173,7 @@ void LoadingOpenGLWidget::paintGL()
 		star->init();
 		connect(this, &LoadingOpenGLWidget::drawStar, star, &Star::draw);
 	}
-	if(!isOK) totAlpha -= 0.01;
+	if(!isOK) totAlpha -= 0.015;
 
 	++timeID;
 	timeID %= 50;

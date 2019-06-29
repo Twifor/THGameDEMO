@@ -8,9 +8,14 @@
 #include "menuwidget.h"
 #include "musicfactory.h"
 
-class MainWidget : public QWidget
+class MainWidget : public QWidget//主控件，负责与用户交互，并向各部件发送数据
 {
 	Q_OBJECT
+	enum GameStatus{
+		START_LOADING,
+		MENU
+	};
+
 public slots:
 	void stopLoading();
 
@@ -28,6 +33,7 @@ private:
 	LoadingOpenGLWidget *loadingWidget;
 	LoadingThread *loadingThread;
 	MenuWidget *menuWidget;
+	GameStatus status;//游戏状态
 };
 
 #endif // MAINWIDGET_H

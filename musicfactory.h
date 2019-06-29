@@ -17,6 +17,7 @@ public:
 	void destroy();
 	void seekTO(qint64 pos);
 	qint64 getPostion();
+	void stop();
 
 signals:
 
@@ -29,6 +30,12 @@ private:
 	QMediaPlayer *player[2];
 	explicit MusicFactory(QObject *parent = nullptr);
 	void newPlayer(int pos);
+	QMediaPlaylist s;
+	int timeID;
+
+	// QObject interface
+protected:
+	void timerEvent(QTimerEvent *event) override;
 };
 
 #endif // MUSICFACTORY_H
