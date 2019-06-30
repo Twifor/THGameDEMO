@@ -9,6 +9,7 @@
 #include <QOpenGLTexture>
 #include <QOpenGLVertexArrayObject>
 #include <QTimer>
+#include "musicroom.h"
 
 #define PARTICLE_MAX_NUM 1000
 #define ANIMATION 0.005f
@@ -41,7 +42,7 @@ public:
 	};
 
 public slots:
-	void draw();
+	void draw(float s);
 
 };
 
@@ -52,7 +53,7 @@ public:
 	BlueParticle();
 
 public slots:
-	void draw();
+	void draw(float s);
 
 signals:
 	void done(BlueParticle *p);
@@ -63,7 +64,8 @@ class MenuWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core//�
 	Q_OBJECT
 	enum MenuStatus{
 		MAIN,
-		MUSICROOM
+		MUSICROOM,
+		MUSICROOMING
 	};
 
 public:
@@ -76,9 +78,13 @@ public:
 	void ok();//确认接口
 	void quitWindow();
 
+	QOpenGLVertexArrayObject *getBlueParticleVAO();
+	QOpenGLShaderProgram *getBlueParticleProgram();
+	QOpenGLTexture *getBlueParticleTexture();
+
 signals:
-	void draw();
-	void draw2();
+	void draw(float s);
+	void draw2(float s);
 	void close();
 
 public slots:
@@ -116,6 +122,8 @@ private:
 	float totAlpha;//用于实现渐隐动画
 
 	MenuStatus status;//菜单状态，其实想好好写的，但是想起状态机模型时已经基本写完了:P
+
+	MusicRoom *musicRoomWidget;
 };
 
 #endif // MENUWIDGET_H

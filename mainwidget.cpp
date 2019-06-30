@@ -11,8 +11,9 @@ void MainWidget::stopLoading()//这里做加载完成后的跳转动画
 //	menuWidget->show();
 //	menuWidget->update();
 	loadingWidget->destroy();
-	MusicFactory::getInstance()->setBack(101200);//101413
-	MusicFactory::getInstance()->play("res/bgm1.wav");//开始放标题曲，无缝循环播放逻辑真心头疼
+	MusicFactory::getInstance()->play(0);
+//	MusicFactory::getInstance()->setBack(101200);//101413
+//	MusicFactory::getInstance()->play("res/bgm1.wav");//开始放标题曲，无缝循环播放逻辑真心头疼
 //	MusicFactory::getInstance()->seekTO(100000);
 }
 

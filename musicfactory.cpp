@@ -53,10 +53,42 @@ void MusicFactory::stop()
 	killTimer(timeID);
 }
 
+void MusicFactory::play(int s)
+{
+	now = s;
+	if(s == 0) {
+		setBack(101200);
+		play("res/bgm1.wav");
+	}else if(s == 1) {
+		setBack(276710);
+		play("res/bgm2.wav");
+	}else if(s == 3) {
+		setBack(222450);
+		play("res/bgm4.wav");
+	}else if(s == 2) {
+		setBack(417200);
+		play("res/bgm3.wav");
+	}
+}
+
+int MusicFactory::getNow()
+{
+	return now;
+}
+
+void MusicFactory::quit()
+{
+	if(player[0]->state() == QMediaPlayer::PlayingState) player[0]->stop();
+	if(player[1]->state() == QMediaPlayer::PlayingState) player[1]->stop();
+	delete player[0];
+	delete player[1];
+}
+
 MusicFactory *MusicFactory::INSTANCE = nullptr;
 
 MusicFactory::MusicFactory(QObject *parent) : QObject(parent)
 {
+	now = -1;
 }
 
 void MusicFactory::newPlayer(int pos)

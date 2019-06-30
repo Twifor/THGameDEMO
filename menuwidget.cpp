@@ -90,6 +90,9 @@ void MenuWidget::down()
 			atAnimation = at = (at + 1) % 4;
 			QSound::play(":/std/select.wav");
 			animationTime = 0;
+		}else if(status == MUSICROOMING) {
+			QSound::play(":/std/select.wav");
+			musicRoomWidget->down();
 		}
 	}
 }
@@ -101,23 +104,51 @@ void MenuWidget::up()
 			atAnimation = at = (at + 3) % 4;
 			QSound::play(":/std/select.wav");
 			animationTime = 0;
+		}else if(status == MUSICROOMING) {
+			QSound::play(":/std/select.wav");
+			musicRoomWidget->up();
+
 		}
 	}
 }
 
 void MenuWidget::ok()
 {
-	if(status == MAIN) {
-		QSound::play(":/std/ok.wav");
-		sparkTime = 0;
+	if(!lock) {
+		if(status == MAIN) {
+			QSound::play(":/std/ok.wav");
+			sparkTime = 0;
+		}else if(status == MUSICROOMING) {
+			QSound::play(":/std/ok.wav");
+			musicRoomWidget->ok();
+		}
 	}
 }
 
 void MenuWidget::quitWindow()
 {
-	atAnimation = at = 3;
-	animationTime = 0;
+	if(status == MAIN) {
+		atAnimation = at = 3;
+		animationTime = 0;
+	}else if(status == MUSICROOMING) {
+		musicRoomWidget->quit();
+	}
 	QSound::play(":/std/cancel.wav");
+}
+
+QOpenGLVertexArrayObject *MenuWidget::getBlueParticleVAO()
+{
+	return VAO2;
+}
+
+QOpenGLShaderProgram *MenuWidget::getBlueParticleProgram()
+{
+	return program2;
+}
+
+QOpenGLTexture *MenuWidget::getBlueParticleTexture()
+{
+	return p2;
 }
 
 void MenuWidget::initializeGL()
@@ -267,7 +298,7 @@ void MenuWidget::resizeGL(int w, int h)
 	glViewport(0, 0, w, h);
 }
 
-void MenuWidget::paintGL()
+void MenuWidget:: paintGL()
 {
 	if(map->find(now) != map->end() && status == MAIN) loadParticles(now); //加载粒子
 	++now;
@@ -295,7 +326,7 @@ void MenuWidget::paintGL()
 	program2->bind();
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-	emit draw();
+	emit draw(totAlpha);
 	texture2->release();
 	VAO2->release();
 	program2->release();
@@ -308,7 +339,7 @@ void MenuWidget::paintGL()
 	p2->bind(1);
 	program2->bind();
 	VAO2->bind();
-	emit draw2();
+	emit draw2(totAlpha);
 	p2->release();
 	program2->release();
 	VAO2->release();
@@ -319,7 +350,13 @@ void MenuWidget::paintGL()
 	program2->release();
 
 	if(status == MUSICROOM) {
-		if(totAlpha > 0.0f) totAlpha -= 0.02f;
+		if(totAlpha > 0.0f) totAlpha -= 0.01f;
+		else{
+			timer->stop();
+			this->hide();
+			musicRoomWidget->show();
+			status = MUSICROOMING;
+		}
 	}
 }
 
@@ -620,7 +657,38 @@ void MenuWidget::solve()
 	qDebug() << "Choose" << at;
 	switch(at) {
 		case 3: emit close(); break;//关闭，发射关闭信号
-		case 1: status = MUSICROOM; break;
+		case 1: {
+			status = MUSICROOM;
+			musicRoomWidget = new MusicRoom(parentWidget());
+			musicRoomWidget->hide();
+			connect(musicRoomWidget, &MusicRoom::done, [ & ](){
+				QTimer::singleShot(0, [&](){
+					lock = true;
+					at = 1;
+					atAnimation = -1;
+					sparkTime = -1;
+					totAlpha = 1.0f;
+					now = 0;
+					pos[0] = -1.5f;
+					pos[1] = -1.5f;
+					pos[2] = -1.5f;
+					pos[3] = -1.5f;
+
+					pos2[0] = -0.10f;
+					pos2[1] = -0.10f;
+					pos2[2] = -0.10f;
+					pos2[3] = -0.10f;
+
+					timer->setInterval(1000 / 60);
+					timer->start();
+
+					delete musicRoomWidget;
+					this->show();
+					status = MAIN;
+				});
+			});
+			break;
+		}
 	}
 }
 
@@ -664,14 +732,14 @@ void Particle::setObj(float x, float y)
 	k = (this->posX - objY) / (this->posY - objX);//计算斜率
 }
 
-void Particle::draw()
+void Particle::draw(float s)
 {
 	MenuWidget::matrix->setToIdentity();
 	MenuWidget::matrix->translate(posX, posY);
 	MenuWidget::matrix->scale(size, size, size);
 
 	MenuWidget::getProgram->setUniformValue("projection", *MenuWidget::matrix);
-	MenuWidget::getProgram->setUniformValue("alpha", life, 0.0);
+	MenuWidget::getProgram->setUniformValue("alpha", life * s, 0.0);
 
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
@@ -689,14 +757,14 @@ BlueParticle::BlueParticle() : QObject (nullptr)
 	life = 1.0;
 }
 
-void BlueParticle::draw()
+void BlueParticle::draw(float s)
 {
 	MenuWidget::matrix->setToIdentity();
 	MenuWidget::matrix->translate(posX, posY);
 	MenuWidget::matrix->scale(0.02f, 0.02f, 0.02f);
 
 	MenuWidget::getProgram->setUniformValue("projection", *MenuWidget::matrix);
-	MenuWidget::getProgram->setUniformValue("alpha", life, 0.0);
+	MenuWidget::getProgram->setUniformValue("alpha", life * s, 0.0);
 
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 	posY += 0.0010f;

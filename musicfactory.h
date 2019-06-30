@@ -18,6 +18,9 @@ public:
 	void seekTO(qint64 pos);
 	qint64 getPostion();
 	void stop();
+	void play(int s);
+	int getNow();
+	void quit();
 
 signals:
 
@@ -32,6 +35,7 @@ private:
 	void newPlayer(int pos);
 	QMediaPlaylist s;
 	int timeID;
+	int now;
 
 	// QObject interface
 protected:

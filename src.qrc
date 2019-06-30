@@ -19,6 +19,22 @@
         <file>ok.wav</file>
         <file>cancel.wav</file>
         <file>musicroom_bg.png</file>
+        <file>e1.png</file>
+        <file>e1b.png</file>
+        <file>e2.png</file>
+        <file>e2b.png</file>
+        <file>e3.png</file>
+        <file>e4b.png</file>
+        <file>e4.png</file>
+        <file>e3b.png</file>
+        <file>song1.png</file>
+        <file>song2.png</file>
+        <file>song3.png</file>
+        <file>song4.png</file>
+        <file>magic.png</file>
+        <file>laba.png</file>
+        <file>laba2.png</file>
+        <file>laba3.png</file>
     </qresource>
     <qresource prefix="/data">
         <file>stars</file>
