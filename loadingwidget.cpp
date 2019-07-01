@@ -31,6 +31,8 @@ LoadingOpenGLWidget::~LoadingOpenGLWidget()
 	delete transform;
 
 	delete map;
+
+	Star::destroy();
 }
 
 void LoadingOpenGLWidget::destroy()
@@ -129,6 +131,8 @@ void LoadingOpenGLWidget::initializeGL()
 	program->release();
 	texture1->release();
 
+	Star::init();
+
 	timer->start();
 	connect(timer, &QTimer::timeout, [ = ](){
 		update();
@@ -170,7 +174,6 @@ void LoadingOpenGLWidget::paintGL()
 		star->setPos(data.x, data.y);
 		star->setSize(data.size);
 		star->setSpeed(data.speed);
-		star->init();
 		connect(this, &LoadingOpenGLWidget::drawStar, star, &Star::draw);
 	}
 	if(!isOK) totAlpha -= 0.015;
@@ -207,6 +210,18 @@ void LoadingOpenGLWidget::loadFile()
 		stream0 >> at >> data.x >> data.y >> data.size >> data.speed;
 		(*map)[at] = data;
 	}
+}
+
+void Star::destroy()
+{
+	delete matrix;
+	delete VBO;
+	delete IBO;
+	delete vs;
+	delete fs;
+	delete program;
+	delete texture;
+	delete VAO;
 }
 
 void Star::setPos(double x, double y)
@@ -342,14 +357,7 @@ Star::Star() : QObject (nullptr)
 
 Star::~Star()
 {
-	delete matrix;
-	delete VBO;
-	delete IBO;
-	delete vs;
-	delete fs;
-	delete program;
-	delete texture;
-	delete VAO;
+
 }
 
 LoadingThread::LoadingThread(QObject *parent) : QThread (parent)
@@ -362,3 +370,12 @@ void LoadingThread::run()//加载过程
 	msleep(3000);
 	emit done();
 }
+
+QMatrix4x4 *Star::matrix = nullptr;//变换矩阵
+QOpenGLBuffer *Star::VBO = nullptr, *Star::IBO = nullptr;
+QOpenGLShader *Star::vs = nullptr, *Star::fs = nullptr;
+QOpenGLShaderProgram *Star::program = nullptr;
+QOpenGLTexture *Star::texture = nullptr;
+QOpenGLVertexArrayObject *Star::VAO = nullptr;
+QMatrix4x4 *Star::transform = nullptr;
+

@@ -3,6 +3,7 @@
 #include <QDateTime>
 #include <QSound>
 #define SCALE 0.5f
+#define MIN(x, y) ((x) < (y) ? (x) : (y))
 
 QMatrix4x4 *MenuWidget::matrix = nullptr;
 QOpenGLShaderProgram *MenuWidget::getProgram = nullptr;
@@ -35,6 +36,9 @@ MenuWidget::MenuWidget(QWidget *parent) : QOpenGLWidget(parent)
 	atAnimation = -1;
 	sparkTime = -1;
 	totAlpha = 1.0f;
+	magicTime = 0;
+	lock2 = true;
+	degree = 0.0f;
 
 	status = MAIN;
 }
@@ -81,6 +85,11 @@ MenuWidget::~MenuWidget()
 	delete p2;
 
 	delete musicRoom_bg;
+	delete magic;
+
+	delete startK;
+	delete startN;
+	delete startF;
 }
 
 void MenuWidget::down()
@@ -257,6 +266,10 @@ void MenuWidget::initializeGL()
 	config_b = new QOpenGLTexture(QImage(":/std/config_b.png").mirrored(false, true));
 	quit_b = new QOpenGLTexture(QImage(":/std/quit_b.png").mirrored(false, true));
 	p2 = new QOpenGLTexture(QImage(":/std/p2.png"));
+	magic = new QOpenGLTexture(QImage(":/std/magic2.png"));
+	startK = new QOpenGLTexture(QImage(":/std/startK.png").mirrored(false, true));
+	startF = new QOpenGLTexture(QImage(":/std/startF.png").mirrored(false, true));
+	startN = new QOpenGLTexture(QImage(":/std/startN.png").mirrored(false, true));
 
 	musicRoom_bg = new QOpenGLTexture(QImage(":/std/musicroom_bg.png").mirrored(false, true));
 	menuMatrix = new QMatrix4x4;
@@ -328,6 +341,62 @@ void MenuWidget:: paintGL()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 	emit draw(totAlpha);
 	texture2->release();
+//	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	magic->bind(1);
+	matrix->setToIdentity();
+	matrix->translate(0.5f - MIN(magicTime, 30) / 150.0f, -0.1f);
+	matrix->scale(0.75f * 1.8f, 1.8f);
+	matrix->rotate(degree, 0.0f, 0.0f, 1.0f);
+	matrix->translate(-0.5f, -0.5f, 0.0f);
+	MenuWidget::getProgram->setUniformValue("projection", *MenuWidget::matrix);
+	MenuWidget::getProgram->setUniformValue("alpha", totAlpha * MIN(magicTime, 30) / 60.0f, 0.0f);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	magic->release();
+//	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	if(magicTime > 45) {
+		startN->bind(1);
+		matrix->setToIdentity();
+		matrix->translate(-0.55f + (MIN(magicTime, 60) - 45.0f) / 150.0f, -0.5f, 0.0f);
+		matrix->scale(0.75f * 1.2f, 1.2f);
+		MenuWidget::getProgram->setUniformValue("projection", *MenuWidget::matrix);
+		MenuWidget::getProgram->setUniformValue("alpha", totAlpha * (MIN(magicTime, 60) - 45.0f) / 25.0f, 0.0f);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+
+		startN->release();
+	}
+
+	if(magicTime > 30) {
+		startK->bind(1);
+		matrix->setToIdentity();
+		matrix->translate(-0.2f, -0.6f + (MIN(magicTime, 45) - 30.0f) / 150.0f, 0.0f);
+		matrix->scale(0.75f * 1.2f, 1.2f);
+		MenuWidget::getProgram->setUniformValue("projection", *MenuWidget::matrix);
+		MenuWidget::getProgram->setUniformValue("alpha", totAlpha * (MIN(magicTime, 45) - 30.0f) / 28.0f, 0.0f);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		startK->release();
+	}
+
+	if(magicTime > 60) {
+		startF->bind(1);
+		matrix->setToIdentity();
+		matrix->translate(0.22f - (MIN(magicTime, 75) - 60.0f) / 150.0f, -0.5f, 0.0f);
+		matrix->scale(0.75f * 1.2f, 1.2f);
+		MenuWidget::getProgram->setUniformValue("projection", *MenuWidget::matrix);
+		MenuWidget::getProgram->setUniformValue("alpha", totAlpha *  (MIN(magicTime, 75) - 60.0f) / 25.0f, 0.0f);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+
+		startF->release();
+	}
+
+	if(lock2) {
+		++magicTime;
+		if(magicTime == 75) lock2 = false;
+	}
+	degree += 0.2f;
+	if(degree > 360.0f) degree = 0.0f;
+
 	VAO2->release();
 	program2->release();
 
@@ -549,7 +618,7 @@ void MenuWidget::drawMenu()
 		if(pos[3] < -0.715f) {
 			pos[3] += dx;
 			pos2[3] -= dx * 0.7006369f;
-		}else lock = false;
+		}else lock = false; //注意这里控制锁
 		menuMatrix->translate(pos[3], pos2[3]);
 		menuMatrix->scale(SCALE, SCALE);
 		program3->setUniformValue("projection", *menuMatrix);
@@ -678,6 +747,10 @@ void MenuWidget::solve()
 					pos2[1] = -0.10f;
 					pos2[2] = -0.10f;
 					pos2[3] = -0.10f;
+
+					magicTime = 0;
+					lock2 = true;
+					degree = 0.0f;
 
 					timer->setInterval(1000 / 60);
 					timer->start();

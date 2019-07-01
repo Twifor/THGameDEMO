@@ -35,6 +35,10 @@
         <file>laba.png</file>
         <file>laba2.png</file>
         <file>laba3.png</file>
+        <file>magic2.png</file>
+        <file>startK.png</file>
+        <file>startF.png</file>
+        <file>startN.png</file>
     </qresource>
     <qresource prefix="/data">
         <file>stars</file>

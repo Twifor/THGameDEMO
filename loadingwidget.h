@@ -35,11 +35,11 @@ public:
 		double size;
 		double speed;
 	};
-
+	static void destroy();
 	void setPos(double x, double y);
 	void setSize(double ss);
 	void setSpeed(double sp);
-	void init();
+	static void init();
 	void draw();
 	void speed();
 	explicit Star();
@@ -49,15 +49,15 @@ private:
 	double alpha;//透明度
 	double size;//大小
 	double sp;
-	QMatrix4x4 *matrix;//变换矩阵
+	static QMatrix4x4 *matrix;//变换矩阵
 	double x, y;
 	bool flag;
-	QOpenGLBuffer *VBO, *IBO;
-	QOpenGLShader *vs, *fs;
-	QOpenGLShaderProgram *program;
-	QOpenGLTexture *texture;
-	QOpenGLVertexArrayObject *VAO;
-	QMatrix4x4 *transform;
+	static QOpenGLBuffer *VBO, *IBO;
+	static QOpenGLShader *vs, *fs;
+	static QOpenGLShaderProgram *program;
+	static QOpenGLTexture *texture;
+	static QOpenGLVertexArrayObject *VAO;
+	static QMatrix4x4 *transform;
 };
 
 class LoadingOpenGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core

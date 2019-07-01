@@ -62,7 +62,7 @@ signals:
 class MenuWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core//超级简单粗暴的标题菜单界面
 {
 	Q_OBJECT
-	enum MenuStatus{
+	enum MenuStatus {
 		MAIN,
 		MUSICROOM,
 		MUSICROOMING
@@ -95,9 +95,10 @@ protected:
 	void paintGL() override;
 
 private:
-	bool lock;//加载动画过场播放锁
+	bool lock, lock2;//加载动画过场播放锁
 	int at, atAnimation, animationTime;//现在选的是哪一个，现在哪一个处于动画状态（鬼畜的抽动），没有就是-1，抖动动画调控时间
 	int sparkTime;//选中闪烁动画
+	int magicTime;//控制魔法阵显示动画
 	QOpenGLBuffer *VBO, *IBO, *VBO2, *VBO3;
 	QOpenGLShader *vs, *fs, *vs2, *fs2;
 	QOpenGLShaderProgram *program, *program2, *program3;
@@ -105,7 +106,7 @@ private:
 	QOpenGLVertexArrayObject *VAO, *VAO2, *VAO3;
 	QOpenGLTexture *musicRoom, *quit, *gameStart, *config;//需要加载一堆纹理
 	QOpenGLTexture *musicRoom_b, *quit_b, *gameStart_b, *config_b;
-	QOpenGLTexture *p2, *musicRoom_bg;
+	QOpenGLTexture *p2, *musicRoom_bg, *magic, *startK, *startF, *startN;
 	void initParticleOpenGL();
 	QTimer *timer;//用于产生游戏循环,很简单，很粗暴
 	Particle *newParticle();
@@ -117,6 +118,7 @@ private:
 	void drawMenu();
 	float pos[4];
 	float pos2[4];
+	float degree;//旋转角度
 	QMatrix4x4 *menuMatrix;
 	void solve();
 	float totAlpha;//用于实现渐隐动画

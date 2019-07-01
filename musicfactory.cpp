@@ -63,7 +63,7 @@ void MusicFactory::play(int s)
 		setBack(385510);
 		play("res/bgm2.wav");
 	}else if(s == 3) {
-		setBack(222450);
+		setBack(222465);
 		play("res/bgm4.wav");
 	}else if(s == 2) {
 		setBack(417200);
@@ -98,6 +98,7 @@ void MusicFactory::newPlayer(int pos)
 
 void MusicFactory::timerEvent(QTimerEvent *)
 {
+//	qDebug() << player[0]->duration();
 	qint64 ss = player[who]->position();
 //	qDebug() << player[0]->duration();
 	if(ABS(ss - b) <= 10) {//这个10是用来屏蔽加载时间误差(?)，猜的，反正加上就对了（试验无数次的结论）

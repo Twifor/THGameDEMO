@@ -224,7 +224,7 @@ void MusicRoom::paintGL()
 	matrix->rotate(45.0f, 1.0f, 0.0f, 0.0f);
 	matrix->rotate(degree, 0.0f, 0.0f, 1.0f);//绕z轴旋转
 	MusicRoom::getProgram->setUniformValue("projection", *matrix);
-	MusicRoom::getProgram->setUniformValue("alpha", preTotAlpha * totAlpha, 0.0);
+	MusicRoom::getProgram->setUniformValue("alpha", preTotAlpha * totAlpha * 0.9f, 0.0);
 	if(preTotAlpha < 1.0f) preTotAlpha += 0.04f;
 	if(pp == 192 || status == PRE) degree += 0.5f;
 	else degree += 2.0f;
