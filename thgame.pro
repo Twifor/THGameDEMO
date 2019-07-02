@@ -30,14 +30,18 @@ SOURCES += \
     loadingwidget.cpp \
     menuwidget.cpp \
     musicfactory.cpp \
-    musicroom.cpp
+    musicroom.cpp \
+    gameresource.cpp \
+    gamerule.cpp
 
 HEADERS += \
         mainwidget.h \
     loadingwidget.h \
     menuwidget.h \
     musicfactory.h \
-    musicroom.h
+    musicroom.h \
+    gameresource.h \
+    gamerule.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

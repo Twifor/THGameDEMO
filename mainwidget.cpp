@@ -4,6 +4,7 @@
 #include <QPixmap>
 #include <QKeyEvent>
 #include <QTimer>
+#include "gameresource.h"
 
 void MainWidget::stopLoading()//这里做加载完成后的跳转动画
 {
@@ -32,13 +33,12 @@ MainWidget::MainWidget(QWidget *parent)
 //	showFullScreen();
 //	show();
 
-	loadingThread = new LoadingThread(this);
-
 	menuWidget = new MenuWidget(this);
 	menuWidget->setGeometry(0, 0, 800, 600);
 	menuWidget->hide();
 	connect(menuWidget, &MenuWidget::close, this, &MainWidget::close);
 
+	loadingThread = new LoadingThread(this);
 	connect(loadingThread, &LoadingThread::done, this, &MainWidget::stopLoading);
 	connect(loadingWidget, &LoadingOpenGLWidget::done, [ = ](){
 		loadingWidget->stop();
@@ -50,12 +50,15 @@ MainWidget::MainWidget(QWidget *parent)
 	});
 
 	status = START_LOADING;
+
 	loadingThread->start();
 }
 
 MainWidget::~MainWidget()
 {
-
+	GameResource::getInstance()->destroy();
+	MusicRoom::destroy();
+	MusicFactory::getInstance()->destroy();
 }
 
 void MainWidget::paintEvent(QPaintEvent *event)

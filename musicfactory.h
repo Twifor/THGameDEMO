@@ -5,6 +5,7 @@
 #include <QMediaPlayer>
 #include <QTimer>
 #include <QMediaPlaylist>
+#include <QBuffer>
 
 class MusicFactory : public QObject//单例模式，调控游戏全局的BGM
 {
@@ -12,7 +13,6 @@ class MusicFactory : public QObject//单例模式，调控游戏全局的BGM
 public:
 	~MusicFactory();
 	static MusicFactory *getInstance();
-	void play(const char* data);
 	void setBack(qint64 p);
 	void destroy();
 	void seekTO(qint64 pos);
@@ -36,6 +36,7 @@ private:
 	QMediaPlaylist s;
 	int timeID;
 	int now;
+	QBuffer *buffer;
 
 	// QObject interface
 protected:

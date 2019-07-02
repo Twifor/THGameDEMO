@@ -2,6 +2,8 @@
 #include <QFile>
 #include <QDateTime>
 #include <QSound>
+#include <gameresource.h>
+
 #define SCALE 0.5f
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
 
@@ -95,7 +97,7 @@ MenuWidget::~MenuWidget()
 void MenuWidget::down()
 {
 	if(!lock) {
-		if(status == MAIN) {
+		if(status == MAIN && sparkTime == -1) {
 			atAnimation = at = (at + 1) % 4;
 			QSound::play(":/std/select.wav");
 			animationTime = 0;
@@ -109,14 +111,13 @@ void MenuWidget::down()
 void MenuWidget::up()
 {
 	if(!lock) {
-		if(status == MAIN) {
+		if(status == MAIN && sparkTime == -1) {
 			atAnimation = at = (at + 3) % 4;
 			QSound::play(":/std/select.wav");
 			animationTime = 0;
 		}else if(status == MUSICROOMING) {
 			QSound::play(":/std/select.wav");
 			musicRoomWidget->up();
-
 		}
 	}
 }
@@ -256,22 +257,38 @@ void MenuWidget::initializeGL()
 		0.28125f, 0.1f, 1.0f, 1.0f,
 		0.28125f, -0.1f, 1.0f, 0.0f
 	};
+	QImage image00[14];
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(GAMESTART_PNG))->loadData(image00[0]);
+	gameStart = new QOpenGLTexture(image00[0].mirrored(false, true));
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(MUSICROOM_PNG))->loadData(image00[1]);
+	musicRoom = new QOpenGLTexture(image00[1].mirrored(false, true));
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(CONFIG_PNG))->loadData(image00[2]);
+	config = new QOpenGLTexture(image00[2].mirrored(false, true));
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(QUIT_PNG))->loadData(image00[3]);
+	quit = new QOpenGLTexture(image00[3].mirrored(false, true));
 
-	gameStart = new QOpenGLTexture(QImage(":/std/gamestart.png").mirrored(false, true));
-	musicRoom = new QOpenGLTexture(QImage(":/std/musicroom.png").mirrored(false, true));
-	config = new QOpenGLTexture(QImage(":/std/config.png").mirrored(false, true));
-	quit = new QOpenGLTexture(QImage(":std/quit.png").mirrored(false, true));
-	gameStart_b = new QOpenGLTexture(QImage(":/std/gamestart_b.png").mirrored(false, true));
-	musicRoom_b = new QOpenGLTexture(QImage(":/std/musicroom_b.png").mirrored(false, true));
-	config_b = new QOpenGLTexture(QImage(":/std/config_b.png").mirrored(false, true));
-	quit_b = new QOpenGLTexture(QImage(":/std/quit_b.png").mirrored(false, true));
-	p2 = new QOpenGLTexture(QImage(":/std/p2.png"));
-	magic = new QOpenGLTexture(QImage(":/std/magic2.png"));
-	startK = new QOpenGLTexture(QImage(":/std/startK.png").mirrored(false, true));
-	startF = new QOpenGLTexture(QImage(":/std/startF.png").mirrored(false, true));
-	startN = new QOpenGLTexture(QImage(":/std/startN.png").mirrored(false, true));
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(GAMESTART_B_PNG))->loadData(image00[4]);
+	gameStart_b = new QOpenGLTexture(image00[4].mirrored(false, true));
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(MUSICROOM_B_PNG))->loadData(image00[5]);
+	musicRoom_b = new QOpenGLTexture(image00[5].mirrored(false, true));
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(CONFIG_B_PNG))->loadData(image00[6]);
+	config_b = new QOpenGLTexture(image00[6].mirrored(false, true));
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(QUIT_B_PNG))->loadData(image00[7]);
+	quit_b = new QOpenGLTexture(image00[7].mirrored(false, true));
 
-	musicRoom_bg = new QOpenGLTexture(QImage(":/std/musicroom_bg.png").mirrored(false, true));
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(P2_PNG))->loadData(image00[8]);
+	p2 = new QOpenGLTexture(image00[8]);
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(MAGIC2_PNG))->loadData(image00[9]);
+	magic = new QOpenGLTexture(image00[9]);
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(STARTK_PNG))->loadData(image00[10]);
+	startK = new QOpenGLTexture(image00[10].mirrored(false, true));
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(STARTF_PNG))->loadData(image00[11]);
+	startF = new QOpenGLTexture(image00[11].mirrored(false, true));
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(STARTN_PNG))->loadData(image00[12]);
+	startN = new QOpenGLTexture(image00[12].mirrored(false, true));
+
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(MUSICROOM_BG_PNG))->loadData(image00[13]);
+	musicRoom_bg = new QOpenGLTexture(image00[13].mirrored(false, true));
 	menuMatrix = new QMatrix4x4;
 
 	VAO3 = new QOpenGLVertexArrayObject;
@@ -450,7 +467,9 @@ void MenuWidget::initParticleOpenGL()
 	VBO2->bind();
 	VBO2->allocate(vertices, sizeof(vertices));
 
-	texture2 = new QOpenGLTexture(QImage(":/std/p.png"));
+	QImage im;
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(P_PNG))->loadData(im);
+	texture2 = new QOpenGLTexture(im);
 	texture2->bind();
 
 	vs2 = new QOpenGLShader(QOpenGLShader::Vertex);
@@ -727,9 +746,9 @@ void MenuWidget::solve()
 	switch(at) {
 		case 3: emit close(); break;//关闭，发射关闭信号
 		case 1: {
-			status = MUSICROOM;
 			musicRoomWidget = new MusicRoom(parentWidget());
 			musicRoomWidget->hide();
+			status = MUSICROOM;
 			connect(musicRoomWidget, &MusicRoom::done, [ & ](){
 				QTimer::singleShot(0, [&](){
 					lock = true;

@@ -44,6 +44,8 @@ public:
 	~MusicRoom();
 	static QMatrix4x4 *matrix;
 	static QOpenGLShaderProgram *getProgram;
+	static void init();
+	static void destroy();
 
 signals:
 	void done();
@@ -75,6 +77,8 @@ private:
 
 	void initParticles();
 	void newParticles();
+
+	static QPixmap *pixMap[4], *pixMap_b[4], *laba[3], *song[4];
 
 };
 

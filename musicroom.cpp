@@ -1,6 +1,7 @@
 #include "menuwidget.h"
 #include "musicroom.h"
 #include <musicfactory.h>
+#include "gameresource.h"
 
 MusicRoom::MusicRoom(QWidget *parent) : QOpenGLWidget(parent)
 {
@@ -78,6 +79,61 @@ MusicRoom::~MusicRoom()
 	delete magic;
 }
 
+void MusicRoom::init()
+{
+	QImage im;
+	for(int i = 0; i < 4; i++) {
+		pixMap[i] = new QPixmap;
+		pixMap_b[i] = new QPixmap;
+		song[i] = new QPixmap;
+	}
+	for(int i = 0; i < 3; i++) laba[i] = new QPixmap;
+
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(E1_PNG))->loadData(im);
+	pixMap[0]->convertFromImage(im);
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(E2_PNG))->loadData(im);
+	pixMap[1]->convertFromImage(im);
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(E3_PNG))->loadData(im);
+	pixMap[2]->convertFromImage(im);
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(E4_PNG))->loadData(im);
+	pixMap[3]->convertFromImage(im);
+
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(E1B_PNG))->loadData(im);
+	pixMap_b[0]->convertFromImage(im);
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(E2B_PNG))->loadData(im);
+	pixMap_b[1]->convertFromImage(im);
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(E3B_PNG))->loadData(im);
+	pixMap_b[2]->convertFromImage(im);
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(E4B_PNG))->loadData(im);
+	pixMap_b[3]->convertFromImage(im);
+
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(LABA_PNG))->loadData(im);
+	laba[0]->convertFromImage(im.mirrored(true, false));
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(LABA2_PNG))->loadData(im);
+	laba[1]->convertFromImage(im.mirrored(true, false));
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(LABA3_PNG))->loadData(im);
+	laba[2]->convertFromImage(im.mirrored(true, false));
+
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(SONG1_PNG))->loadData(im);
+	song[0]->convertFromImage(im);
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(SONG2_PNG))->loadData(im);
+	song[1]->convertFromImage(im);
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(SONG3_PNG))->loadData(im);
+	song[2]->convertFromImage(im);
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(SONG4_PNG))->loadData(im);
+	song[3]->convertFromImage(im);
+}
+
+void MusicRoom::destroy()
+{
+	for(int i = 0; i < 4; i++) {
+		delete pixMap[i];
+		delete pixMap_b[i];
+		delete song[i];
+	}
+	for(int i = 0; i < 3; i++) delete laba[i];
+}
+
 void MusicRoom::initializeGL()
 {
 	initializeOpenGLFunctions();
@@ -110,11 +166,12 @@ void MusicRoom::initializeGL()
 	IBO->bind();
 	IBO->allocate(indices, sizeof(indices));
 
-	QImage image(":/std/menubg.png");
+	QImage image(":/std/menubg.png"), im;
 	image.scaled(800, 600);
 	texture = new QOpenGLTexture(image.mirrored(false, true));
 	texture->bind();
-	texture2 = new QOpenGLTexture(QImage(":/std/musicroom_bg.png").mirrored(false, true));
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(MUSICROOM_BG_PNG))->loadData(im);
+	texture2 = new QOpenGLTexture(im.mirrored(false, true));
 	texture2->bind();
 
 	vs = new QOpenGLShader(QOpenGLShader::Vertex);
@@ -164,7 +221,9 @@ void MusicRoom::initializeGL()
 	texture->release();
 	texture2->release();
 
-	magic = new QOpenGLTexture(QImage(":/std/magic.png"));
+	QImage iim;
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(MAGIC_PNG))->loadData(iim);
+	magic = new QOpenGLTexture(iim);
 
 	initParticles();
 
@@ -241,10 +300,10 @@ void MusicRoom::paintGL()
 
 	painter.endNativePainting();
 	if(status == PRE) {
-		painter.drawPixmap(120, pos[0], 550, 75, QPixmap(":/std/e1.png"));
-		painter.drawPixmap(120, pos[1], 550, 75, QPixmap(":/std/e2b.png"));
-		painter.drawPixmap(120, pos[2], 550, 75, QPixmap(":/std/e3b.png"));
-		painter.drawPixmap(120, pos[3], 550, 75, QPixmap(":/std/e4b.png"));
+		painter.drawPixmap(120, pos[0], 550, 75, *pixMap[0]);
+		painter.drawPixmap(120, pos[1], 550, 75, *pixMap_b[1]);
+		painter.drawPixmap(120, pos[2], 550, 75, *pixMap_b[2]);
+		painter.drawPixmap(120, pos[3], 550, 75, *pixMap_b[3]);
 		if(pos[0] < 100) pos[0] += 10;
 		if(pos[1] < 150) pos[1] += 10;
 		if(pos[2] < 200) pos[2] += 10;
@@ -252,28 +311,22 @@ void MusicRoom::paintGL()
 		else status = MAIN;
 	}else  {
 		painter.setOpacity(totAlpha);
-		if(at == 0) painter.drawPixmap(120, 100, 550, 75, QPixmap(":/std/e1.png"));
-		else painter.drawPixmap(120, 100, 550, 75, QPixmap(":/std/e1b.png"));
-		if(at == 1) painter.drawPixmap(120, 150, 550, 75, QPixmap(":/std/e2.png"));
-		else painter.drawPixmap(120, 150, 550, 75, QPixmap(":/std/e2b.png"));
-		if(at == 2) painter.drawPixmap(120, 200, 550, 75, QPixmap(":/std/e3.png"));
-		else painter.drawPixmap(120, 200, 550, 75, QPixmap(":/std/e3b.png"));
-		if(at == 3) painter.drawPixmap(120, 250, 550, 75, QPixmap(":/std/e4.png"));
-		else painter.drawPixmap(120, 250, 550, 75, QPixmap(":/std/e4b.png"));
+		if(at == 0) painter.drawPixmap(120, 100, 550, 75, *pixMap[0]);
+		else painter.drawPixmap(120, 100, 550, 75, *pixMap_b[0]);
+		if(at == 1) painter.drawPixmap(120, 150, 550, 75, *pixMap[1]);
+		else painter.drawPixmap(120, 150, 550, 75, *pixMap_b[1]);
+		if(at == 2) painter.drawPixmap(120, 200, 550, 75, *pixMap[2]);
+		else painter.drawPixmap(120, 200, 550, 75, *pixMap_b[2]);
+		if(at == 3) painter.drawPixmap(120, 250, 550, 75, *pixMap[3]);
+		else painter.drawPixmap(120, 250, 550, 75, *pixMap_b[3]);
 
-		QPixmap laba;
-		if(labaNow == 0) laba.convertFromImage(QImage(":/std/laba3.png").mirrored(true, false));
-		else if(labaNow == 1) laba.convertFromImage(QImage(":/std/laba2.png").mirrored(true, false));
-		else laba.convertFromImage(QImage(":/std/laba.png").mirrored(true, false));
-		if(MusicFactory::getInstance()->getNow() == 0) painter.drawPixmap(90, 115, 45, 45, laba);
-		else if(MusicFactory::getInstance()->getNow() == 1) painter.drawPixmap(90, 165, 45, 45, laba);
-		else if(MusicFactory::getInstance()->getNow() == 2) painter.drawPixmap(90, 215, 45, 45, laba);
-		else painter.drawPixmap(90, 265, 45, 45, laba);
+		int p = 2 - labaNow;
+		if(MusicFactory::getInstance()->getNow() == 0) painter.drawPixmap(90, 115, 45, 45, *laba[p]);
+		else if(MusicFactory::getInstance()->getNow() == 1) painter.drawPixmap(90, 165, 45, 45, *laba[p]);
+		else if(MusicFactory::getInstance()->getNow() == 2) painter.drawPixmap(90, 215, 45, 45, *laba[p]);
+		else painter.drawPixmap(90, 265, 45, 45, *laba[p]);
 
-		if(at == 0) painter.drawPixmap(20, 400, 768, pp, QPixmap(":/std/song1.png"));
-		else if(at == 1) painter.drawPixmap(20, 400, 768, pp, QPixmap(":/std/song2.png"));
-		else if(at == 2) painter.drawPixmap(20, 400, 768, pp, QPixmap(":/std/song3.png"));
-		else if(at == 3) painter.drawPixmap(20, 400, 768, pp, QPixmap(":/std/song4.png"));
+		painter.drawPixmap(20, 400, 768, pp, *song[at]);
 		if(pp < 192) pp += 11;
 		else pp = 192;
 	}
@@ -309,7 +362,9 @@ void MusicRoom::initParticles()
 	VBO2->bind();
 	VBO2->allocate(vertices, sizeof(vertices));
 
-	texture3 = new QOpenGLTexture(QImage(":/std/p2.png"));
+	QImage im;
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(P2_PNG))->loadData(im);
+	texture3 = new QOpenGLTexture(im);
 	texture3->bind();
 
 	vs2 = new QOpenGLShader(QOpenGLShader::Vertex);
@@ -397,3 +452,7 @@ void GreenParticle::draw(float s)
 	}else life -= degree;
 	if(!lock && life <= 0.0f) emit done(this);
 }
+QPixmap *MusicRoom ::pixMap[4] = {nullptr, nullptr, nullptr, nullptr};
+QPixmap *MusicRoom::pixMap_b[4] = {nullptr, nullptr, nullptr, nullptr};
+QPixmap *MusicRoom::laba[3] = {nullptr, nullptr, nullptr};
+QPixmap *MusicRoom::song[4] = {nullptr, nullptr, nullptr, nullptr};

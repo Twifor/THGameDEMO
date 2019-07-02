@@ -4,41 +4,9 @@
         <file>bg.png</file>
         <file>Star.png</file>
         <file>menubg.png</file>
-        <file>particle.png</file>
-        <file>p.png</file>
-        <file>config.png</file>
-        <file>gamestart.png</file>
-        <file>musicroom.png</file>
-        <file>quit.png</file>
-        <file>config_b.png</file>
-        <file>gamestart_b.png</file>
-        <file>musicroom_b.png</file>
-        <file>quit_b.png</file>
         <file>select.wav</file>
-        <file>p2.png</file>
         <file>ok.wav</file>
         <file>cancel.wav</file>
-        <file>musicroom_bg.png</file>
-        <file>e1.png</file>
-        <file>e1b.png</file>
-        <file>e2.png</file>
-        <file>e2b.png</file>
-        <file>e3.png</file>
-        <file>e4b.png</file>
-        <file>e4.png</file>
-        <file>e3b.png</file>
-        <file>song1.png</file>
-        <file>song2.png</file>
-        <file>song3.png</file>
-        <file>song4.png</file>
-        <file>magic.png</file>
-        <file>laba.png</file>
-        <file>laba2.png</file>
-        <file>laba3.png</file>
-        <file>magic2.png</file>
-        <file>startK.png</file>
-        <file>startF.png</file>
-        <file>startN.png</file>
     </qresource>
     <qresource prefix="/data">
         <file>stars</file>

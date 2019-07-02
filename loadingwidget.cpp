@@ -1,6 +1,8 @@
 #include "loadingwidget.h"
 #include <QPainter>
 #include <QTextStream>
+#include <gameresource.h>
+#include "musicroom.h"
 
 LoadingOpenGLWidget::LoadingOpenGLWidget(QWidget*parent) : QOpenGLWidget(parent)
 {
@@ -367,7 +369,9 @@ LoadingThread::LoadingThread(QObject *parent) : QThread (parent)
 
 void LoadingThread::run()//加载过程
 {
-	msleep(3000);
+	GameResource::getInstance()->changeStatus(GameResource::MENU);//初始化游戏资源
+	MusicRoom::init();
+	msleep(2000);//提供播放动画的时间
 	emit done();
 }
 
