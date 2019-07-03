@@ -88,6 +88,7 @@ void GameResource::update()
 			if(i <= 31) load(static_cast<ResourceID>(i));
 			else pop(static_cast<ResourceID>(i));
 		}
+		for(int i = 35; i < 47; i++) load(static_cast<ResourceID>(i));//之后的资源(历史遗留问题)
 	}
 }
 

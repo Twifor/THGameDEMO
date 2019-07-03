@@ -65,7 +65,8 @@ class MenuWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core//�
 	enum MenuStatus {
 		MAIN,
 		MUSICROOM,
-		MUSICROOMING
+		MUSICROOMING,
+		CONFIG
 	};
 
 public:
@@ -77,6 +78,8 @@ public:
 	void up();
 	void ok();//确认接口
 	void quitWindow();
+	void left();
+	void right();
 
 	QOpenGLVertexArrayObject *getBlueParticleVAO();
 	QOpenGLShaderProgram *getBlueParticleProgram();
@@ -105,8 +108,9 @@ private:
 	QOpenGLTexture *texture, *texture2;
 	QOpenGLVertexArrayObject *VAO, *VAO2, *VAO3;
 	QOpenGLTexture *musicRoom, *quit, *gameStart, *config;//需要加载一堆纹理
-	QOpenGLTexture *musicRoom_b, *quit_b, *gameStart_b, *config_b;
+	QOpenGLTexture *musicRoom_b, *quit_b, *gameStart_b, *config_b, *title, *bgmvolume;
 	QOpenGLTexture *p2, *musicRoom_bg, *magic, *startK, *startF, *startN;
+	QOpenGLTexture *num[10];
 	void initParticleOpenGL();
 	QTimer *timer;//用于产生游戏循环,很简单，很粗暴
 	Particle *newParticle();
@@ -124,6 +128,8 @@ private:
 	float totAlpha;//用于实现渐隐动画
 
 	MenuStatus status;//菜单状态，其实想好好写的，但是想起状态机模型时已经基本写完了:P
+	int configStatus;//控制config时的动画过程
+	float posConfigX, posConfigY;//控制config选项的飞入
 
 	MusicRoom *musicRoomWidget;
 };

@@ -21,6 +21,7 @@ public:
 	void play(int s);
 	int getNow();
 	void quit();
+	void setVolume(int volume);
 
 signals:
 

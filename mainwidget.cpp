@@ -76,6 +76,10 @@ void MainWidget::keyPressEvent(QKeyEvent *event)
 		if(status == MENU && !event->isAutoRepeat()) menuWidget->ok();
 	}else if(event->key() == Qt::Key_Escape) {
 		if(status == MENU && !event->isAutoRepeat()) menuWidget->quitWindow();
+	}else if(event->key()==Qt::Key_Left){
+		if(status == MENU && !event->isAutoRepeat()) menuWidget->left();
+	}else if(event->key()==Qt::Key_Right){
+		if(status == MENU && !event->isAutoRepeat()) menuWidget->right();
 	}
 }
 

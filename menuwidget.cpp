@@ -3,6 +3,7 @@
 #include <QDateTime>
 #include <QSound>
 #include <gameresource.h>
+#include "gamerule.h"
 
 #define SCALE 0.5f
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
@@ -92,6 +93,10 @@ MenuWidget::~MenuWidget()
 	delete startK;
 	delete startN;
 	delete startF;
+
+	delete title;
+	delete bgmvolume;
+	for(int i = 0; i < 10; i++) delete num[i];
 }
 
 void MenuWidget::down()
@@ -142,8 +147,30 @@ void MenuWidget::quitWindow()
 		animationTime = 0;
 	}else if(status == MUSICROOMING) {
 		musicRoomWidget->quit();
+	}else if(status == CONFIG) {
+		configStatus = 2;
 	}
 	QSound::play(":/std/cancel.wav");
+}
+
+void MenuWidget::left()
+{
+	if(status == CONFIG) {
+		QSound::play(":/std/select.wav");
+		GameRule::bgmVolume -= 5;
+		if(GameRule::bgmVolume < 0) GameRule::bgmVolume = 0;
+		GameRule::update();//更新游戏规则
+	}
+}
+
+void MenuWidget::right()
+{
+	if(status == CONFIG) {
+		QSound::play(":/std/select.wav");
+		GameRule::bgmVolume += 5;
+		if(GameRule::bgmVolume > 100) GameRule::bgmVolume = 100;
+		GameRule::update();//更新游戏规则
+	}
 }
 
 QOpenGLVertexArrayObject *MenuWidget::getBlueParticleVAO()
@@ -257,7 +284,7 @@ void MenuWidget::initializeGL()
 		0.28125f, 0.1f, 1.0f, 1.0f,
 		0.28125f, -0.1f, 1.0f, 0.0f
 	};
-	QImage image00[14];
+	QImage image00[16];
 	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(GAMESTART_PNG))->loadData(image00[0]);
 	gameStart = new QOpenGLTexture(image00[0].mirrored(false, true));
 	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(MUSICROOM_PNG))->loadData(image00[1]);
@@ -289,6 +316,15 @@ void MenuWidget::initializeGL()
 
 	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(MUSICROOM_BG_PNG))->loadData(image00[13]);
 	musicRoom_bg = new QOpenGLTexture(image00[13].mirrored(false, true));
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(TITLE_PNG))->loadData(image00[14]);
+	title = new QOpenGLTexture(image00[14].mirrored(false, true));
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(BGMVOLUME_PNG))->loadData(image00[15]);
+	bgmvolume = new QOpenGLTexture(image00[15].mirrored(false, true));
+	for(int i = 0; i < 10; i++) {//加载十个数字的纹理
+		static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(static_cast<ResourceID>(37 + i)))->loadData(image00[0]);
+		num[i] = new QOpenGLTexture(image00[0].mirrored(false, true));
+	}
+
 	menuMatrix = new QMatrix4x4;
 
 	VAO3 = new QOpenGLVertexArrayObject;
@@ -330,7 +366,7 @@ void MenuWidget::resizeGL(int w, int h)
 
 void MenuWidget:: paintGL()
 {
-	if(map->find(now) != map->end() && status == MAIN) loadParticles(now); //加载粒子
+	if(map->find(now) != map->end() && (status == MAIN || status == CONFIG)) loadParticles(now); //加载粒子
 	++now;
 	now %= 30;
 	if(!lock && now % 5 == 0 && status == MAIN) newBlueParticle();
@@ -406,10 +442,22 @@ void MenuWidget:: paintGL()
 
 		startF->release();
 	}
+	if(magicTime > 75) {
+		title->bind(1);
+		matrix->setToIdentity();
+		matrix->translate(-0.38f, (MIN(magicTime, 90.0f) - 90.0f) / 60.0f - 0.70f, 0.0f);
+		matrix->scale(1.8f * 0.75f, 0.15f * 1.8f);
+		MenuWidget::getProgram->setUniformValue("projection", *MenuWidget::matrix);
+		MenuWidget::getProgram->setUniformValue("alpha", 0.95f * totAlpha *  1.0f * (MIN(magicTime, 90) - 75.0f) / 25.0f, 0.0f);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+
+
+		title->release();
+	}
 
 	if(lock2) {
 		++magicTime;
-		if(magicTime == 75) lock2 = false;
+		if(magicTime == 90) lock2 = false;
 	}
 	degree += 0.2f;
 	if(degree > 360.0f) degree = 0.0f;
@@ -589,7 +637,8 @@ void MenuWidget::drawMenu()
 	program3->bind();
 
 	if(lock) {//这里是菜单飞出动画部分
-		gameStart->bind(1);
+		if(at == 0) gameStart->bind(1);
+		else gameStart_b->bind(1);
 		dx = 0.02f  / 1.00778221f;
 		menuMatrix->setToIdentity();
 		if(pos[0] < -0.7f) {
@@ -601,9 +650,13 @@ void MenuWidget::drawMenu()
 		program3->setUniformValue("projection", *menuMatrix);
 		program3->setUniformValue("alpha", 1.0f, 0.0f);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
-		gameStart->release();
+		if(at == 0) gameStart->release();
+		else gameStart_b->release();
 
-		musicRoom_b->bind(1);
+
+		if(at == 1) musicRoom->bind(1);
+		else musicRoom_b->bind(1);
+
 		dx = 0.018f  / 1.04769091f;
 		if(pos[1] < -0.72f) {
 			pos[1] += dx;
@@ -615,9 +668,12 @@ void MenuWidget::drawMenu()
 		program3->setUniformValue("projection", *menuMatrix);
 		program3->setUniformValue("alpha", 1.0f, 0.0f);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
-		musicRoom_b->release();
+		if(at == 1) musicRoom->release();
+		else musicRoom_b->release();
 
-		config_b->bind(1);
+
+		if(at == 2) config->bind(1);
+		else config_b->bind(1);
 		dx = 0.016f  / 1.11803398f;
 		if(pos[2] < -0.68f) {
 			pos[2] += dx;
@@ -629,9 +685,12 @@ void MenuWidget::drawMenu()
 		program3->setUniformValue("projection", *menuMatrix);
 		program3->setUniformValue("alpha", 1.0f, 0.0f);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
-		config_b->release();
+		if(at == 2) config->release();
+		else config_b->release();
 
-		quit_b->bind(1);
+
+		if(at == 3) quit->bind(1);
+		else quit_b->bind(1);
 		menuMatrix->setToIdentity();
 		dx = 0.014f  / 1.1592830f;
 		if(pos[3] < -0.715f) {
@@ -643,102 +702,273 @@ void MenuWidget::drawMenu()
 		program3->setUniformValue("projection", *menuMatrix);
 		program3->setUniformValue("alpha", 1.0f, 0.0f);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
-		quit_b->release();
+		if(at == 3) quit->release();
+		else quit_b->release();
 
 		program3->release();
 		VAO3->release();
 	}else{
-		if(at == 0) {
-			if(sparkTime == -1) gameStart->bind(1);
-			else if(sparkTime % 4 < 2) gameStart->bind(1);
-			else gameStart_b->bind(1);
-		}else gameStart_b->bind(1);
-		menuMatrix->setToIdentity();
-		if(atAnimation == 0) menuMatrix->translate(-0.686331f + X[animationTime % 8] * ANIMATION, -0.201709f + Y[animationTime % 8] * ANIMATION);
-		else menuMatrix->translate(-0.686331f, -0.201709f);
-		menuMatrix->scale(SCALE, SCALE);
-		program3->setUniformValue("projection", *menuMatrix);
-		program3->setUniformValue("alpha", totAlpha, 0.0f);
-		glDrawArrays(GL_TRIANGLES, 0, 6);
-		if(at == 0) {
-			if(sparkTime == -1) gameStart->release();
-			else if(sparkTime % 4 < 2) gameStart->release();
-			else gameStart_b->release();
-		}else gameStart_b->release();
+		if(status != CONFIG) {//不是config
+			if(at == 0) {
+				if(sparkTime == -1) gameStart->bind(1);
+				else if(sparkTime % 4 < 2) gameStart->bind(1);
+				else gameStart_b->bind(1);
+			}else gameStart_b->bind(1);
+			menuMatrix->setToIdentity();
+			if(atAnimation == 0) menuMatrix->translate(-0.686331f + X[animationTime % 8] * ANIMATION, -0.201709f + Y[animationTime % 8] * ANIMATION);
+			else menuMatrix->translate(-0.686331f, -0.201709f);
+			menuMatrix->scale(SCALE, SCALE);
+			program3->setUniformValue("projection", *menuMatrix);
+			program3->setUniformValue("alpha", totAlpha, 0.0f);
+			glDrawArrays(GL_TRIANGLES, 0, 6);
+			if(at == 0) {
+				if(sparkTime == -1) gameStart->release();
+				else if(sparkTime % 4 < 2) gameStart->release();
+				else gameStart_b->release();
+			}else gameStart_b->release();
 
-		if(at == 1) {
-			if(sparkTime == -1) musicRoom->bind(1);
-			else if(sparkTime % 4 < 2) musicRoom->bind(1);
-			else musicRoom_b->bind(1);
-		}else musicRoom_b->bind(1);
-		menuMatrix->setToIdentity();
-		if(atAnimation == 1) menuMatrix->translate(-0.70969f + X[animationTime % 8] * ANIMATION, -0.346972f + Y[animationTime % 8] * ANIMATION);
-		else menuMatrix->translate(-0.70969f, -0.346972f);
-		menuMatrix->scale(SCALE, SCALE);
-		program3->setUniformValue("projection", *menuMatrix);
-		program3->setUniformValue("alpha", totAlpha, 0.0f);
-		glDrawArrays(GL_TRIANGLES, 0, 6);
-		if(at == 1) {
-			if(sparkTime == -1) musicRoom->release();
-			else if(sparkTime % 4 < 2) musicRoom->release();
-			else musicRoom_b->release();
-		}else musicRoom_b->release();
+			if(at == 1) {
+				if(sparkTime == -1) musicRoom->bind(1);
+				else if(sparkTime % 4 < 2) musicRoom->bind(1);
+				else musicRoom_b->bind(1);
+			}else musicRoom_b->bind(1);
+			menuMatrix->setToIdentity();
+			if(atAnimation == 1) menuMatrix->translate(-0.70969f + X[animationTime % 8] * ANIMATION, -0.346972f + Y[animationTime % 8] * ANIMATION);
+			else menuMatrix->translate(-0.70969f, -0.346972f);
+			menuMatrix->scale(SCALE, SCALE);
+			program3->setUniformValue("projection", *menuMatrix);
+			program3->setUniformValue("alpha", totAlpha, 0.0f);
+			glDrawArrays(GL_TRIANGLES, 0, 6);
+			if(at == 1) {
+				if(sparkTime == -1) musicRoom->release();
+				else if(sparkTime % 4 < 2) musicRoom->release();
+				else musicRoom_b->release();
+			}else musicRoom_b->release();
 
-		if(at == 2) {
-			if(sparkTime == -1) config->bind(1);
-			else if(sparkTime % 4 < 2) config->bind(1);
-			else config_b->bind(1);
-		}else config_b->bind(1);
-		menuMatrix->setToIdentity();
-		if(atAnimation == 2) menuMatrix->translate(-0.669971f + X[animationTime % 8] * ANIMATION, -0.515014f + Y[animationTime % 8] * ANIMATION);
-		else menuMatrix->translate(-0.669971f, -0.515014f);
-		menuMatrix->scale(SCALE, SCALE);
-		program3->setUniformValue("projection", *menuMatrix);
-		program3->setUniformValue("alpha", totAlpha, 0.0f);
-		glDrawArrays(GL_TRIANGLES, 0, 6);
-		if(at == 2) {
-			if(sparkTime == -1) config->release();
-			else if(sparkTime % 4 < 2) config->release();
-			else config_b->release();
-		}else config_b->release();
+			if(at == 2) {
+				if(sparkTime == -1) config->bind(1);
+				else if(sparkTime % 4 < 2) config->bind(1);
+				else config_b->bind(1);
+			}else config_b->bind(1);
+			menuMatrix->setToIdentity();
+			if(atAnimation == 2) menuMatrix->translate(-0.669971f + X[animationTime % 8] * ANIMATION, -0.515014f + Y[animationTime % 8] * ANIMATION);
+			else menuMatrix->translate(-0.669971f, -0.515014f);
+			menuMatrix->scale(SCALE, SCALE);
+			program3->setUniformValue("projection", *menuMatrix);
+			program3->setUniformValue("alpha", totAlpha, 0.0f);
+			glDrawArrays(GL_TRIANGLES, 0, 6);
+			if(at == 2) {
+				if(sparkTime == -1) config->release();
+				else if(sparkTime % 4 < 2) config->release();
+				else config_b->release();
+			}else config_b->release();
 
-		if(at == 3) {
-			if(sparkTime == -1) quit->bind(1);
-			else if(sparkTime % 4 < 2) quit->bind(1);
-			else quit_b->bind(1);
-		}else quit_b->bind(1);
-		menuMatrix->setToIdentity();
-		if(atAnimation == 3) menuMatrix->translate(-0.702958f + X[animationTime % 8] * ANIMATION, -0.658439f + Y[animationTime % 8] * ANIMATION);
-		else menuMatrix->translate(-0.702958f, -0.658439f);
-		menuMatrix->scale(SCALE, SCALE);
-		program3->setUniformValue("projection", *menuMatrix);
-		program3->setUniformValue("alpha", totAlpha, 0.0f);
-		glDrawArrays(GL_TRIANGLES, 0, 6);
-		if(at == 3) {
-			if(sparkTime == -1) quit->release();
-			else if(sparkTime % 4 < 2) quit->release();
-			else quit_b->release();
-		}else quit_b->release();
+			if(at == 3) {
+				if(sparkTime == -1) quit->bind(1);
+				else if(sparkTime % 4 < 2) quit->bind(1);
+				else quit_b->bind(1);
+			}else quit_b->bind(1);
+			menuMatrix->setToIdentity();
+			if(atAnimation == 3) menuMatrix->translate(-0.702958f + X[animationTime % 8] * ANIMATION, -0.658439f + Y[animationTime % 8] * ANIMATION);
+			else menuMatrix->translate(-0.702958f, -0.658439f);
+			menuMatrix->scale(SCALE, SCALE);
+			program3->setUniformValue("projection", *menuMatrix);
+			program3->setUniformValue("alpha", totAlpha, 0.0f);
+			glDrawArrays(GL_TRIANGLES, 0, 6);
+			if(at == 3) {
+				if(sparkTime == -1) quit->release();
+				else if(sparkTime % 4 < 2) quit->release();
+				else quit_b->release();
+			}else quit_b->release();
 
-		if(atAnimation != -1) {
-			++animationTime;
-			if(animationTime == 15) {
-				atAnimation = -1;
-				animationTime = 0;
+			if(atAnimation != -1) {
+				++animationTime;
+				if(animationTime == 15) {
+					atAnimation = -1;
+					animationTime = 0;
+				}
+			}
+			if(sparkTime != -1) {
+				++sparkTime;
+				if(sparkTime == 35) {
+					sparkTime = -1;
+					solve();        //动画播放完毕，执行操作
+				}
+			}
+			program3->release();
+			VAO3->release();
+		}else{
+			if(configStatus == 0) {//在需要菜单退出时播放菜单退出动画
+				gameStart_b->bind(1);
+				dx = -0.02f  / 1.00778221f;
+				menuMatrix->setToIdentity();
+				if(pos[0] > -1.5f) {
+					pos[0] += dx;
+					pos2[0] -= dx * 0.125f;
+				}
+				menuMatrix->translate(pos[0], pos2[0]);
+				menuMatrix->scale(SCALE, SCALE);
+				program3->setUniformValue("projection", *menuMatrix);
+				program3->setUniformValue("alpha", 1.0f, 0.0f);
+				glDrawArrays(GL_TRIANGLES, 0, 6);
+				gameStart_b->release();
+
+				musicRoom_b->bind(1);
+				dx = -0.018f  / 1.04769091f;
+				if(pos[1] > -1.5f) {
+					pos[1] += dx;
+					pos2[1] -= dx * 0.3125f;
+				}
+				menuMatrix->setToIdentity();
+				menuMatrix->translate(pos[1], pos2[1]);
+				menuMatrix->scale(SCALE, SCALE);
+				program3->setUniformValue("projection", *menuMatrix);
+				program3->setUniformValue("alpha", 1.0f, 0.0f);
+				glDrawArrays(GL_TRIANGLES, 0, 6);
+				musicRoom_b->release();
+
+				config->bind(1);
+				dx = -0.016f  / 1.11803398f;
+				if(pos[2] > -1.5f) {
+					pos[2] += dx;
+					pos2[2] -= dx * 0.5f;
+				};
+				menuMatrix->setToIdentity();
+				menuMatrix->translate(pos[2], pos2[2]);
+				menuMatrix->scale(SCALE, SCALE);
+				program3->setUniformValue("projection", *menuMatrix);
+				program3->setUniformValue("alpha", 1.0f, 0.0f);
+				glDrawArrays(GL_TRIANGLES, 0, 6);
+				config->release();
+
+				quit_b->bind(1);
+				menuMatrix->setToIdentity();
+				dx = -0.014f  / 1.1592830f;
+				if(pos[3] > -1.5f) {
+					pos[3] += dx;
+					pos2[3] -= dx * 0.7006369f;
+				}else {
+					configStatus = 1; //注意这里控制过程
+					posConfigX = -1.01131f;
+					posConfigY = -0.252717f;
+				}
+				menuMatrix->translate(pos[3], pos2[3]);
+				menuMatrix->scale(SCALE, SCALE);
+				program3->setUniformValue("projection", *menuMatrix);
+				program3->setUniformValue("alpha", 1.0f, 0.0f);
+				glDrawArrays(GL_TRIANGLES, 0, 6);
+				quit_b->release();
+
+				program3->release();
+				VAO3->release();
+			}else if(configStatus == 1) {//需要播放选项飞入动画
+				bgmvolume->bind(1);
+				menuMatrix->setToIdentity();
+				dx = 0.016f  / 1.04769091f;
+				if(posConfigX < -0.72f) {
+					posConfigX += dx;
+					posConfigY -= dx * 0.3125f;
+				} else configStatus = 4;
+//				qDebug() << posConfigX << posConfigY;
+				menuMatrix->translate(posConfigX, posConfigY);
+				menuMatrix->scale(SCALE, SCALE);
+				program3->setUniformValue("projection", *menuMatrix);
+				program3->setUniformValue("alpha", 1.0f, 0.0f);
+				glDrawArrays(GL_TRIANGLES, 0, 6);
+
+				bgmvolume->release();
+				VAO3->release();
+				program3->release();
+			}else if(configStatus == 2) {//退出动画
+				bgmvolume->bind(1);
+				menuMatrix->setToIdentity();
+				dx = -0.016f  / 1.04769091f;
+				if(posConfigX > -1.11131f) {
+					posConfigX += dx;
+					posConfigY -= dx * 0.3125f;
+				} else{
+					status = MAIN;
+					lock = true;
+				}
+				menuMatrix->translate(posConfigX, posConfigY);
+				menuMatrix->scale(SCALE, SCALE);
+				program3->setUniformValue("projection", *menuMatrix);
+				program3->setUniformValue("alpha", 1.0f, 0.0f);
+				glDrawArrays(GL_TRIANGLES, 0, 6);
+
+				bgmvolume->release();
+				num[GameRule::bgmVolume / 100 % 10]->bind(1);
+				menuMatrix->setToIdentity();
+				menuMatrix->translate(-0.388238f, -0.350551f);
+				menuMatrix->scale(SCALE, SCALE);
+				program3->setUniformValue("projection", *menuMatrix);
+				program3->setUniformValue("alpha", (posConfigX + 1.11131f) / 0.39131f, 0.0f);
+				glDrawArrays(GL_TRIANGLES, 0, 6);
+				num[GameRule::bgmVolume / 100 % 10]->release();
+
+				num[GameRule::bgmVolume / 10 % 10]->bind(1);
+				menuMatrix->setToIdentity();
+				menuMatrix->translate(-0.358238f, -0.350551f);
+				menuMatrix->scale(SCALE, SCALE);
+				program3->setUniformValue("projection", *menuMatrix);
+				program3->setUniformValue("alpha",   (posConfigX + 1.11131f) / 0.39131f, 0.0f);
+				glDrawArrays(GL_TRIANGLES, 0, 6);
+				num[GameRule::bgmVolume / 10 % 10]->release();
+
+				num[GameRule::bgmVolume % 10]->bind(1);
+				menuMatrix->setToIdentity();
+				menuMatrix->translate(-0.328238f, -0.350551f);
+				menuMatrix->scale(SCALE, SCALE);
+				program3->setUniformValue("projection", *menuMatrix);
+				program3->setUniformValue("alpha",   (posConfigX + 1.11131f) / 0.39131f, 0.0f);
+				glDrawArrays(GL_TRIANGLES, 0, 6);
+				num[GameRule::bgmVolume % 10]->release();
+
+				VAO3->release();
+				program3->release();
+			}else if(configStatus > 3 && configStatus < 19) {
+				bgmvolume->bind(1);
+				menuMatrix->setToIdentity();
+				menuMatrix->translate(-0.698238f, -0.350551f);
+				menuMatrix->scale(SCALE, SCALE);
+				program3->setUniformValue("projection", *menuMatrix);
+				program3->setUniformValue("alpha", 1.0f, 0.0f);
+				glDrawArrays(GL_TRIANGLES, 0, 6);
+				bgmvolume->release();
+
+				num[GameRule::bgmVolume / 100 % 10]->bind(1);
+				menuMatrix->setToIdentity();
+				menuMatrix->translate(-0.388238f, -0.350551f);
+				menuMatrix->scale(SCALE, SCALE);
+				program3->setUniformValue("projection", *menuMatrix);
+				program3->setUniformValue("alpha", (configStatus - 3) / 15.0f, 0.0f);
+				glDrawArrays(GL_TRIANGLES, 0, 6);
+				num[GameRule::bgmVolume / 100 % 10]->release();
+
+				num[GameRule::bgmVolume / 10 % 10]->bind(1);
+				menuMatrix->setToIdentity();
+				menuMatrix->translate(-0.358238f, -0.350551f);
+				menuMatrix->scale(SCALE, SCALE);
+				program3->setUniformValue("projection", *menuMatrix);
+				program3->setUniformValue("alpha",  (configStatus - 3) / 15.0f, 0.0f);
+				glDrawArrays(GL_TRIANGLES, 0, 6);
+				num[GameRule::bgmVolume / 10 % 10]->release();
+
+				num[GameRule::bgmVolume % 10]->bind(1);
+				menuMatrix->setToIdentity();
+				menuMatrix->translate(-0.328238f, -0.350551f);
+				menuMatrix->scale(SCALE, SCALE);
+				program3->setUniformValue("projection", *menuMatrix);
+				program3->setUniformValue("alpha",  (configStatus - 3) / 15.0f, 0.0f);
+				glDrawArrays(GL_TRIANGLES, 0, 6);
+				num[GameRule::bgmVolume % 10]->release();
+
+				if(configStatus < 18) ++configStatus;
 			}
 		}
-		if(sparkTime != -1) {
-			++sparkTime;
-			if(sparkTime == 35) {
-				sparkTime = -1;
-				solve();//动画播放完毕，执行操作
-			}
-		}
-		program3->release();
-		VAO3->release();
 	}
-
 }
+
 
 void MenuWidget::solve()
 {
@@ -779,6 +1009,11 @@ void MenuWidget::solve()
 					status = MAIN;
 				});
 			});
+			break;
+		}
+		case 2: {
+			status = CONFIG;
+			configStatus = 0;
 			break;
 		}
 	}

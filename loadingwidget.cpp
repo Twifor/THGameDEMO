@@ -369,9 +369,11 @@ LoadingThread::LoadingThread(QObject *parent) : QThread (parent)
 
 void LoadingThread::run()//加载过程
 {
+	msleep(2000);//提供播放动画的时间
+	qDebug() << "Begin loading...";
 	GameResource::getInstance()->changeStatus(GameResource::MENU);//初始化游戏资源
 	MusicRoom::init();
-	msleep(2000);//提供播放动画的时间
+	qDebug() << "Loading successfully";
 	emit done();
 }
 

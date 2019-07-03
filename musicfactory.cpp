@@ -2,6 +2,8 @@
 #include <QUrl>
 #include <QTimer>
 #include "gameresource.h"
+#include "gamerule.h"
+
 #define ABS(x) ((x) > 0 ? (x) : (-(x)))
 
 MusicFactory::~MusicFactory()
@@ -73,7 +75,7 @@ void MusicFactory::play(int s)
 		static_cast<GameResourceWAVData*>(GameResource::getInstance()->getData(BGM3_WAV))->loadData(buffer);
 		player[0]->setMedia(QMediaContent(), buffer);
 	}
-
+	player[0]->setVolume(GameRule::bgmVolume);
 	player[0]->play();
 	timeID = startTimer(1, Qt::PreciseTimer);
 }
@@ -89,6 +91,14 @@ void MusicFactory::quit()
 	if(player[1]->state() == QMediaPlayer::PlayingState) player[1]->stop();
 	delete player[0];
 	delete player[1];
+	player[0] = nullptr;
+	player[1] = nullptr;
+}
+
+void MusicFactory::setVolume(int volume)
+{
+	if(player[0] != nullptr) player[0]->setVolume(volume);
+	if(player[1] != nullptr) player[0]->setVolume(volume);
 }
 
 MusicFactory *MusicFactory::INSTANCE = nullptr;
@@ -114,6 +124,7 @@ void MusicFactory::timerEvent(QTimerEvent *)
 	if(ABS(ss - b) <= 10) {//这个10是用来屏蔽加载时间误差(?)，猜的，反正加上就对了（试验无数次的结论）
 		QTimer::singleShot(0, [ & ](){
 			player[who ^ 1]->setMedia(QMediaContent(), buffer);
+			player[who ^ 1]->setVolume(GameRule::bgmVolume);
 			player[who = who ^ 1]->play();
 		});
 		qDebug() << "repeat BGM";

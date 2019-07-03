@@ -300,10 +300,14 @@ void MusicRoom::paintGL()
 
 	painter.endNativePainting();
 	if(status == PRE) {
-		painter.drawPixmap(120, pos[0], 550, 75, *pixMap[0]);
-		painter.drawPixmap(120, pos[1], 550, 75, *pixMap_b[1]);
-		painter.drawPixmap(120, pos[2], 550, 75, *pixMap_b[2]);
-		painter.drawPixmap(120, pos[3], 550, 75, *pixMap_b[3]);
+		if(at == 0) painter.drawPixmap(120, pos[0], 550, 75, *pixMap[0]);
+		else painter.drawPixmap(120, pos[0], 550, 75, *pixMap_b[0]);
+		if(at == 1) painter.drawPixmap(120, pos[1], 550, 75, *pixMap[1]);
+		else painter.drawPixmap(120, pos[1], 550, 75, *pixMap_b[1]);
+		if(at == 2) painter.drawPixmap(120, pos[2], 550, 75, *pixMap[2]);
+		else painter.drawPixmap(120, pos[2], 550, 75, *pixMap_b[2]);
+		if(at == 3) painter.drawPixmap(120, pos[3], 550, 75, *pixMap[3]);
+		else painter.drawPixmap(120, pos[3], 550, 75, *pixMap_b[3]);
 		if(pos[0] < 100) pos[0] += 10;
 		if(pos[1] < 150) pos[1] += 10;
 		if(pos[2] < 200) pos[2] += 10;

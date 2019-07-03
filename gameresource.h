@@ -6,7 +6,7 @@
 #include <QImage>
 #include <QFile>
 
-const int RESOURCE_NUM = 35;
+const int RESOURCE_NUM = 47;
 enum ResourceID {//游戏资源ID，所有游戏资源必须在这里进行注册才能够使用
 	P_PNG,//粒子,1
 	P2_PNG,//另一个粒子,2
@@ -42,7 +42,19 @@ enum ResourceID {//游戏资源ID，所有游戏资源必须在这里进行注�
 	BGM1_WAV,//四首bgm,32,bgm类资源每一次只能加载一首，不允许加载多首
 	BGM2_WAV,//33
 	BGM3_WAV,//34
-	BGM4_WAV//35
+	BGM4_WAV,//35
+	TITLE_PNG,//36，标题图
+	BGMVOLUME_PNG,//37
+	NUM0_PNG,//38
+	NUM1_PNG,//39
+	NUM2_PNG,//40
+	NUM3_PNG,//41
+	NUM4_PNG,//42
+	NUM5_PNG,//43
+	NUM6_PNG,//44
+	NUM7_PNG,//45
+	NUM8_PNG,//46
+	NUM9_PNG//47
 };
 
 class GameResourceData {//游戏资源数据基类
