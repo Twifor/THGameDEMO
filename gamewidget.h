@@ -1,0 +1,44 @@
+#ifndef GAMEWIDGET_H
+#define GAMEWIDGET_H
+
+#include <QObject>
+#include <QOpenGLWidget>
+#include <QOpenGLFunctions_3_3_Core>
+#include <QOpenGLBuffer>
+#include <QOpenGLVertexArrayObject>
+#include <QOpenGLShader>
+#include <QOpenGLShaderProgram>
+#include <QOpenGLTexture>
+#include <QTimer>
+#include <QMatrix4x4>
+
+class GameWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core//游戏界面核心类
+{
+	Q_OBJECT
+public:
+	explicit GameWidget(QWidget *parent = nullptr);
+	~GameWidget();
+
+signals:
+
+public slots:
+
+protected:
+	void initializeGL() override;
+	void resizeGL(int w, int h) override;
+	void paintGL() override;
+
+private:
+	int life, spellcard, score;//玩家信息
+	QOpenGLVertexArrayObject *bg_VAO, *ma_VAO;
+	QOpenGLBuffer *bg_IBO, *bg_VBO, *ma_VBO;
+	QOpenGLShader *bg_vs, *bg_fs, *ma_vs, *ma_fs;
+	QOpenGLTexture *bg_texture, *bluestar_texture, *redstar_texture;
+	QOpenGLShaderProgram *bg_program, *ma_program;
+	float totAlpha;
+	QTimer timer;//控制游戏循环
+	QPixmap *pixmap;//存放游戏元素贴图
+	QMatrix4x4 *matrix;
+};
+
+#endif // GAMEWIDGET_H

@@ -98,7 +98,7 @@ void MusicFactory::quit()
 void MusicFactory::setVolume(int volume)
 {
 	if(player[0] != nullptr) player[0]->setVolume(volume);
-	if(player[1] != nullptr) player[0]->setVolume(volume);
+	if(player[1] != nullptr) player[1]->setVolume(volume);
 }
 
 MusicFactory *MusicFactory::INSTANCE = nullptr;

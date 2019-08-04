@@ -9,6 +9,7 @@
 #include <QOpenGLTexture>
 #include <QOpenGLVertexArrayObject>
 #include <QTimer>
+#include <QThread>
 #include "musicroom.h"
 
 #define PARTICLE_MAX_NUM 1000
@@ -16,6 +17,14 @@
 
 const float X[] = {1, -1, 1, -1, 1, -1, 1, -1};//从竞赛里学的写法
 const float Y[] = {1, 1, -1, -1, 1, 1, -1, -1};
+
+class MainGameLoadingThread : public QThread {//Game Start游戏资源加载线程
+	Q_OBJECT
+public:
+	explicit MainGameLoadingThread(QObject *parent = nullptr);
+protected:
+	void run() override;
+};
 
 class Particle : public QObject {//用于产生粒子特效
 	Q_OBJECT
@@ -66,7 +75,8 @@ class MenuWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core//�
 		MAIN,
 		MUSICROOM,
 		MUSICROOMING,
-		CONFIG
+		CONFIG,
+		GAMESTART//游戏开始加载的状态
 	};
 
 public:
@@ -89,8 +99,10 @@ signals:
 	void draw(float s);
 	void draw2(float s);
 	void close();
+	void start();//游戏正式开始信号
 
 public slots:
+	void dealWithLoading();
 
 protected:
 	void initializeGL() override;
@@ -126,12 +138,15 @@ private:
 	QMatrix4x4 *menuMatrix;
 	void solve();
 	float totAlpha;//用于实现渐隐动画
+	float loadingAlpha;
 
 	MenuStatus status;//菜单状态，其实想好好写的，但是想起状态机模型时已经基本写完了:P
 	int configStatus;//控制config时的动画过程
 	float posConfigX, posConfigY;//控制config选项的飞入
 
 	MusicRoom *musicRoomWidget;
+
+	MainGameLoadingThread *thread;
 };
 
 #endif // MENUWIDGET_H

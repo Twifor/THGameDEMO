@@ -6,7 +6,7 @@
 #include <QImage>
 #include <QFile>
 
-const int RESOURCE_NUM = 47;
+const int RESOURCE_NUM = 52;
 enum ResourceID {//游戏资源ID，所有游戏资源必须在这里进行注册才能够使用
 	P_PNG,//粒子,1
 	P2_PNG,//另一个粒子,2
@@ -54,7 +54,13 @@ enum ResourceID {//游戏资源ID，所有游戏资源必须在这里进行注�
 	NUM6_PNG,//44
 	NUM7_PNG,//45
 	NUM8_PNG,//46
-	NUM9_PNG//47
+	NUM9_PNG,//47
+	GAME_BG_PNG,//48
+	PLAYER_PNG,//49
+	SPELLCARD_PNG,//50
+	REDSTAR_PNG,//51
+	BLUESTAR_PNG//52
+
 };
 
 class GameResourceData {//游戏资源数据基类
@@ -84,7 +90,8 @@ class GameResource : public QObject//单例模式，统一管理游戏资源
 	Q_OBJECT
 public:
 	enum ResourceStatus {//状态控制加载资源的广度
-		MENU
+		MENU,
+		GAME
 	};
 	void destroy();//销毁单例，清除所有游戏资源
 	void load(ResourceID id);//加载一个特定的资源，通常指bgm

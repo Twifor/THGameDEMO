@@ -5,6 +5,7 @@
 #include <QKeyEvent>
 #include <QTimer>
 #include "gameresource.h"
+#include "gamerule.h"
 
 void MainWidget::stopLoading()//这里做加载完成后的跳转动画
 {
@@ -15,7 +16,21 @@ void MainWidget::stopLoading()//这里做加载完成后的跳转动画
 	MusicFactory::getInstance()->play(0);
 //	MusicFactory::getInstance()->setBack(101200);//101413
 //	MusicFactory::getInstance()->play("res/bgm1.wav");//开始放标题曲，无缝循环播放逻辑真心头疼
-//	MusicFactory::getInstance()->seekTO(100000);
+	//	MusicFactory::getInstance()->seekTO(100000);
+}
+
+void MainWidget::gameStart()//开始游戏函数
+{
+	qDebug() << "Game Start";
+	delete menuWidget;//释放菜单界面对象
+	status = GameStart;//修改状态机状态
+	gameWidget = new GameWidget(this);
+	gameWidget->setGeometry(0, 0, 800, 600);
+	gameWidget->show();
+	MusicFactory::getInstance()->quit();//放bgm
+	GameRule::bgmVolume = GameRule::defaultBgmVolume;
+	GameRule::update();
+	MusicFactory::getInstance()->play(1);
 }
 
 MainWidget::MainWidget(QWidget *parent)
@@ -34,9 +49,12 @@ MainWidget::MainWidget(QWidget *parent)
 //	show();
 
 	menuWidget = new MenuWidget(this);
+	gameWidget = nullptr;
+
 	menuWidget->setGeometry(0, 0, 800, 600);
 	menuWidget->hide();
 	connect(menuWidget, &MenuWidget::close, this, &MainWidget::close);
+	connect(menuWidget, &MenuWidget::start, this, &MainWidget::gameStart);
 
 	loadingThread = new LoadingThread(this);
 	connect(loadingThread, &LoadingThread::done, this, &MainWidget::stopLoading);
@@ -76,9 +94,9 @@ void MainWidget::keyPressEvent(QKeyEvent *event)
 		if(status == MENU && !event->isAutoRepeat()) menuWidget->ok();
 	}else if(event->key() == Qt::Key_Escape) {
 		if(status == MENU && !event->isAutoRepeat()) menuWidget->quitWindow();
-	}else if(event->key()==Qt::Key_Left){
+	}else if(event->key() == Qt::Key_Left) {
 		if(status == MENU && !event->isAutoRepeat()) menuWidget->left();
-	}else if(event->key()==Qt::Key_Right){
+	}else if(event->key() == Qt::Key_Right) {
 		if(status == MENU && !event->isAutoRepeat()) menuWidget->right();
 	}
 }

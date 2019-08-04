@@ -29,13 +29,14 @@ signals:
 class MusicRoom : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
 {
 	Q_OBJECT
+
+public:
 	enum MusicRoomStatus {
 		QUIT,
 		MAIN,
 		PRE,
 	};
 
-public:
 	explicit MusicRoom(QWidget *parent = nullptr);
 	void quit();
 	void up();
@@ -46,6 +47,7 @@ public:
 	static QOpenGLShaderProgram *getProgram;
 	static void init();
 	static void destroy();
+	MusicRoomStatus getStatus();
 
 signals:
 	void done();

@@ -195,7 +195,7 @@ void LoadingOpenGLWidget::paintGL()
 	painter.drawPixmap(650, 520, 120, 60, QPixmap(":/std/loading.png"));
 	painter.end();
 
-	//	QMetaObject::invokeMethod(this, "update", Qt::QueuedConnection);
+	//	QMetaObject::invokeMethod(this, "update", Qt::QueuedConnection);//正宗的刷新界面方法
 	if(totAlpha <= 0.0) emit done();
 }
 

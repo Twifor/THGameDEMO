@@ -42,6 +42,7 @@ void MusicRoom::down()
 {
 	at = (at + 1) % 4;
 	pp = 0;
+
 }
 
 void MusicRoom::ok()
@@ -132,6 +133,11 @@ void MusicRoom::destroy()
 		delete song[i];
 	}
 	for(int i = 0; i < 3; i++) delete laba[i];
+}
+
+MusicRoom::MusicRoomStatus MusicRoom::getStatus()
+{
+	return status;
 }
 
 void MusicRoom::initializeGL()

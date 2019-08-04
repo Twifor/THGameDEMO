@@ -81,14 +81,19 @@ GameResource::GameResource() : QObject (nullptr)
 	update();
 }
 
-void GameResource::update()
+void GameResource::update()//这里需要修改
 {
 	if(status == MENU) {
 		for(int i = 0; i < RESOURCE_NUM; i++) {//遍历所有资源
 			if(i <= 31) load(static_cast<ResourceID>(i));
 			else pop(static_cast<ResourceID>(i));
 		}
-		for(int i = 35; i < 47; i++) load(static_cast<ResourceID>(i));//之后的资源(历史遗留问题)
+		for(int i = 35; i < 47; i++) load(static_cast<ResourceID>(i)); //之后的资源(历史遗留问题)
+	}else if(status == GAME) {
+		for(int i = 0; i < RESOURCE_NUM; i++) {
+			if(i <= 31 || (i >= 35 && i < 47)) pop(static_cast<ResourceID>(i)); //释放之前的资源
+			else if(i >= 47 && i <= 51) load(static_cast<ResourceID>(i)); //加载游戏所需的资源文件
+		}
 	}
 }
 

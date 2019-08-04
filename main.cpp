@@ -34,13 +34,13 @@ int main(int argc, char *argv[])
 
 	QSettings set("config.ini", QSettings::IniFormat);
 	set.beginGroup("Config");
-	GameRule::bgmVolume =  set.value("volume").toInt();
+	GameRule::defaultBgmVolume = GameRule::bgmVolume =  set.value("volume").toInt();
 	GameRule::isCheat = set.value("isCheat").toBool();
 	GameRule::isFullScreen = set.value("isFullScreen").toBool();
 
 	if(GameRule::isFullScreen) changeWindow();
 	MainWidget w;
-	if(GameRule::isFullScreen)w.showFullScreen();
+	if(GameRule::isFullScreen) w.showFullScreen();
 	else w.show();
 
 	return a.exec();

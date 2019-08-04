@@ -4,6 +4,7 @@
 #include <QSound>
 #include <gameresource.h>
 #include "gamerule.h"
+#include "musicfactory.h"
 
 #define SCALE 0.5f
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
@@ -18,6 +19,7 @@ MenuWidget::MenuWidget(QWidget *parent) : QOpenGLWidget(parent)
 
 	matrix = new QMatrix4x4;
 	timer = new QTimer;
+	thread = nullptr;
 
 	map = new QMap<int, Particle::Data>;
 	loadData();
@@ -42,6 +44,7 @@ MenuWidget::MenuWidget(QWidget *parent) : QOpenGLWidget(parent)
 	magicTime = 0;
 	lock2 = true;
 	degree = 0.0f;
+	loadingAlpha = 0.0f;
 
 	status = MAIN;
 }
@@ -106,7 +109,7 @@ void MenuWidget::down()
 			atAnimation = at = (at + 1) % 4;
 			QSound::play(":/std/select.wav");
 			animationTime = 0;
-		}else if(status == MUSICROOMING) {
+		}else if(status == MUSICROOMING && musicRoomWidget->getStatus() == MusicRoom::MAIN) {
 			QSound::play(":/std/select.wav");
 			musicRoomWidget->down();
 		}
@@ -120,7 +123,7 @@ void MenuWidget::up()
 			atAnimation = at = (at + 3) % 4;
 			QSound::play(":/std/select.wav");
 			animationTime = 0;
-		}else if(status == MUSICROOMING) {
+		}else if(status == MUSICROOMING && musicRoomWidget->getStatus() == MusicRoom::MAIN) {
 			QSound::play(":/std/select.wav");
 			musicRoomWidget->up();
 		}
@@ -133,7 +136,7 @@ void MenuWidget::ok()
 		if(status == MAIN) {
 			QSound::play(":/std/ok.wav");
 			sparkTime = 0;
-		}else if(status == MUSICROOMING) {
+		}else if(status == MUSICROOMING && musicRoomWidget->getStatus() == MusicRoom::MAIN) {
 			QSound::play(":/std/ok.wav");
 			musicRoomWidget->ok();
 		}
@@ -142,15 +145,18 @@ void MenuWidget::ok()
 
 void MenuWidget::quitWindow()
 {
-	if(status == MAIN) {
+	if(status == MAIN && sparkTime == -1) {
 		atAnimation = at = 3;
+		QSound::play(":/std/cancel.wav");
 		animationTime = 0;
 	}else if(status == MUSICROOMING) {
 		musicRoomWidget->quit();
+		QSound::play(":/std/cancel.wav");
 	}else if(status == CONFIG) {
 		configStatus = 2;
+		QSound::play(":/std/cancel.wav");
 	}
-	QSound::play(":/std/cancel.wav");
+
 }
 
 void MenuWidget::left()
@@ -158,7 +164,9 @@ void MenuWidget::left()
 	if(status == CONFIG) {
 		QSound::play(":/std/select.wav");
 		GameRule::bgmVolume -= 5;
+		GameRule::defaultBgmVolume -= 5;
 		if(GameRule::bgmVolume < 0) GameRule::bgmVolume = 0;
+		if(GameRule::defaultBgmVolume < 0) GameRule::defaultBgmVolume = 0;
 		GameRule::update();//更新游戏规则
 	}
 }
@@ -168,7 +176,9 @@ void MenuWidget::right()
 	if(status == CONFIG) {
 		QSound::play(":/std/select.wav");
 		GameRule::bgmVolume += 5;
+		GameRule::defaultBgmVolume += 5;
 		if(GameRule::bgmVolume > 100) GameRule::bgmVolume = 100;
+		if(GameRule::defaultBgmVolume > 100) GameRule::defaultBgmVolume = 100;
 		GameRule::update();//更新游戏规则
 	}
 }
@@ -186,6 +196,13 @@ QOpenGLShaderProgram *MenuWidget::getBlueParticleProgram()
 QOpenGLTexture *MenuWidget::getBlueParticleTexture()
 {
 	return p2;
+}
+
+void MenuWidget::dealWithLoading()
+{
+	qDebug() << "Game loading successfully!";
+	delete thread;
+	emit start();//资源加载结束，发射游戏开始信号
 }
 
 void MenuWidget::initializeGL()
@@ -366,6 +383,8 @@ void MenuWidget::resizeGL(int w, int h)
 
 void MenuWidget:: paintGL()
 {
+	QPainter painter(this);
+	painter.beginNativePainting();
 	if(map->find(now) != map->end() && (status == MAIN || status == CONFIG)) loadParticles(now); //加载粒子
 	++now;
 	now %= 30;
@@ -377,12 +396,13 @@ void MenuWidget:: paintGL()
 
 	VAO->bind();
 	texture->bind(0);
-	musicRoom_bg->bind(2);
+	if(status != GAMESTART) musicRoom_bg->bind(2);
 	program->bind();
 	program->setUniformValue("alpha", totAlpha, 0.0f);
 
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
+	if(status != GAMESTART) musicRoom_bg->release();
 	texture->release();
 	VAO->release();
 	program->release();
@@ -479,10 +499,7 @@ void MenuWidget:: paintGL()
 	VAO2->release();
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	VAO2->release();
-	texture2->release();
-	program2->release();
-
+	painter.endNativePainting();
 	if(status == MUSICROOM) {
 		if(totAlpha > 0.0f) totAlpha -= 0.01f;
 		else{
@@ -490,6 +507,23 @@ void MenuWidget:: paintGL()
 			this->hide();
 			musicRoomWidget->show();
 			status = MUSICROOMING;
+		}
+	}else if(status == GAMESTART) {
+		loadingAlpha += 0.02f;
+		if(fabs(loadingAlpha - 2.0f) <= 1e-5) loadingAlpha = 0.0f;
+		if(loadingAlpha >= 1.0f) painter.setOpacity(((2.0f - loadingAlpha) / 1.25f + 0.2f));
+		else painter.setOpacity((loadingAlpha / 1.25f + 0.2f));
+		painter.drawPixmap(650, 520, 120, 60, QPixmap(":/std/loading.png"));
+		if(totAlpha > 0.0f) {
+			totAlpha -= 0.01f;
+			GameRule::bgmVolume--;
+			GameRule::update();
+		}else{
+			if(thread == nullptr) {
+				thread = new MainGameLoadingThread;
+				connect(thread, &MainGameLoadingThread::finished, this, &MenuWidget::dealWithLoading);
+				thread->start();
+			}
 		}
 	}
 }
@@ -1016,6 +1050,10 @@ void MenuWidget::solve()
 			configStatus = 0;
 			break;
 		}
+		case 0: {
+			status = GAMESTART;
+			break;
+		}
 	}
 }
 
@@ -1097,4 +1135,15 @@ void BlueParticle::draw(float s)
 	posY += 0.0010f;
 	life -= degree;
 	if(life <= 0.0f) emit done(this);
+}
+
+MainGameLoadingThread::MainGameLoadingThread(QObject *parent)
+{
+
+}
+
+void MainGameLoadingThread::run()
+{
+	msleep(2000);//这里用来加载游戏资源
+	GameResource::getInstance()->changeStatus(GameResource::GAME);
 }
