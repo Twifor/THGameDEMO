@@ -55,7 +55,7 @@ void MusicFactory::play(int s)
 	now = s;
 
 	if(s == 0) {
-		setBack(101075);
+		setBack(101055);
 		GameResource::getInstance()->load(BGM1_WAV);
 		static_cast<GameResourceWAVData*>(GameResource::getInstance()->getData(BGM1_WAV))->loadData(buffer);
 		player[0]->setMedia(QMediaContent(), buffer);
@@ -77,7 +77,7 @@ void MusicFactory::play(int s)
 	}
 	player[0]->setVolume(GameRule::bgmVolume);
 	player[0]->play();
-	timeID = startTimer(1, Qt::PreciseTimer);
+	timeID = startTimer(5, Qt::PreciseTimer);
 }
 
 int MusicFactory::getNow()
@@ -121,7 +121,7 @@ void MusicFactory::timerEvent(QTimerEvent *)
 //	qDebug() << player[0]->duration();
 	qint64 ss = player[who]->position();
 //	qDebug() << player[0]->duration();
-	if(ABS(ss - b) <= 10) {//这个10是用来屏蔽加载时间误差(?)，猜的，反正加上就对了（试验无数次的结论）
+	if(ABS(ss - b) <= 15) {//这个15是用来屏蔽加载时间误差(?)，猜的，反正加上就对了（试验无数次的结论）
 		QTimer::singleShot(0, [ & ](){
 			player[who ^ 1]->setMedia(QMediaContent(), buffer);
 			player[who ^ 1]->setVolume(GameRule::bgmVolume);
@@ -130,4 +130,3 @@ void MusicFactory::timerEvent(QTimerEvent *)
 		qDebug() << "repeat BGM";
 	}
 }
-

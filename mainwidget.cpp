@@ -22,7 +22,6 @@ void MainWidget::stopLoading()//这里做加载完成后的跳转动画
 void MainWidget::gameStart()//开始游戏函数
 {
 	qDebug() << "Game Start";
-	delete menuWidget;//释放菜单界面对象
 	status = GameStart;//修改状态机状态
 	gameWidget = new GameWidget(this);
 	gameWidget->setGeometry(0, 0, 800, 600);
@@ -31,6 +30,10 @@ void MainWidget::gameStart()//开始游戏函数
 	GameRule::bgmVolume = GameRule::defaultBgmVolume;
 	GameRule::update();
 	MusicFactory::getInstance()->play(1);
+	QTimer::singleShot(1000, [&](){
+		delete menuWidget;//释放菜单界面对象
+	});
+
 }
 
 MainWidget::MainWidget(QWidget *parent)

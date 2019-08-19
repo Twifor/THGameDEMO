@@ -12,7 +12,7 @@
 class MainWidget : public QWidget//主控件，负责与用户交互，并向各部件发送数据
 {
 	Q_OBJECT
-	enum GameStatus {//设置状态，状态机模型的体现
+	enum GameStatus {//设置状态，状态机模型
 		START_LOADING,//一开始的加载状态
 		MENU,//菜单状态
 		GameStart//游戏进行中状态

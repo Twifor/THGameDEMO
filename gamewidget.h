@@ -11,11 +11,16 @@
 #include <QOpenGLTexture>
 #include <QTimer>
 #include <QMatrix4x4>
+#include "maingame.h"
 
 class GameWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core//游戏界面核心类
 {
 	Q_OBJECT
 public:
+	enum GameWidgetStatus {
+		INIT,
+		MAIN
+	};
 	explicit GameWidget(QWidget *parent = nullptr);
 	~GameWidget();
 
@@ -30,6 +35,7 @@ protected:
 
 private:
 	int life, spellcard, score;//玩家信息
+	int power, point, graze;//灵力，得点，擦弹
 	QOpenGLVertexArrayObject *bg_VAO, *ma_VAO;
 	QOpenGLBuffer *bg_IBO, *bg_VBO, *ma_VBO;
 	QOpenGLShader *bg_vs, *bg_fs, *ma_vs, *ma_fs;
@@ -39,6 +45,9 @@ private:
 	QTimer timer;//控制游戏循环
 	QPixmap *pixmap;//存放游戏元素贴图
 	QMatrix4x4 *matrix;
+
+	MainGame *mainGame;//主游戏界面对象
+	GameWidgetStatus status;
 };
 
 #endif // GAMEWIDGET_H

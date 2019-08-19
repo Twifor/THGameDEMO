@@ -6,7 +6,7 @@
 #include <QImage>
 #include <QFile>
 
-const int RESOURCE_NUM = 52;
+const int RESOURCE_NUM = 80;
 enum ResourceID {//游戏资源ID，所有游戏资源必须在这里进行注册才能够使用
 	P_PNG,//粒子,1
 	P2_PNG,//另一个粒子,2
@@ -59,8 +59,35 @@ enum ResourceID {//游戏资源ID，所有游戏资源必须在这里进行注�
 	PLAYER_PNG,//49
 	SPELLCARD_PNG,//50
 	REDSTAR_PNG,//51
-	BLUESTAR_PNG//52
-
+	BLUESTAR_PNG,//52
+	LINGLI_PNG,//53
+	DEDIAN_PNG,//54
+	GRAZE_PNG,//55
+	RED0_PNG,//56
+	RED1_PNG,//57
+	RED2_PNG,//58
+	RED3_PNG,//59
+	RED4_PNG,//60
+	RED5_PNG,//61
+	RED6_PNG,//62
+	RED7_PNG,//62
+	RED8_PNG,//64
+	RED9_PNG,//65
+	REDPOINT_PNG,//66
+	REDXIE_PNG,//67
+	BLUE0_PNG,//68
+	BLUE1_PNG,//69
+	BLUE2_PNG,//70
+	BLUE3_PNG,//71
+	BLUE4_PNG,//72
+	BLUE5_PNG,//73
+	BLUE6_PNG,//74
+	BLUE7_PNG,//75
+	BLUE8_PNG,//76
+	BLUE9_PNG,//77
+	MAIN_GAME_BG_PNG,//78，主游戏背景图片
+	TREE_PNG,//79
+	MAIN_GAME_STAR_PNG//80
 };
 
 class GameResourceData {//游戏资源数据基类
@@ -101,8 +128,8 @@ public:
 	static GameResource *getInstance();//获得单例对象指针
 	~GameResource();
 signals:
-	void changeStatusSuccess();//状态修改成功
-	void loadSuccess();//加载游戏资源成功
+	void changeStatusSuccess();//状态修改成功[未使用]
+	void loadSuccess();//加载游戏资源成功[未使用]
 
 public slots:
 
