@@ -28,3 +28,63 @@ MainGame::~MainGame()
 	delete timer;
 }
 
+void MainGame::startLeft()
+{
+	scene->satrtLeft();
+}
+
+void MainGame::startRight()
+{
+	scene->startRight();
+}
+
+void MainGame::startUp()
+{
+	scene->startUp();
+}
+
+void MainGame::startDown()
+{
+	scene->startDown();
+}
+
+void MainGame::endtLeft()
+{
+	scene->endLeft();
+}
+
+void MainGame::endRight()
+{
+	scene->endRight();
+}
+
+void MainGame::endUp()
+{
+	scene->endUp();
+}
+
+void MainGame::endDown()
+{
+	scene->endDown();
+}
+
+void MainGame::startShift()
+{
+	scene->startShift();
+}
+
+void MainGame::endShift()
+{
+	scene->endShift();
+}
+
+void MainGame::startZ()
+{
+	scene->startZ();
+}
+
+void MainGame::endZ()
+{
+	scene->endZ();
+}
+

@@ -37,7 +37,9 @@ SOURCES += \
     maingame.cpp \
     scene.cpp \
     camera.cpp \
-    myplane.cpp
+    myplane.cpp \
+    baseitem.cpp \
+    gametexture.cpp
 
 HEADERS += \
         mainwidget.h \
@@ -51,7 +53,9 @@ HEADERS += \
     maingame.h \
     scene.h \
     camera.h \
-    myplane.h
+    myplane.h \
+    baseitem.h \
+    gametexture.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

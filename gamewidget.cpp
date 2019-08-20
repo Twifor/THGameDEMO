@@ -37,6 +37,66 @@ GameWidget::~GameWidget()
 	delete mainGame;
 }
 
+void GameWidget::startUp()
+{
+	mainGame->startUp();
+}
+
+void GameWidget::startDown()
+{
+	mainGame->startDown();
+}
+
+void GameWidget::startLeft()
+{
+	mainGame->startLeft();
+}
+
+void GameWidget::startRight()
+{
+	mainGame->startRight();
+}
+
+void GameWidget::endUp()
+{
+	mainGame->endUp();
+}
+
+void GameWidget::endDown()
+{
+	mainGame->endDown();
+}
+
+void GameWidget::endLeft()
+{
+	mainGame->endtLeft();
+}
+
+void GameWidget::endRight()
+{
+	mainGame->endRight();
+}
+
+void GameWidget::startShift()
+{
+	mainGame->startShift();
+}
+
+void GameWidget::endShift()
+{
+	mainGame->endShift();
+}
+
+void GameWidget::startZ()
+{
+	mainGame->startZ();
+}
+
+void GameWidget::endZ()
+{
+	mainGame->endZ();
+}
+
 void GameWidget::initializeGL()
 {
 	initializeOpenGLFunctions();//全是套路

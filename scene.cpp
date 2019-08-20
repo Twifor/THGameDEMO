@@ -2,6 +2,8 @@
 #include "scene.h"
 #include <QPainter>
 #include <deque>
+#include <QGraphicsItem>
+
 #define SPEED 0.08f
 
 Scene::Scene(QObject *parent) : QGraphicsScene (parent)
@@ -17,6 +19,12 @@ Scene::Scene(QObject *parent) : QGraphicsScene (parent)
 
 	tree2_dq.push_back(-2.0f);
 	tree2_dq.push_back(-14.0f);
+
+	myPlane = new MyPlane;
+	addItem(myPlane);
+
+	gameTexure = new GameTexture;
+	gameTexure->init();
 }
 
 Scene::~Scene()
@@ -24,12 +32,95 @@ Scene::~Scene()
 	delete bg_VBO;
 	delete bg_VAO;
 	delete bg_texture;
-	delete bg_vs;
 	delete bg_program;
 
 	delete tree_texture;
 	delete star_texture;
+
+	delete myPlane;
+	delete gameTexure;
 }
+
+void Scene::satrtLeft()
+{
+	myPlane->startLeft();
+}
+
+void Scene::endLeft()
+{
+	myPlane->endLeft();
+}
+
+void Scene::startRight()
+{
+	myPlane->startRight();
+}
+
+void Scene::endRight()
+{
+	myPlane->endRight();
+}
+
+void Scene::startUp()
+{
+	myPlane->startUp();
+}
+
+void Scene::endUp()
+{
+	myPlane->endUp();
+}
+
+void Scene::startDown()
+{
+	myPlane->startDown();
+}
+
+void Scene::endDown()
+{
+	myPlane->endDown();
+}
+
+void Scene::startShift()
+{
+	myPlane->startShift();
+}
+
+void Scene::endShift()
+{
+	myPlane->endShift();
+}
+
+void Scene::startZ()
+{
+	myPlane->startZ();
+}
+
+void Scene::endZ()
+{
+	myPlane->endZ();
+}
+
+QOpenGLShaderProgram *Scene::getProgram1()
+{
+	return ma_program;
+}
+
+QOpenGLVertexArrayObject *Scene::getVAO1()
+{
+	return bg_VAO;
+}
+
+QOpenGLTexture *Scene::getTexture(GameTexture::TextureType type)
+{
+	return gameTexure->getTexure(type);
+}
+
+QMatrix4x4 *Scene::getMatrix()
+{
+	return &matrix;
+}
+
 void Scene::drawBackground(QPainter *painter, const QRectF &rect){
 //	qDebug() << "paint";
 	static int lock = false;
@@ -38,7 +129,7 @@ void Scene::drawBackground(QPainter *painter, const QRectF &rect){
 		lock = true;
 	}else{
 		painter->beginNativePainting();
-		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClear( GL_COLOR_BUFFER_BIT);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 //		glEnable(GL_DEPTH_TEST);
@@ -48,7 +139,7 @@ void Scene::drawBackground(QPainter *painter, const QRectF &rect){
 		bg_program->bind();
 		bg_texture->bind(0);
 		for(float s:dq) {
-			QMatrix4x4 pr, matrix;
+
 			matrix.setToIdentity();
 			pr.setToIdentity();
 			pr.perspective(45.0, 487.0f / 557.0f, 0.1f, 50.0f);
@@ -70,7 +161,7 @@ void Scene::drawBackground(QPainter *painter, const QRectF &rect){
 		tree_texture->bind(0);
 
 		for(float s:tree_dq) {
-			QMatrix4x4 pr, matrix;
+
 			matrix.setToIdentity();
 			pr.setToIdentity();
 			pr.perspective(45.0, 487.0f / 557.0f, 0.1f, 50.0f);
@@ -87,7 +178,7 @@ void Scene::drawBackground(QPainter *painter, const QRectF &rect){
 		if(tree_dq.back() <= -10.0f && tree_dq.back() + SPEED * 1.5f > -10.0f) tree_dq.push_back(-18.0f);
 
 		for(float s:tree2_dq) {
-			QMatrix4x4 pr, matrix;
+
 			matrix.setToIdentity();
 			pr.setToIdentity();
 			pr.perspective(45.0, 487.0f / 557.0f, 0.1f, 50.0f);
@@ -106,7 +197,7 @@ void Scene::drawBackground(QPainter *painter, const QRectF &rect){
 
 		tree_texture->release();
 		star_texture->bind(0);
-		QMatrix4x4 matrix;
+
 		matrix.setToIdentity();
 		bg_program->setUniformValue("projection", matrix);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -214,5 +305,51 @@ void Scene::init()
 	bg_VAO->release();
 	bg_VBO->release();
 	bg_IBO->release();
+
+	delete bg_vs;
+	delete bg_fs;
+
+	bg_vs = new QOpenGLShader(QOpenGLShader::Vertex);
+	bg_vs->compileSourceCode("#version 330 core\n"
+							 "layout (location = 0) in vec3 aPos;\n"
+							 "layout (location = 1) in vec2 aTexCoord;\n"
+							 "out vec2 TexCoord;\n"
+							 "uniform mat4 matrix;\n"
+							 "void main()\n"
+							 "{\n"
+							 "gl_Position = matrix * vec4(aPos, 1.0);\n"
+							 "TexCoord = aTexCoord;\n"
+							 "}");
+
+	bg_fs = new QOpenGLShader(QOpenGLShader::Fragment);
+	bg_fs->compileSourceCode("#version 330 core\n"
+							 "out vec4 FragColor;\n"
+							 "in vec2 TexCoord;\n"
+							 "in vec2 fog;\n"
+
+							 "uniform sampler2D ourTexture;\n"
+							 "uniform vec2 alpha;\n"
+
+							 "void main()\n"
+							 "{\n"
+							 "FragColor = texture(ourTexture, TexCoord);\n"
+							 "FragColor.a *= alpha.x;\n"
+							 "}");
+	ma_program = new QOpenGLShaderProgram;
+	ma_program->addShader(bg_vs);
+	ma_program->addShader(bg_fs);
+	ma_program->link();
+	ma_program->bind();
+
+	ma_program->enableAttributeArray(ma_program->attributeLocation("aPos"));
+	ma_program->setAttributeBuffer(ma_program->attributeLocation("aPos"), GL_FLOAT, 0, 3, sizeof(float) * 5);
+
+	ma_program->enableAttributeArray(ma_program->attributeLocation("aTexCoord"));
+	ma_program->setAttributeBuffer(ma_program->attributeLocation("aTexCoord"), GL_FLOAT, 3 * sizeof(float), 2, sizeof(float) * 5);
+
+	ma_program->setUniformValue("ourTexture", 0);
+	delete bg_vs;
+	delete bg_fs;
+	ma_program->release();
 
 }

@@ -23,8 +23,18 @@ public:
 	};
 	explicit GameWidget(QWidget *parent = nullptr);
 	~GameWidget();
-
-signals:
+	void startUp();
+	void startDown();
+	void startLeft();
+	void startRight();
+	void endUp();
+	void endDown();
+	void endLeft();
+	void endRight();
+	void startShift();
+	void endShift();
+	void startZ();
+	void endZ();
 
 public slots:
 

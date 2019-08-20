@@ -26,6 +26,7 @@ void MainWidget::gameStart()//开始游戏函数
 	gameWidget = new GameWidget(this);
 	gameWidget->setGeometry(0, 0, 800, 600);
 	gameWidget->show();
+
 	MusicFactory::getInstance()->quit();//放bgm
 	GameRule::bgmVolume = GameRule::defaultBgmVolume;
 	GameRule::update();
@@ -33,7 +34,6 @@ void MainWidget::gameStart()//开始游戏函数
 	QTimer::singleShot(1000, [&](){
 		delete menuWidget;//释放菜单界面对象
 	});
-
 }
 
 MainWidget::MainWidget(QWidget *parent)
@@ -89,18 +89,25 @@ void MainWidget::paintEvent(QPaintEvent *event)
 
 void MainWidget::keyPressEvent(QKeyEvent *event)
 {
-	if(event->key() == Qt::Key_Up) {
+	if(event->key() == Qt::Key_Shift && status == GameStart) {
+		gameWidget->startShift();
+	}else if(event->key() == Qt::Key_Up) {
 		if(status == MENU && !event->isAutoRepeat()) menuWidget->up();
+		else if(status == GameStart && !event->isAutoRepeat()) gameWidget->startUp();
 	}else if(event->key() == Qt::Key_Down) {
 		if(status == MENU && !event->isAutoRepeat()) menuWidget->down();
+		else if(status == GameStart && !event->isAutoRepeat()) gameWidget->startDown();
 	}else if(event->key() == Qt::Key_Z) {
 		if(status == MENU && !event->isAutoRepeat()) menuWidget->ok();
+		else if(status == GameStart && !event->isAutoRepeat()) gameWidget->startZ();
 	}else if(event->key() == Qt::Key_Escape) {
 		if(status == MENU && !event->isAutoRepeat()) menuWidget->quitWindow();
 	}else if(event->key() == Qt::Key_Left) {
 		if(status == MENU && !event->isAutoRepeat()) menuWidget->left();
+		else if(status == GameStart && !event->isAutoRepeat()) gameWidget->startLeft();
 	}else if(event->key() == Qt::Key_Right) {
 		if(status == MENU && !event->isAutoRepeat()) menuWidget->right();
+		else if(status == GameStart && !event->isAutoRepeat()) gameWidget->startRight();
 	}
 }
 
@@ -108,5 +115,19 @@ void MainWidget::closeEvent(QCloseEvent *event)
 {
 //	if(loadingThread->isRunning())loadingThread->exit(0);//这里还有问题，注意线程的及时退出[待修复]
 	event->accept();
+}
+
+void MainWidget::keyReleaseEvent(QKeyEvent *event)
+{
+	if(event->isAutoRepeat()) {
+		event->accept();
+		return;
+	}
+	if(status == GameStart && event->key() == Qt::Key_Shift) gameWidget->endShift();
+	else if(status == GameStart && event->key() == Qt::Key_Left) gameWidget->endLeft();
+	else if(status == GameStart && event->key() == Qt::Key_Right) gameWidget->endRight();
+	else if(status == GameStart && event->key() == Qt::Key_Up) gameWidget->endUp();
+	else if(status == GameStart && event->key() == Qt::Key_Down) gameWidget->endDown();
+	else if(status == GameStart && event->key() == Qt::Key_Z) gameWidget->endZ();
 }
 

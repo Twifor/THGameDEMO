@@ -15,7 +15,19 @@ public:
 	MainGame(QWidget *parent);
 	~MainGame();
 
-	// QOpenGLWidget interface
+public slots:
+	void startLeft();
+	void startRight();
+	void startUp();
+	void startDown();
+	void endtLeft();
+	void endRight();
+	void endUp();
+	void endDown();
+	void startShift();
+	void endShift();
+	void startZ();
+	void endZ();
 
 
 private:

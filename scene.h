@@ -9,7 +9,9 @@
 #include <QOpenGLShaderProgram>
 #include <QOpenGLTexture>
 #include "camera.h"
+#include "myplane.h"
 #include <deque>
+#include "gametexture.h"
 
 class Scene : public QGraphicsScene, protected QOpenGLFunctions_3_3_Core
 {
@@ -17,6 +19,23 @@ class Scene : public QGraphicsScene, protected QOpenGLFunctions_3_3_Core
 public:
 	Scene(QObject *parent);
 	~Scene();
+	void satrtLeft();
+	void endLeft();
+	void startRight();
+	void endRight();
+	void startUp();
+	void endUp();
+	void startDown();
+	void endDown();
+	void startShift();
+	void endShift();
+	void startZ();
+	void endZ();
+
+	QOpenGLShaderProgram *getProgram1();//提供外部接口，以省资源
+	QOpenGLVertexArrayObject *getVAO1();
+	QOpenGLTexture *getTexture(GameTexture::TextureType type);
+	QMatrix4x4 *getMatrix();
 
 	// QGraphicsScene interface
 protected:
@@ -30,8 +49,12 @@ private:
 	QOpenGLTexture *bg_texture, *tree_texture, *star_texture, *redstar_texture;
 	QOpenGLShaderProgram *bg_program, *ma_program;
 	Camera *camera;//摄像机类
+	QMatrix4x4 pr, matrix;
 
 	std::deque<float> dq, tree_dq, tree2_dq;//双端队列，用于加载纹理
+	MyPlane *myPlane;
+
+	GameTexture *gameTexure;
 };
 
 #endif // SCENE_H
