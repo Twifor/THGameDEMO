@@ -1,17 +1,20 @@
 #include "myplane.h"
+#include <QDateTime>
 #include <QDebug>
 #include <QOpenGLContext>
 #include "scene.h"
 #include <QPainter>
 #include "gametexture.h"
-#define MOVINGSPEED 6
+#include "basebullet.h"
+#include <QSound>
+#include "musicfactory.h"
+#include "gametools.h"
+#include "gamewidget.h"
 
-MyPlane::MyPlane( QGraphicsItem *parent) : BaseItem (parent)
+#define MOVINGSPEED 3
+
+MyPlane::MyPlane( QGraphicsItem *parent) : BulletMakerBase (QPointF(247, 510), parent)
 {
-	pos.setX(247);
-	pos.setY(510);
-	setPos(pos);
-
 	isShifting = false;
 	status = 0;
 	timeLine = 0;
@@ -19,6 +22,10 @@ MyPlane::MyPlane( QGraphicsItem *parent) : BaseItem (parent)
 	isZ = false;
 
 	type = MY_PLANE;
+	timeLine6 = 0;
+	setBall(5);
+
+	ballLine = 0.0f;
 }
 
 void MyPlane::startLeft()
@@ -89,41 +96,78 @@ void MyPlane::endZ()
 	isZ = false;
 }
 
-QRectF MyPlane::boundingRect() const
+void MyPlane::advance(int phase)
 {
-	return QRectF(-20, -25, 35, 60);
+	bool isOk = true;
+	if(status & 1) {
+		pos.setX(pos.x() - (isShifting ? MOVINGSPEED >> 1 : MOVINGSPEED));
+		if(pos.x() <= 15) {
+			pos.setX(15);
+		}else{
+			isOk = false;
+			setPos(pos);
+		}
+	}
+	if(status & 2) {
+		pos.setX(pos.x() + (isShifting ? MOVINGSPEED >> 1 : MOVINGSPEED));
+		if(pos.x() >= 479) {
+			pos.setX(479);
+		}else{
+			isOk = false;
+			setPos(pos);
+		}
+	}
+	if(status & 4) {
+		pos.setY(pos.y() - (isShifting ? MOVINGSPEED >> 1 : MOVINGSPEED));
+		if(pos.y() <= 22) {
+			pos.setY(22);
+		}else{
+			setPos(pos);
+			isOk = false;
+		}
+	}
+	if(status & 8) {
+		pos.setY(pos.y() + (isShifting ? MOVINGSPEED >> 1 : MOVINGSPEED));
+		if(pos.y() >= 526) {
+			pos.setY(526);
+		}else{
+			setPos(pos);
+			isOk = false;
+		}
+	}
+	if(pos.y() <= 100) emit collect(this);
+	if(isOk) update();
 }
 
-QPainterPath MyPlane::shape() const
+QRectF MyPlane::boundingRect() const
 {
-
+	return QRectF(-20, -20, 40, 40);
 }
 
 void MyPlane::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-	if(status & 1) {
-		pos.setX(pos.x() - (isShifting ? MOVINGSPEED >> 1 : MOVINGSPEED));
-		if(pos.x() <= 15) pos.setX(15);
-		setPos(pos);
-	}
-	if(status & 2) {
-		pos.setX(pos.x() + (isShifting ? MOVINGSPEED >> 1 : MOVINGSPEED));
-		if(pos.x() >= 479) pos.setX(479);
-		setPos(pos);
-	}
-	if(status & 4) {
-		pos.setY(pos.y() - (isShifting ? MOVINGSPEED >> 1 : MOVINGSPEED));
-		if(pos.y() <= 22) pos.setY(22);
-		setPos(pos);
-	}
-	if(status & 8) {
-		pos.setY(pos.y() + (isShifting ? MOVINGSPEED >> 1 : MOVINGSPEED));
-		if(pos.y() >= 526) pos.setY(526);
-		setPos(pos);
+	QList<QGraphicsItem *>l = collidingItems(Qt::IntersectsItemBoundingRect);        //碰撞检测
+	for(QGraphicsItem *s:l) {
+		BaseItem* ss = static_cast<BaseItem*>(s);
+		if(ss->type == POWER || ss->type == POINT || ss->type == UP || ss->type == SPELL) {
+			if(fabs(ss->getPos().x() - pos.x()) + fabs(ss->getPos().y() - pos.y()) <= 15) {
+				if(ss->type == POWER || ss->type == POINT) MusicFactory::getInstance()->playItem();
+				else MusicFactory::getInstance()->playExtend();
+				ss->destroyItem();
+				if(ss->type == POWER) GameWidget::Instance->addPower();
+				else if(ss->type == POINT) GameWidget::Instance->addPoint();
+				else if(ss->type == SPELL) {
+					static_cast<Scene*>(scene())->addBaseItem(new SpellExtendItem());
+					GameWidget::Instance->addSpell();
+				}else{
+					static_cast<Scene*>(scene())->addBaseItem(new ExtendItem());
+					GameWidget::Instance->addLife();
+				}
+			}else static_cast<FunctionalItem*>(ss)->makeTo(this);
+		}
 	}
 
 	painter->beginNativePainting();
-	static bool flag = true;
 	if(flag) {
 		init();
 		flag = false;
@@ -138,11 +182,12 @@ void MyPlane::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
 
 	if(timeLine4) {
 		s->getMatrix()->setToIdentity();
-		s->getMatrix()->translate((pos.x() - 247) / 247.0, (278 - pos.y()) / 278.0);
+		s->getMatrix()->translate(GameTools::toGLX(pos.x()), GameTools::toGLY(pos.y()));
 		s->getMatrix()->rotate(timeLine2, 0, 0, 1.0);
 		s->getMatrix()->scale(0.1f * 1.4f, 0.1f * 1.4f);
 		s->getProgram1()->setUniformValue("matrix", *s->getMatrix());
 		s->getProgram1()->setUniformValue("alpha", 0.1f * (timeLine4 / 100.0f), 1.0f);
+		s->getProgram1()->setUniformValue("limit", 0.0f, -100.0f);
 		s->getTexture(GameTexture::SLOWEFFECT2)->bind(0);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		s->getTexture(GameTexture::SLOWEFFECT2)->release();
@@ -150,11 +195,12 @@ void MyPlane::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
 		if(timeLine2 >= 360) timeLine2 = 0;
 
 		s->getMatrix()->setToIdentity();
-		s->getMatrix()->translate((pos.x() - 247) / 247.0, (278 - pos.y()) / 278.0);
+		s->getMatrix()->translate(GameTools::toGLX(pos.x()),  GameTools::toGLY(pos.y()));
 		s->getMatrix()->rotate(timeLine3, 0, 0, 1.0);
 		s->getMatrix()->scale(0.1f * 1.4f, 0.1f * 1.4f);
 		s->getProgram1()->setUniformValue("matrix", *s->getMatrix());
 		s->getProgram1()->setUniformValue("alpha", 0.4f * (timeLine4 / 100.0f), 1.0f);
+		s->getProgram1()->setUniformValue("limit", 0.0f, -100.0f);
 		s->getTexture(GameTexture::SLOWEFFECT1)->bind(0);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		s->getTexture(GameTexture::SLOWEFFECT1)->release();
@@ -163,13 +209,13 @@ void MyPlane::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
 	}
 
 	s->getMatrix()->setToIdentity();
-	s->getMatrix()->translate((pos.x() - 247) / 247.0, (278 - pos.y()) / 278.0);
+	s->getMatrix()->translate(GameTools::toGLX(pos.x()),  GameTools::toGLY(pos.y()));
 	s->getMatrix()->scale(0.08f, 0.095f);
 	s->getProgram1()->setUniformValue("matrix", *s->getMatrix());
 	s->getProgram1()->setUniformValue("alpha", 1.0f, 1.0f);
+	s->getProgram1()->setUniformValue("limit", 0.0f, -100.0f);
 
-	if((status & 1) && (status & 2));
-	else if((status & 1) == 0 && ((status & 2) == 0)) {
+	if(((status & 1) == 0 && ((status & 2) == 0)) || ((status & 1) && (status & 2))) {
 		s->getTexture(static_cast<GameTexture::TextureType>(timeLine / 5))->bind(0);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		s->getTexture(static_cast<GameTexture::TextureType>(timeLine / 5))->release();
@@ -190,11 +236,12 @@ void MyPlane::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
 	if(timeLine == 40) timeLine = 0;
 	if(timeLine4) {
 		s->getMatrix()->setToIdentity();
-		s->getMatrix()->translate((pos.x() - 247) / 247.0, (278 - pos.y()) / 278.0);
+		s->getMatrix()->translate(GameTools::toGLX(pos.x()),  GameTools::toGLY(pos.y()));
 		s->getMatrix()->rotate(timeLine3, 0, 0, 1.0);
 		s->getMatrix()->scale(0.035f, 0.035f);
 		s->getProgram1()->setUniformValue("matrix", *s->getMatrix());
 		s->getProgram1()->setUniformValue("alpha", timeLine4 / 100.0f, 1.0f);
+		s->getProgram1()->setUniformValue("limit", 0.0f, -100.0f);
 		s->getTexture(GameTexture::CENTER)->bind(0);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		s->getTexture(GameTexture::CENTER)->release();
@@ -202,13 +249,102 @@ void MyPlane::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
 	if(isShifting) {
 		timeLine4 += 8;
 		if(timeLine4 >= 100) timeLine4 = 100;
+		for(int i = 1; i <= numOfBalls; i++) {
+			if(ballPos[i].y() + moveY[numOfBalls][i] < objY[numOfBalls][i]) {
+				ballPos[i].setY(ballPos[i].y() + moveY[numOfBalls][i]);
+				if(ballPos[i].x() < 0) ballPos[i].setX(ballPos[i].x() + moveX[numOfBalls][i]);
+				else ballPos[i].setX(ballPos[i].x() - moveX[numOfBalls][i]);
+			}
+			drawLine(QPointF(pos.x() + ballPos[i].x(), pos.y() + ballPos[i].y()));
+		}
 	}else{
 		timeLine4 -= 8;
 		if(timeLine4 <= 0) timeLine4 = 0;
+		for(int i = 1; i <= numOfBalls; i++) {
+			if(ballPos[i].y() - moveY[numOfBalls][i] > offsetY[numOfBalls][i]) {
+				ballPos[i].setY(ballPos[i].y() - moveY[numOfBalls][i]);
+				if(ballPos[i].x() < 0) ballPos[i].setX(ballPos[i].x() - moveX[numOfBalls][i]);
+				else ballPos[i].setX(ballPos[i].x() + moveX[numOfBalls][i]);
+			}
+		}
 	}
+	if(isZ) { //产生新子弹
+		if(timeLine5 == 3) {
+			MusicFactory::getInstance()->playFire();
+			if(numOfBalls == 1) emit makeBullet(new MyBullet(QPointF(pos.x(), pos.y() - 5)));
+			else if(numOfBalls == 2) {
+				Scene::Instance->addBaseItem(new MyBullet(QPointF(pos.x() - 10, pos.y() - 5)));
+				Scene::Instance->addBaseItem(new MyBullet(QPointF(pos.x() + 10, pos.y() - 5)));
+			}else if(numOfBalls == 3) {
+				Scene::Instance->addBaseItem(new MyBullet(QPointF(pos.x() - 10, pos.y() - 5)));
+				Scene::Instance->addBaseItem(new MyBullet(QPointF(pos.x(), pos.y() - 5)));
+				Scene::Instance->addBaseItem(new MyBullet(QPointF(pos.x() + 10, pos.y() - 5)));
+			}else if(numOfBalls == 4) {
+				Scene::Instance->addBaseItem(new MyBullet(QPointF(pos.x() - 21, pos.y() - 5)));
+				Scene::Instance->addBaseItem(new MyBullet(QPointF(pos.x() - 7, pos.y() - 5)));
+				Scene::Instance->addBaseItem(new MyBullet(QPointF(pos.x() + 7, pos.y() - 5)));
+				Scene::Instance->addBaseItem(new MyBullet(QPointF(pos.x() + 21, pos.y() - 5)));
+			}else{
+				Scene::Instance->addBaseItem(new MyBullet(QPointF(pos.x() - 20, pos.y() - 5)));
+				Scene::Instance->addBaseItem(new MyBullet(QPointF(pos.x() - 10, pos.y() - 5)));
+				Scene::Instance->addBaseItem(new MyBullet(QPointF(pos.x(), pos.y() - 5)));
+				Scene::Instance->addBaseItem(new MyBullet(QPointF(pos.x() + 10, pos.y() - 5)));
+				Scene::Instance->addBaseItem(new MyBullet(QPointF(pos.x() + 20, pos.y() - 5)));
+			}
+		}
+		++timeLine5;
+		if(timeLine5 == 4) timeLine5 = 0;
+	};
+	s->getTexture(GameTexture::MARISA_BALL)->bind(0);
+	for(int i = 1; i <= numOfBalls; i++) {
+		s->getMatrix()->setToIdentity();
+		s->getMatrix()->translate(GameTools::toGLX(pos.x() + ballPos[i].x()),  GameTools::toGLY(pos.y() + ballPos[i].y()));
+		s->getMatrix()->rotate(timeLine6, 0, 0, 1.0);
+		s->getMatrix()->scale(0.035f, 0.035f);
+		s->getProgram1()->setUniformValue("matrix", *s->getMatrix());
+		s->getProgram1()->setUniformValue("alpha", 1.0f, 1.0f);
+		s->getProgram1()->setUniformValue("limit", 0.0f, -100.0f);
+
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	}
+	s->getTexture(GameTexture::MARISA_BALL)->release();
+	timeLine6 += 3;
+	if(timeLine6 >= 360) timeLine6 = 0;
+
+
 	s->getVAO1()->release();
 	s->getProgram1()->release();
 
 	painter->endNativePainting();
+}
 
+void MyPlane::drawLine(QPointF begin)
+{
+	Scene *s = static_cast<Scene*>(scene());
+	float ss = GameTools::toGLY(begin.y());
+	float p =  ss + ballLine;
+	s->getTexture(GameTexture::MARISA_LINE)->bind(0);
+	while(p <= 1.5) {
+		s->getMatrix()->setToIdentity();
+		s->getMatrix()->translate(GameTools::toGLX(begin.x()), p);
+		s->getMatrix()->scale(0.035f, 0.5f);
+		s->getMatrix()->rotate(90, 0, 0, 1.0);
+		s->getProgram1()->setUniformValue("matrix", *s->getMatrix());
+		s->getProgram1()->setUniformValue("alpha", 0.6f, 1.0f);
+		s->getProgram1()->setUniformValue("limit", 0.0f, ss);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		p += 1.0f;
+	}
+	s->getTexture(GameTexture::MARISA_LINE)->release();
+	ballLine += 0.02f;
+	if(ballLine >= 0.5f) ballLine = 0.0f;
+}
+
+void MyPlane::setBall(int num)
+{
+	numOfBalls = num;
+	for(int i = 1; i <= numOfBalls; i++) {
+		ballPos[i].setX(offsetX[numOfBalls][i]);
+		ballPos[i].setY(offsetY[numOfBalls][i]);
+	}
 }

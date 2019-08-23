@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <QOpenGLTexture>
-const int TEXTURE_NUMBER = 28;
+const int TEXTURE_NUMBER = 36;
 class GameTexture : public QObject//管理主游戏各种纹理
 {
 	Q_OBJECT
@@ -38,6 +38,14 @@ public:
 		SLOWEFFECT2,
 		CENTER,
 		MARISA_BULLET,
+		MARISA_BALL,
+		MARISA_LINE,
+		POWER,
+		POINT,
+		UP,
+		SPELL,
+		SPELL_EXTEND,
+		EXTEND
 	};
 
 	explicit GameTexture(QObject *parent = nullptr);

@@ -6,8 +6,11 @@
 
 #define SPEED 0.08f
 
+Scene *Scene::Instance = nullptr;
 Scene::Scene(QObject *parent) : QGraphicsScene (parent)
 {
+	Instance = this;
+
 	totAlpha = 1.0f;
 	camera = new Camera(this);
 	dq.push_back(-2.0);
@@ -22,6 +25,11 @@ Scene::Scene(QObject *parent) : QGraphicsScene (parent)
 
 	myPlane = new MyPlane;
 	addItem(myPlane);
+
+	UpItem *item = new UpItem(QPointF(rand() % 487, -1000));
+	addItem(item);
+	SpellItem *item2 = new SpellItem(QPointF(rand() % 487, -10));
+	addItem(item2);
 
 	gameTexure = new GameTexture;
 	gameTexure->init();
@@ -101,6 +109,44 @@ void Scene::endZ()
 	myPlane->endZ();
 }
 
+void Scene::dealWithNewItem()
+{
+	for(BaseItem *item:bulletQueue) addItem(item);
+	bulletQueue.clear();
+
+	FunctionalItem *item;
+	if(rand() % 2) item = new PowerItem(QPointF(rand() % 487, -10));
+	else item = new PointItem(QPointF(rand() % 487, -10));
+	connect(myPlane, &MyPlane::collect, item, &FunctionalItem::makeTo);
+	addItem(item);
+	if(rand() % 2) item = new PowerItem(QPointF(rand() % 487, -10));
+	else item = new PointItem(QPointF(rand() % 487, -10));
+	connect(myPlane, &MyPlane::collect, item, &FunctionalItem::makeTo);
+	addItem(item);
+	if(rand() % 2) item = new PowerItem(QPointF(rand() % 487, -10));
+	else item = new PointItem(QPointF(rand() % 487, -10));
+	connect(myPlane, &MyPlane::collect, item, &FunctionalItem::makeTo);
+	addItem(item);
+	if(rand() % 2) item = new PowerItem(QPointF(rand() % 487, -10));
+	else item = new PointItem(QPointF(rand() % 487, -10));
+	connect(myPlane, &MyPlane::collect, item, &FunctionalItem::makeTo);
+	addItem(item);
+	if(rand() % 2) item = new PowerItem(QPointF(rand() % 487, -10));
+	else item = new PointItem(QPointF(rand() % 487, -10));
+	connect(myPlane, &MyPlane::collect, item, &FunctionalItem::makeTo);
+	addItem(item);
+	if(rand() % 2) item = new PowerItem(QPointF(rand() % 487, -10));
+	else item = new PointItem(QPointF(rand() % 487, -10));
+	connect(myPlane, &MyPlane::collect, item, &FunctionalItem::makeTo);
+	addItem(item);
+}
+
+void Scene::deleteItem(BaseItem *p)
+{
+	removeItem(p);
+	p->deleteLater();
+}
+
 QOpenGLShaderProgram *Scene::getProgram1()
 {
 	return ma_program;
@@ -121,8 +167,12 @@ QMatrix4x4 *Scene::getMatrix()
 	return &matrix;
 }
 
+void Scene::addBaseItem(BaseItem *item)
+{
+	bulletQueue.push_back(item);
+}
+
 void Scene::drawBackground(QPainter *painter, const QRectF &rect){
-//	qDebug() << "paint";
 	static int lock = false;
 	if(!lock) {
 		init();
@@ -314,10 +364,13 @@ void Scene::init()
 							 "layout (location = 0) in vec3 aPos;\n"
 							 "layout (location = 1) in vec2 aTexCoord;\n"
 							 "out vec2 TexCoord;\n"
+							 "out vec2 lock;\n"
 							 "uniform mat4 matrix;\n"
+							 "uniform vec2 limit;\n"
 							 "void main()\n"
 							 "{\n"
 							 "gl_Position = matrix * vec4(aPos, 1.0);\n"
+							 "lock.x=gl_Position.y-limit.y;\n"
 							 "TexCoord = aTexCoord;\n"
 							 "}");
 
@@ -326,6 +379,7 @@ void Scene::init()
 							 "out vec4 FragColor;\n"
 							 "in vec2 TexCoord;\n"
 							 "in vec2 fog;\n"
+							 "in vec2 lock;\n"
 
 							 "uniform sampler2D ourTexture;\n"
 							 "uniform vec2 alpha;\n"
@@ -334,6 +388,7 @@ void Scene::init()
 							 "{\n"
 							 "FragColor = texture(ourTexture, TexCoord);\n"
 							 "FragColor.a *= alpha.x;\n"
+							 "if(lock.x<0.0)FragColor.a = 0;\n"
 							 "}");
 	ma_program = new QOpenGLShaderProgram;
 	ma_program->addShader(bg_vs);

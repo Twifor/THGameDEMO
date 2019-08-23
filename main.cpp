@@ -5,8 +5,9 @@
 #include <QMessageBox>
 #include <QSettings>
 #include "gamerule.h"
+#include <QtOpenGL/QGLWidget>
 
-void changeWindow(){//改一下分辨率，我也不知道有啥用
+void changeWindow(){
 	DEVMODE DevMode;
 	EnumDisplaySettings(nullptr, ENUM_CURRENT_SETTINGS, &DevMode);
 	DevMode.dmFields = DM_PELSWIDTH | DM_PELSHEIGHT;
@@ -18,17 +19,22 @@ void changeWindow(){//改一下分辨率，我也不知道有啥用
 int main(int argc, char *argv[])
 {
 	QApplication a(argc, argv);
+	if((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_3_3) == 0) {
+		QMessageBox::critical(nullptr, "Missing OpenGL", "OpenGL3.3 or higher version is expected.\n"
+							  "Please update the graphics card driver.");
+		return 0;
+	}
 	QFile res("res.dat"), index("index.dat"), config("config.ini");
 	if(!res.exists()) {
-		QMessageBox::critical(nullptr, "找不到文件", "缺少游戏资源文件res.dat");
+		QMessageBox::critical(nullptr, "Cannot find file", "Lack resource file res.dat");
 		return 0;
 	}
 	if(!index.exists()) {
-		QMessageBox::critical(nullptr, "找不到文件", "缺少游戏索引文件index.dat");
+		QMessageBox::critical(nullptr, "Cannot find file", "Lack index file index.dat");
 		return 0;
 	}
 	if(!config.exists()) {
-		QMessageBox::critical(nullptr, "找不到文件", "缺少配置文件config.ini");
+		QMessageBox::critical(nullptr, "Cannot find file", "Lack config file config.ini");
 		return 0;
 	}
 

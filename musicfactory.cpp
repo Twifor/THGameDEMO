@@ -25,6 +25,8 @@ void MusicFactory::setBack(qint64 p)
 void MusicFactory::destroy()
 {
 	if(INSTANCE != nullptr) delete INSTANCE;
+	delete fire;
+	delete item;
 }
 
 void MusicFactory::seekTO(qint64 pos)
@@ -53,7 +55,7 @@ void MusicFactory::play(int s)
 	if(buffer != nullptr) delete buffer;
 	buffer = new QBuffer;
 	now = s;
-
+	last = 0;
 	if(s == 0) {
 		setBack(101055);
 		GameResource::getInstance()->load(BGM1_WAV);
@@ -65,7 +67,7 @@ void MusicFactory::play(int s)
 		static_cast<GameResourceWAVData*>(GameResource::getInstance()->getData(BGM2_WAV))->loadData(buffer);
 		player[0]->setMedia(QMediaContent(), buffer);
 	}else if(s == 3) {
-		setBack(222465);
+		setBack(222100);
 		GameResource::getInstance()->load(BGM4_WAV);
 		static_cast<GameResourceWAVData*>(GameResource::getInstance()->getData(BGM4_WAV))->loadData(buffer);
 		player[0]->setMedia(QMediaContent(), buffer);
@@ -101,6 +103,21 @@ void MusicFactory::setVolume(int volume)
 	if(player[1] != nullptr) player[1]->setVolume(volume);
 }
 
+void MusicFactory::playFire()
+{
+	fire->play();
+}
+
+void MusicFactory::playItem()
+{
+	item->play();
+}
+
+void MusicFactory::playExtend()
+{
+	extend->play();
+}
+
 MusicFactory *MusicFactory::INSTANCE = nullptr;
 
 MusicFactory::MusicFactory(QObject *parent) : QObject(parent)
@@ -109,6 +126,9 @@ MusicFactory::MusicFactory(QObject *parent) : QObject(parent)
 	buffer = nullptr;
 	player[0] = nullptr;
 	player[1] = nullptr;
+	fire = new QSound(":/std/fire.wav");
+	item = new QSound(":/std/item.wav");
+	extend = new QSound(":/std/extend.wav");
 }
 
 void MusicFactory::newPlayer(int pos)
@@ -118,15 +138,20 @@ void MusicFactory::newPlayer(int pos)
 
 void MusicFactory::timerEvent(QTimerEvent *)
 {
-//	qDebug() << player[0]->duration();
-	qint64 ss = player[who]->position();
-//	qDebug() << player[0]->duration();
+	if(last) {
+		--last;
+		return;
+	}
+	qint64 ss;
+	if(player[who]->state() == QMediaPlayer::PlayingState) ss = player[who]->position();
+	else ss = 0;
 	if(ABS(ss - b) <= 15) {//这个15是用来屏蔽加载时间误差(?)，猜的，反正加上就对了（试验无数次的结论）
 		QTimer::singleShot(0, [ & ](){
-			player[who ^ 1]->setMedia(QMediaContent(), buffer);
-			player[who ^ 1]->setVolume(GameRule::bgmVolume);
-			player[who = who ^ 1]->play();
+			player[who = who ^ 1]->setMedia(QMediaContent(), buffer);
+			player[who]->setVolume(GameRule::bgmVolume);
+			player[who]->play();
 		});
+		last = 100;
 		qDebug() << "repeat BGM";
 	}
 }

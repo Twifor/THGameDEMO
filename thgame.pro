@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui multimedia
+QT       += core gui multimedia opengl
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -39,7 +39,10 @@ SOURCES += \
     camera.cpp \
     myplane.cpp \
     baseitem.cpp \
-    gametexture.cpp
+    gametexture.cpp \
+    basebullet.cpp \
+    bulletmakerbase.cpp \
+    gametools.cpp
 
 HEADERS += \
         mainwidget.h \
@@ -55,7 +58,10 @@ HEADERS += \
     camera.h \
     myplane.h \
     baseitem.h \
-    gametexture.h
+    gametexture.h \
+    basebullet.h \
+    bulletmakerbase.h \
+    gametools.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

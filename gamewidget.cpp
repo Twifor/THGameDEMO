@@ -2,20 +2,25 @@
 #include "gameresource.h"
 #include <QPainter>
 
+GameWidget* GameWidget::Instance = nullptr;
 GameWidget::GameWidget(QWidget *parent) : QOpenGLWidget (parent)
 {
 	totAlpha = 0.0f;
 	pixmap = new QPixmap[30];
-	life = 6;
-	spellcard = 6;
+	life = 2;
+	spellcard = 2;
 	score = 0;
-	power = 233;
-	point = 6662333;
-	graze = 100;
+	power = 0;
+	point = 0;
+	graze = 0;
 
 	status = INIT;
 	mainGame = new MainGame(this);
 	mainGame->setGeometry(41, 22, 487, 557);
+
+	Instance = this;
+	ydx = dx = 10000000;
+	fpsTimeLine = 0;
 }
 
 GameWidget::~GameWidget()
@@ -95,6 +100,32 @@ void GameWidget::startZ()
 void GameWidget::endZ()
 {
 	mainGame->endZ();
+}
+
+void GameWidget::addPower()
+{
+	power += 5;
+	power %= 400;
+}
+
+void GameWidget::addPoint()
+{
+	++point;
+}
+
+void GameWidget::addSpell()
+{
+	++spellcard;
+}
+
+void GameWidget::addLife()
+{
+	++life;
+}
+
+void GameWidget::showFPS(long long p)
+{
+	ydx = p;
 }
 
 void GameWidget::initializeGL()
@@ -320,8 +351,10 @@ void GameWidget::initializeGL()
 	pixmap[27].convertFromImage(image);
 	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(BLUE9_PNG))->loadData(image);
 	pixmap[28].convertFromImage(image);
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(SCORE_PNG))->loadData(image);
+	pixmap[29].convertFromImage(image);
 
-	timer.setInterval(1000 / 60);
+	timer.setInterval(16);
 	timer.start();
 	connect(&timer, &QTimer::timeout, [ = ](){
 		update();
@@ -366,34 +399,37 @@ void GameWidget::paintGL()//这里绘制游戏界面
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 	float be = 0.58f;
-	for(int i = 1; i <= spellcard; i++) {
+	for(int i = 1; i <= 6; i++) {
 		matrix->setToIdentity();
 		matrix->translate(be, 0.53f);
 		matrix->scale(0.08f, 0.1f);
 		ma_program->setUniformValue("projection", *matrix);
-		ma_program->setUniformValue("alpha", totAlpha * 0.8f, 0.0f);
+		if(i <= spellcard) ma_program->setUniformValue("alpha", totAlpha * 0.8f, 0.0f);
+		else ma_program->setUniformValue("alpha", totAlpha * 0.3f, 0.0f);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		be += 0.065f;
 	}
 	bluestar_texture->release();
 	be = 0.58f;
 	redstar_texture->bind(2);
-	for(int i = 1; i <= life; i++) {
+	for(int i = 1; i <= 6; i++) {
 		matrix->setToIdentity();
 		matrix->translate(be, 0.65f);
 		matrix->scale(0.08f, 0.1f);
 		ma_program->setUniformValue("projection", *matrix);
-		ma_program->setUniformValue("alpha", totAlpha * 0.8f, 0.0f);
+		if(i <= life) ma_program->setUniformValue("alpha", totAlpha * 0.8f, 0.0f);
+		else ma_program->setUniformValue("alpha", totAlpha * 0.3f, 0.0f);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		be += 0.065f;
 	}
+	redstar_texture->release();
 
 	ma_program->release();
 	ma_VAO->release();
-
 	painter.endNativePainting();
 
 	painter.setOpacity(totAlpha);
+	painter.drawPixmap(545, 40, 94, 33, pixmap[29]);
 	painter.drawPixmap(545, 75, 94, 33, pixmap[0]);
 	painter.drawPixmap(545, 110, 94, 33, pixmap[1]);
 	painter.drawPixmap(545, 150, 86, 28, pixmap[4]);
@@ -410,8 +446,26 @@ void GameWidget::paintGL()//这里绘制游戏界面
 	painter.drawPixmap(760, 150, 24, 28, pixmap[7]);
 	painter.drawPixmap(773, 150, 24, 28, pixmap[7]);
 
+	for(int i = 0, sc = score, pp = 773; i <= 9; i++) {
+		painter.drawPixmap(pp, 42, 24, 28, pixmap[19 + sc % 10]), sc /= 10, pp -= 16;
+	}
 	int s = point, pp = 773;
-	while(s) painter.drawPixmap(pp, 183, 24, 28, pixmap[19 + s % 10]), s /= 10, pp -= 13;
+	if(s == 0) painter.drawPixmap(pp, 183, 24, 28, pixmap[19]);
+	else while(s) painter.drawPixmap(pp, 183, 24, 28, pixmap[19 + s % 10]), s /= 10, pp -= 13;
 	s = graze, pp = 773;
-	while(s) painter.drawPixmap(pp, 210, 24, 28, pixmap[19 + s % 10]), s /= 10, pp -= 13;
+	if(s == 0) painter.drawPixmap(pp, 210, 24, 28, pixmap[19]);
+	else while(s) painter.drawPixmap(pp, 210, 24, 28, pixmap[19 + s % 10]), s /= 10, pp -= 13;
+
+	QPen pen;
+	pen.setColor(Qt::white);
+	painter.setPen(pen);
+	qDebug() << dx;
+	if(fpsTimeLine == 5) {
+		painter.drawText(750, 595, QString::number(1000.0 / ydx, 'f', 2));
+		dx = ydx;
+	}else{
+		painter.drawText(750, 595, QString::number(1000.0 / dx, 'f', 2));
+	}
+	++fpsTimeLine;
+	if(fpsTimeLine == 6) fpsTimeLine = 0;
 }

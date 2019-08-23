@@ -1,6 +1,9 @@
 #include "gameresource.h"
 #include "maingame.h"
 #include <QPainter>
+#include "baseitem.h"
+#include "gamewidget.h"
+#include <QPointF>
 
 MainGame::MainGame(QWidget *parent) : QGraphicsView (parent)
 {
@@ -12,9 +15,17 @@ MainGame::MainGame(QWidget *parent) : QGraphicsView (parent)
 
 	setStyleSheet("border:0px solid red");
 	timer = new QTimer;
-	timer->setInterval(1000 / 60);
+	timer->setTimerType(Qt::PreciseTimer);
+	timer->setInterval(16);
+
+	lastTime = 0;
+	time = new QDateTime;
+	lastTime = time->currentMSecsSinceEpoch();
 	connect(timer, &QTimer::timeout, [ = ](){
-		scene->update();
+		GameWidget::Instance->showFPS(time->currentMSecsSinceEpoch() - lastTime);
+		lastTime = time->currentMSecsSinceEpoch();
+		scene->dealWithNewItem();
+		scene->advance();
 	});
 	timer->start();
 	scene->setSceneRect(0, 0, 487, 557);

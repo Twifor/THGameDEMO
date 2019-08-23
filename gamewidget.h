@@ -35,6 +35,12 @@ public:
 	void endShift();
 	void startZ();
 	void endZ();
+	static GameWidget *Instance;
+	void addPower();
+	void addPoint();
+	void addSpell();
+	void addLife();
+	void showFPS(long long p);
 
 public slots:
 
@@ -58,6 +64,9 @@ private:
 
 	MainGame *mainGame;//主游戏界面对象
 	GameWidgetStatus status;
+	long long dx, ydx;
+	int fpsTimeLine;
+
 };
 
 #endif // GAMEWIDGET_H

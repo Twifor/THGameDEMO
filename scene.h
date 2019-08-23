@@ -12,6 +12,7 @@
 #include "myplane.h"
 #include <deque>
 #include "gametexture.h"
+#include <QQueue>
 
 class Scene : public QGraphicsScene, protected QOpenGLFunctions_3_3_Core
 {
@@ -31,17 +32,24 @@ public:
 	void endShift();
 	void startZ();
 	void endZ();
+	void dealWithNewItem();//加入新物品
+	static Scene *Instance;
+	void deleteItem(BaseItem *p);
 
 	QOpenGLShaderProgram *getProgram1();//提供外部接口，以省资源
 	QOpenGLVertexArrayObject *getVAO1();
 	QOpenGLTexture *getTexture(GameTexture::TextureType type);
 	QMatrix4x4 *getMatrix();
 
-	// QGraphicsScene interface
+public slots:
+	void addBaseItem(BaseItem *item);
+
 protected:
 	void drawBackground(QPainter *painter, const QRectF &rect) override;
 	void init();
 private:
+	QQueue<BaseItem *> bulletQueue;//队列暂存物品
+
 	float totAlpha;
 	QOpenGLVertexArrayObject *bg_VAO, *ma_VAO;
 	QOpenGLBuffer *bg_IBO, *bg_VBO, *ma_VBO;
