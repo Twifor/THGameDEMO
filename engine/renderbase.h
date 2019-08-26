@@ -110,11 +110,64 @@ public:
 	void render() override;
 };
 
+class SlowEffectRender1 : public RenderBase {
+	Q_OBJECT
+public:
+	SlowEffectRender1(QObject *parent = nullptr);
+	~SlowEffectRender1();
+	void setPos(float x, float y, float angle, float alpha);
+	void init() override;
+	void render() override;
+
+protected:
+	float x0, y0, angle0, alpha0;
+	QOpenGLBuffer *VBO, *IBO;
+	QOpenGLVertexArrayObject *VAO;
+};
+
+class SlowEffectRender2 : public SlowEffectRender1 {
+	Q_OBJECT
+public:
+	SlowEffectRender2(QObject *parent = nullptr);
+	void render() override;
+};
+
 class TreeRender2 : public BackGroundRender {
 	Q_OBJECT
 public:
 	TreeRender2(TextureManager::TextureType type, QObject *parent = nullptr);
 	void render()override;
+};
+
+class CenterRender : public SlowEffectRender1 {
+	Q_OBJECT
+public:
+	CenterRender(QObject *parent = nullptr);
+	void render() override;
+};
+
+class BallRender : public RotateRender2D {
+	Q_OBJECT
+public:
+	BallRender(QObject *parent = nullptr);
+};
+
+class LineRender : public RenderBase {
+	Q_OBJECT
+public:
+	LineRender(QObject *parent = nullptr);
+	void init() override;
+	void render() override;
+	void setPos(float x, float y, float up, float left, float limit);
+
+protected:
+	QOpenGLBuffer * VBO, *IBO;
+	QOpenGLVertexArrayObject *VAO;
+	int num, offsetVBO, offsetIBO;
+	int MAXNUMBER = 25;
+	float *VBOOP;
+	unsigned int *IBOOP;
+	unsigned int index;
 };
 
 #endif // RENDERBASE_H

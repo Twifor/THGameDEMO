@@ -14,6 +14,7 @@ GameWidget::GameWidget(QWidget *parent) : QOpenGLWidget (parent)
 	power = 0;
 	point = 0;
 	graze = 0;
+	level = 0;
 
 	status = INIT;
 	mainOpenGLGame = new OpenGLGame(this);
@@ -123,6 +124,11 @@ void GameWidget::addSpell()
 void GameWidget::addLife()
 {
 	++life;
+}
+
+int GameWidget::getLevel()
+{
+	return level;
 }
 
 void GameWidget::initializeGL()

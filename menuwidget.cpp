@@ -152,7 +152,7 @@ void MenuWidget::quitWindow()
 	}else if(status == MUSICROOMING) {
 		musicRoomWidget->quit();
 		QSound::play(":/std/cancel.wav");
-	}else if(status == CONFIG) {
+	}else if(status == CONFIG && configStatus != 0 && configStatus != 1) {
 		configStatus = 2;
 		QSound::play(":/std/cancel.wav");
 	}
@@ -1014,33 +1014,33 @@ void MenuWidget::solve()
 			musicRoomWidget->hide();
 			status = MUSICROOM;
 			connect(musicRoomWidget, &MusicRoom::done, [ & ](){
+				lock = true;
+				at = 1;
+				atAnimation = -1;
+				sparkTime = -1;
+				totAlpha = 1.0f;
+				now = 0;
+				pos[0] = -1.5f;
+				pos[1] = -1.5f;
+				pos[2] = -1.5f;
+				pos[3] = -1.5f;
+
+				pos2[0] = -0.10f;
+				pos2[1] = -0.10f;
+				pos2[2] = -0.10f;
+				pos2[3] = -0.10f;
+
+				magicTime = 0;
+				lock2 = true;
+				degree = 0.0f;
+
+				this->show();
+				timer->setInterval(1000 / 60);
+				status = MAIN;
+				timer->start();
 				QTimer::singleShot(0, [&](){
-					lock = true;
-					at = 1;
-					atAnimation = -1;
-					sparkTime = -1;
-					totAlpha = 1.0f;
-					now = 0;
-					pos[0] = -1.5f;
-					pos[1] = -1.5f;
-					pos[2] = -1.5f;
-					pos[3] = -1.5f;
-
-					pos2[0] = -0.10f;
-					pos2[1] = -0.10f;
-					pos2[2] = -0.10f;
-					pos2[3] = -0.10f;
-
-					magicTime = 0;
-					lock2 = true;
-					degree = 0.0f;
-
-					timer->setInterval(1000 / 60);
-					timer->start();
-
+					musicRoomWidget->hide();
 					delete musicRoomWidget;
-					this->show();
-					status = MAIN;
 				});
 			});
 			break;

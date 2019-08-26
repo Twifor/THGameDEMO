@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QOpenGLTexture>
 #include <QVector>
-#define TEXTURE_NUMBER 27
+#define TEXTURE_NUMBER 32
 
 class TextureManager : public QObject
 {
@@ -38,7 +38,12 @@ public:
 		MARISA22,
 		MARISA23,
 		MARISA24,
-		TREE
+		SLOWEFFECT1_PNG,
+		SLOWEFFECT2_PNG,
+		TREE,
+		CENTER,
+		BALL,
+		MARISA_LINE
 	};
 	QOpenGLTexture *getTexture(TextureType type);
 	void setTexture(TextureType type, QOpenGLTexture *texture);

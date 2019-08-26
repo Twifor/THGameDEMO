@@ -1,5 +1,6 @@
 #include "itemdataevent.h"
 #include "openglgame.h"
+#include "itemmanager.h"
 
 ItemDataEventBase::ItemDataEventBase(QObject *parent) : QObject(parent)
 {
@@ -51,4 +52,64 @@ bool TreeEvent::update(RenderBase *render)
 	static_cast<TreeRender*>(render)->setZ(s);
 	if(s >= 8.5f) return true;
 	return false;
+}
+
+SlowEffectEvent1::SlowEffectEvent1(QObject *parent) : ItemDataEventBase(parent)
+{
+
+}
+
+bool SlowEffectEvent1::update(RenderBase *render)
+{
+	if(OpenGLGame::Instance->slowEffectTimeLine == 0) return true;
+	static_cast<SlowEffectRender1*>(render)->setPos(OpenGLGame::Instance->myPlaneX, OpenGLGame::Instance->myPlaneY, OpenGLGame::Instance->slowEffectRotate1, OpenGLGame::Instance->slowEffectAlpha1);
+	return false;
+}
+
+SlowEffectEvent2::SlowEffectEvent2(QObject *parent) : ItemDataEventBase (parent)
+{
+
+}
+
+bool SlowEffectEvent2::update(RenderBase *render)
+{
+	if(OpenGLGame::Instance->slowEffectTimeLine == 0) return true;
+	static_cast<SlowEffectRender1*>(render)->setPos(OpenGLGame::Instance->myPlaneX, OpenGLGame::Instance->myPlaneY, OpenGLGame::Instance->slowEffectRotate2, OpenGLGame::Instance->slowEffectAlpha2);
+	return false;
+}
+
+CenterEvent::CenterEvent(QObject *parent)
+{
+
+}
+
+bool CenterEvent::update(RenderBase *render)
+{
+	if(OpenGLGame::Instance->slowEffectTimeLine == 0) return true;
+	static_cast<CenterRender*>(render)->setPos(OpenGLGame::Instance->myPlaneX, OpenGLGame::Instance->myPlaneY, OpenGLGame::Instance->slowEffectRotate1, OpenGLGame::Instance->centerAlpha);
+	return false;
+}
+
+BallEvent::BallEvent(int i, QObject *parent) : ItemDataEventBase(parent)
+{
+	id = i;
+}
+
+bool BallEvent::update(RenderBase *render)
+{
+	static_cast<BallRender*>(render)->setPos(OpenGLGame::Instance->ballX[id], OpenGLGame::Instance->ballY[id] * ItemManager::INSTANCE()->getDiv(), 0.035f, 0.035f, OpenGLGame::Instance->ballRotate);
+	return false;
+}
+
+LineEvent::LineEvent(float x, float y, float limit, QObject *parent) : ItemDataEventBase (parent)
+{
+	this->x = x;
+	this->y = y;
+	this->limit = limit;
+}
+
+bool LineEvent::update(RenderBase *render)
+{
+	static_cast<LineRender*>(render)->setPos(x, y, 0.5f, 0.04f, limit);
+	return true;
 }

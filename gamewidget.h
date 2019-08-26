@@ -40,6 +40,7 @@ public:
 	void addPoint();
 	void addSpell();
 	void addLife();
+	int getLevel();
 
 public slots:
 
@@ -51,6 +52,7 @@ protected:
 private:
 	int life, spellcard, score;//玩家信息
 	int power, point, graze;//灵力，得点，擦弹
+	int level;
 	QOpenGLVertexArrayObject *bg_VAO, *ma_VAO;
 	QOpenGLBuffer *bg_IBO, *bg_VBO, *ma_VBO;
 	QOpenGLShader *bg_vs, *bg_fs, *ma_vs, *ma_fs;

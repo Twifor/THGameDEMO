@@ -7,7 +7,7 @@
 #include <QQueue>
 #include "renderbase.h"
 
-#define ITEM_NUMBER 5
+#define ITEM_NUMBER 10
 
 struct ItemData;
 struct TreeData;
@@ -17,12 +17,17 @@ class ItemManager : public QObject
 	Q_OBJECT
 public:
 	~ItemManager();
-	enum ItemType {
+	enum ItemType {//这里设置优先级
 		BACKGROUND,
 		STAR_BACKGROUND,
 		TREE,
 		TREE2,
+		SLOWEFFECT1,
+		SLOWEFFECT2,
 		MARISA,
+		CENTER,
+		MARISA_LINE,
+		BALL,
 	};
 	void addItem(ItemType type, int depth, ItemDataEventBase *base);
 	void addNewItem(ItemType type, int depth, ItemDataEventBase *base);

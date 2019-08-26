@@ -17,11 +17,9 @@ ItemManager::ItemManager(QObject *parent) : QObject(parent)
 										  "layout (location = 0) in vec3 aPos;\n"
 										  "layout (location = 1) in vec2 aTexCoord;\n"
 										  "out vec2 TexCoord;\n"
-										  "uniform float div;\n"
 										  "void main()\n"
 										  "{\n"
 										  "gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-										  "gl_Position.y = gl_Position.y * div;\n"
 										  "TexCoord = aTexCoord;\n"
 										  "}",
 										  "#version 330 core\n"
@@ -37,7 +35,6 @@ ItemManager::ItemManager(QObject *parent) : QObject(parent)
 										  "layout (location = 0) in vec3 aPos;\n"
 										  "layout (location = 1) in vec2 aTexCoord;\n"
 										  "layout (location = 2) in vec3 rotate;\n"
-										  "uniform float div;\n"
 										  "\n"
 										  "out vec2 TexCoord;\n"
 										  "\n"
@@ -48,8 +45,7 @@ ItemManager::ItemManager(QObject *parent) : QObject(parent)
 										  "}\n"
 										  "\n"
 										  "void main(){\n"
-										  "gl_Position = getRotateMatrix()*vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-										  "gl_Position.y = gl_Position.y * div;\n"
+										  "gl_Position = getRotateMatrix() * vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
 										  "TexCoord = aTexCoord;\n"
 										  "}\n",
 										  "#version 330 core\n"
@@ -67,9 +63,11 @@ ItemManager::ItemManager(QObject *parent) : QObject(parent)
 										  "out vec2 TexCoord;\n"
 										  "out vec2 fog;\n"
 										  "uniform mat4 projection;\n"
+										  "uniform float div;\n"
 										  "void main()\n"
 										  "{\n"
 										  "gl_Position = projection * vec4(aPos, 1.0);\n"
+										  "gl_Position.y = gl_Position.y * div;\n"
 										  "fog.x=gl_Position.z/25.0;\n"
 										  "fog.y=0;\n"
 										  "TexCoord = aTexCoord;\n"
@@ -88,30 +86,29 @@ ItemManager::ItemManager(QObject *parent) : QObject(parent)
 	ShaderManager::INSTANCE()->setProgram(3, "#version 330 core\n"
 										  "layout (location = 0) in vec3 aPos;\n"
 										  "layout (location = 1) in vec2 aTexCoord;\n"
+										  "layout (location = 2) in float limit;\n"
+										  ""
 										  "out vec2 TexCoord;\n"
-										  "out vec2 lock;\n"
-										  "uniform mat4 matrix;\n"
-										  "uniform vec2 limit;\n"
+										  "out float lock;\n"
 										  "void main()\n"
 										  "{\n"
-										  "gl_Position = matrix * vec4(aPos, 1.0);\n"
-										  "lock.x=gl_Position.y-limit.y;\n"
+										  "gl_Position = vec4(aPos, 1.0);\n"
+										  "lock = gl_Position.y - limit;\n"
 										  "TexCoord = aTexCoord;\n"
-										  "}", "#version 330 core\n"
-										  "out vec4 FragColor;\n"
+										  "}\n", "#version 330 core\n"
 										  "in vec2 TexCoord;\n"
-										  "in vec2 fog;\n"
-										  "in vec2 lock;\n"
-
+										  "in float lock;\n"
+										  ""
 										  "uniform sampler2D mainTexture;\n"
 										  "uniform vec2 alpha;\n"
-
-										  "void main()\n"
-										  "{\n"
-										  "FragColor = texture(mainTexture, TexCoord);\n"
-										  "FragColor.a *= alpha.x;\n"
-										  "if(lock.x<0.0)FragColor.a = 0;\n"
-										  "}");
+										  ""
+										  "out vec4 FragColor;\n"
+										  ""
+										  "void main(){\n"
+										  "FragColor = texture(mainTexture,TexCoord);\n"
+										  "FragColor.a = FragColor.a * alpha.x;\n"
+										  "if(lock < 0.0)FragColor.a = 0;\n"
+										  "}\n");
 
 	ShaderManager::INSTANCE()->getProgram(0)->setUniformValue("mainTexture", 0);
 	ShaderManager::INSTANCE()->getProgram(1)->setUniformValue("mainTexture", 0);
@@ -173,11 +170,21 @@ ItemManager::ItemManager(QObject *parent) : QObject(parent)
 	TextureManager::INSTANCE()->setTexture(TextureManager::MARISA23, new QOpenGLTexture(image.mirrored(false, true)));
 	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(MARISA24_PNG))->loadData(image);
 	TextureManager::INSTANCE()->setTexture(TextureManager::MARISA24, new QOpenGLTexture(image.mirrored(false, true)));
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(SLOWEFFECT1_PNG))->loadData(image);
+	TextureManager::INSTANCE()->setTexture(TextureManager::SLOWEFFECT1_PNG, new QOpenGLTexture(image.mirrored(false, true)));
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(SLOWEFFECT2_PNG))->loadData(image);
+	TextureManager::INSTANCE()->setTexture(TextureManager::SLOWEFFECT2_PNG, new QOpenGLTexture(image.mirrored(false, true)));
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(CENTER_PNG))->loadData(image);
+	TextureManager::INSTANCE()->setTexture(TextureManager::CENTER, new QOpenGLTexture(image.mirrored(false, true)));
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(MARISA_BALL_PNG))->loadData(image);
+	TextureManager::INSTANCE()->setTexture(TextureManager::BALL, new QOpenGLTexture(image.mirrored(false, true)));
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(MARISA_LINE_PNG))->loadData(image);
+	TextureManager::INSTANCE()->setTexture(TextureManager::MARISA_LINE, new QOpenGLTexture(image.mirrored(false, true)));
 }
 
 ItemManager *ItemManager::in = nullptr;
 
-ItemManager::~ItemManager()
+ItemManager::~ItemManager()//别忘了删event
 {
 	for(int i = 0; i < ITEM_NUMBER; i++) delete mainSplayTree[i];
 	for(int i = 0; i < ITEM_NUMBER; i++) delete render[i];

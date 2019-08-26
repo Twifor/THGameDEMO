@@ -50,4 +50,43 @@ protected:
 	float s;
 };
 
+class SlowEffectEvent1 : public ItemDataEventBase {
+	Q_OBJECT
+public:
+	explicit SlowEffectEvent1 (QObject *parent = nullptr);
+	bool update(RenderBase *render)override;
+};
+
+class SlowEffectEvent2 : public ItemDataEventBase {
+	Q_OBJECT
+public:
+	explicit SlowEffectEvent2 (QObject *parent = nullptr);
+	bool update(RenderBase *render)override;
+};
+
+class CenterEvent : public ItemDataEventBase {
+	Q_OBJECT
+public:
+	explicit CenterEvent(QObject *parent = nullptr);
+	bool update(RenderBase *render)override;
+};
+
+class BallEvent : public ItemDataEventBase {
+	Q_OBJECT
+public:
+	explicit BallEvent(int id, QObject *parent = nullptr);
+	bool update(RenderBase *render)override;
+private:
+	int id;
+};
+
+class LineEvent : public ItemDataEventBase {
+	Q_OBJECT
+public:
+	explicit LineEvent(float x, float y, float limit, QObject *parent = nullptr);
+	bool update(RenderBase *render)override;
+private:
+	float x, y, limit;
+};
+
 #endif // ITEMDATAEVENT_H
