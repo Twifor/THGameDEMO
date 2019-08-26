@@ -8,6 +8,8 @@
 
 MusicFactory::~MusicFactory()
 {
+	delete fire;
+	delete item;
 }
 
 MusicFactory *MusicFactory::getInstance()
@@ -25,8 +27,6 @@ void MusicFactory::setBack(qint64 p)
 void MusicFactory::destroy()
 {
 	if(INSTANCE != nullptr) delete INSTANCE;
-	delete fire;
-	delete item;
 }
 
 void MusicFactory::seekTO(qint64 pos)

@@ -6,7 +6,6 @@
 #include <QGraphicsView>
 #include <QOpenGLWidget>
 #include <QTimer>
-#include "scene.h"
 #include <QTime>
 
 class MainGame : public QGraphicsView, protected QOpenGLFunctions_3_3_Core

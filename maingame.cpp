@@ -1,7 +1,6 @@
 #include "gameresource.h"
 #include "maingame.h"
 #include <QPainter>
-#include "baseitem.h"
 #include "gamewidget.h"
 #include <QPointF>
 
@@ -22,7 +21,6 @@ MainGame::MainGame(QWidget *parent) : QGraphicsView (parent)
 	time = new QDateTime;
 	lastTime = time->currentMSecsSinceEpoch();
 	connect(timer, &QTimer::timeout, [ = ](){
-		GameWidget::Instance->showFPS(time->currentMSecsSinceEpoch() - lastTime);
 		lastTime = time->currentMSecsSinceEpoch();
 		scene->dealWithNewItem();
 		scene->advance();

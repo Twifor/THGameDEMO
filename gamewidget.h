@@ -11,7 +11,7 @@
 #include <QOpenGLTexture>
 #include <QTimer>
 #include <QMatrix4x4>
-#include "maingame.h"
+#include "openglgame.h"
 
 class GameWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core//游戏界面核心类
 {
@@ -40,7 +40,6 @@ public:
 	void addPoint();
 	void addSpell();
 	void addLife();
-	void showFPS(long long p);
 
 public slots:
 
@@ -62,9 +61,10 @@ private:
 	QPixmap *pixmap;//存放游戏元素贴图
 	QMatrix4x4 *matrix;
 
-	MainGame *mainGame;//主游戏界面对象
+	OpenGLGame *mainOpenGLGame;//主游戏界面对象
 	GameWidgetStatus status;
-	long long dx, ydx;
+	long long last, now;
+	double ans;
 	int fpsTimeLine;
 
 };

@@ -1,6 +1,7 @@
 #include "gamewidget.h"
 #include "gameresource.h"
 #include <QPainter>
+#include <QDateTime>
 
 GameWidget* GameWidget::Instance = nullptr;
 GameWidget::GameWidget(QWidget *parent) : QOpenGLWidget (parent)
@@ -15,11 +16,12 @@ GameWidget::GameWidget(QWidget *parent) : QOpenGLWidget (parent)
 	graze = 0;
 
 	status = INIT;
-	mainGame = new MainGame(this);
-	mainGame->setGeometry(41, 22, 487, 557);
+	mainOpenGLGame = new OpenGLGame(this);
+	mainOpenGLGame->setGeometry(41, 22, 487, 557);
 
 	Instance = this;
-	ydx = dx = 10000000;
+	last = 0;
+	now = 1;
 	fpsTimeLine = 0;
 }
 
@@ -39,67 +41,67 @@ GameWidget::~GameWidget()
 	delete redstar_texture;
 	delete matrix;
 
-	delete mainGame;
+	delete mainOpenGLGame;
 }
 
 void GameWidget::startUp()
 {
-	mainGame->startUp();
+	mainOpenGLGame->startUp();
 }
 
 void GameWidget::startDown()
 {
-	mainGame->startDown();
+	mainOpenGLGame->startDown();
 }
 
 void GameWidget::startLeft()
 {
-	mainGame->startLeft();
+	mainOpenGLGame->startLeft();
 }
 
 void GameWidget::startRight()
 {
-	mainGame->startRight();
+	mainOpenGLGame->startRight();
 }
 
 void GameWidget::endUp()
 {
-	mainGame->endUp();
+	mainOpenGLGame->endUp();
 }
 
 void GameWidget::endDown()
 {
-	mainGame->endDown();
+	mainOpenGLGame->endDown();
 }
 
 void GameWidget::endLeft()
 {
-	mainGame->endtLeft();
+	mainOpenGLGame->endtLeft();
 }
 
 void GameWidget::endRight()
 {
-	mainGame->endRight();
+	mainOpenGLGame->endRight();
 }
 
 void GameWidget::startShift()
 {
-	mainGame->startShift();
+	mainOpenGLGame->startShift();
 }
 
 void GameWidget::endShift()
 {
-	mainGame->endShift();
+	mainOpenGLGame->endShift();
 }
 
 void GameWidget::startZ()
 {
-	mainGame->startZ();
+	mainOpenGLGame->startZ();
 }
 
 void GameWidget::endZ()
 {
-	mainGame->endZ();
+	mainOpenGLGame->endZ();
 }
 
 void GameWidget::addPower()
@@ -121,11 +123,6 @@ void GameWidget::addSpell()
 void GameWidget::addLife()
 {
 	++life;
-}
-
-void GameWidget::showFPS(long long p)
-{
-	ydx = p;
 }
 
 void GameWidget::initializeGL()
@@ -358,6 +355,7 @@ void GameWidget::initializeGL()
 	timer.start();
 	connect(&timer, &QTimer::timeout, [ = ](){
 		update();
+		mainOpenGLGame->update();
 	});
 }
 
@@ -456,16 +454,13 @@ void GameWidget::paintGL()//这里绘制游戏界面
 	if(s == 0) painter.drawPixmap(pp, 210, 24, 28, pixmap[19]);
 	else while(s) painter.drawPixmap(pp, 210, 24, 28, pixmap[19 + s % 10]), s /= 10, pp -= 13;
 
+	now = QDateTime::currentMSecsSinceEpoch();
 	QPen pen;
 	pen.setColor(Qt::white);
 	painter.setPen(pen);
-	qDebug() << dx;
-	if(fpsTimeLine == 5) {
-		painter.drawText(750, 595, QString::number(1000.0 / ydx, 'f', 2));
-		dx = ydx;
-	}else{
-		painter.drawText(750, 595, QString::number(1000.0 / dx, 'f', 2));
-	}
+	if(fpsTimeLine == 5) ans = 1000.0 / (now - last);
+	painter.drawText(720, 595, QString::number(ans, 'f', 2) + QString("fps"));
+	last = now;
 	++fpsTimeLine;
 	if(fpsTimeLine == 6) fpsTimeLine = 0;
 }

@@ -82,7 +82,7 @@ MainWidget::~MainWidget()
 	MusicFactory::getInstance()->destroy();
 }
 
-void MainWidget::paintEvent(QPaintEvent *event)
+void MainWidget::paintEvent(QPaintEvent *)
 {
 
 }

@@ -1,0 +1,120 @@
+#ifndef RENDERBASE_H
+#define RENDERBASE_H
+
+#include <QObject>
+#include <QOpenGLBuffer>
+#include <QOpenGLVertexArrayObject>
+#include "texturemanager.h"
+#include <QOpenGLFunctions_3_3_Core>
+#include <QMatrix4x4>
+#include <queue>
+#include "camera.h"
+
+class RenderBase : public QObject, protected QOpenGLFunctions_3_3_Core
+{
+	Q_OBJECT
+public:
+	explicit RenderBase(QObject *parent = nullptr);
+	virtual void init() = 0;
+	virtual void render() = 0;
+
+signals:
+
+public slots:
+};
+
+class TranslateRender2D : public RenderBase {//位移渲染器
+	Q_OBJECT
+public:
+	explicit TranslateRender2D(TextureManager::TextureType type, QObject *parent = nullptr);
+	~TranslateRender2D();
+	virtual void init() override;
+	virtual void render() override;
+	virtual void setPos(float x, float y, float up, float left);
+
+protected:
+	QOpenGLBuffer *VBO, *IBO;
+	QOpenGLVertexArrayObject *VAO;
+	int num, offsetVBO, offsetIBO;
+	int MAXNUMBER = 35000;
+	float *VBOOP;
+	unsigned int *IBOOP;
+	unsigned int index;
+	TextureManager::TextureType t;
+};
+
+class RotateRender2D : public RenderBase {//旋转渲染器
+	Q_OBJECT
+public:
+	explicit RotateRender2D(TextureManager::TextureType type, QObject *parent = nullptr);
+	~RotateRender2D();
+	void init() override;
+	void render() override;
+	void setPos(float x, float y, float up, float left, float angle);
+
+protected:
+	QOpenGLBuffer *VBO, *IBO;
+	QOpenGLVertexArrayObject *VAO;
+	int num, offsetVBO, offsetIBO;
+	int MAXNUMBER = 15000;
+	float *VBOOP;
+	unsigned int *IBOOP;
+	unsigned int index;
+	TextureManager::TextureType t;
+};
+
+class BackGroundRender : public TranslateRender2D {
+	Q_OBJECT
+public:
+	BackGroundRender(TextureManager::TextureType type, QObject *parent = nullptr);
+	void setZ(float z);
+	void render() override;
+	void init() override;
+
+protected:
+	std::queue<float> que;
+	Camera camera;
+};
+
+class StarBackGroundRender : public TranslateRender2D {
+	Q_OBJECT
+public:
+	StarBackGroundRender(TextureManager::TextureType type, QObject *parent = nullptr);
+	void render() override;
+	void init() override;
+};
+
+class PlaneRender : public RenderBase {
+	Q_OBJECT
+public:
+	PlaneRender(QObject *parent = nullptr);
+	void init() override;
+	void render() override;
+	void setStatus(float x, float y, float up, float left, TextureManager::TextureType type);
+
+protected:
+	QOpenGLBuffer *VBO, *IBO;
+	QOpenGLVertexArrayObject *VAO;
+	int num, offsetVBO, offsetIBO;
+	int MAXNUMBER = 1;
+	float *VBOOP;
+	unsigned int *IBOOP;
+	unsigned int index;
+	TextureManager::TextureType t;
+};
+
+class TreeRender : public BackGroundRender {
+	Q_OBJECT
+public:
+	TreeRender(TextureManager::TextureType type, QObject *parent = nullptr);
+	void render() override;
+};
+
+class TreeRender2 : public BackGroundRender {
+	Q_OBJECT
+public:
+	TreeRender2(TextureManager::TextureType type, QObject *parent = nullptr);
+	void render()override;
+};
+
+#endif // RENDERBASE_H

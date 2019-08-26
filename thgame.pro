@@ -34,15 +34,15 @@ SOURCES += \
     gameresource.cpp \
     gamerule.cpp \
     gamewidget.cpp \
-    maingame.cpp \
-    scene.cpp \
     camera.cpp \
-    myplane.cpp \
-    baseitem.cpp \
-    gametexture.cpp \
-    basebullet.cpp \
-    bulletmakerbase.cpp \
-    gametools.cpp
+    gametools.cpp \
+    openglgame.cpp \
+    engine/itemdataevent.cpp \
+    engine/itemmanager.cpp \
+    engine/renderbase.cpp \
+    engine/shadermanager.cpp \
+    engine/texturemanager.cpp
+
 
 HEADERS += \
         mainwidget.h \
@@ -53,15 +53,17 @@ HEADERS += \
     gameresource.h \
     gamerule.h \
     gamewidget.h \
-    maingame.h \
-    scene.h \
     camera.h \
-    myplane.h \
-    baseitem.h \
-    gametexture.h \
     basebullet.h \
-    bulletmakerbase.h \
-    gametools.h
+    gametools.h \
+    openglgame.h \
+    engine/itemdataevent.h \
+    engine/itemmanager.h \
+    engine/renderbase.h \
+    engine/shadermanager.h \
+    engine/splaytree.h \
+    engine/texturemanager.h
+
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
