@@ -89,4 +89,13 @@ private:
 	float x, y, limit;
 };
 
+class MyBulletEvent : public ItemDataEventBase {
+	Q_OBJECT
+public:
+	explicit MyBulletEvent(float x, float y, QObject *parent = nullptr);
+	bool update(RenderBase *render)override;
+private:
+	float x, y;
+};
+
 #endif // ITEMDATAEVENT_H

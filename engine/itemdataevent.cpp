@@ -113,3 +113,15 @@ bool LineEvent::update(RenderBase *render)
 	static_cast<LineRender*>(render)->setPos(x, y, 0.5f, 0.04f, limit);
 	return true;
 }
+
+MyBulletEvent::MyBulletEvent(float x, float y, QObject *parent) : x(x), y(y), ItemDataEventBase (parent)
+{
+}
+
+bool MyBulletEvent::update(RenderBase *render)
+{
+	if(y >= 1.2f) return true;
+	y += 0.08f;
+	static_cast<MyBulletRender*>(render)->setPos(x, y * ItemManager::INSTANCE()->getDiv(), 0.06f * 0.8f, 0.035f * 0.8f, 0.5f);
+	return false;
+}

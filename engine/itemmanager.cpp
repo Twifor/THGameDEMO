@@ -109,11 +109,36 @@ ItemManager::ItemManager(QObject *parent) : QObject(parent)
 										  "FragColor.a = FragColor.a * alpha.x;\n"
 										  "if(lock < 0.0)FragColor.a = 0;\n"
 										  "}\n");
+	ShaderManager::INSTANCE()->setProgram(4, "#version 330 core\n"
+										  "layout (location = 0) in vec3 aPos;\n"
+										  "layout (location = 1) in vec2 aTexCoord;\n"
+										  "layout (location = 2) in float alpha;\n"
+										  ""
+										  "out vec2 TexCoord;\n"
+										  "out float A;\n"
+										  "void main()\n"
+										  "{\n"
+										  "gl_Position = vec4(aPos, 1.0);\n"
+										  "A = alpha;\n"
+										  "TexCoord = aTexCoord;\n"
+										  "}\n", "#version 330 core\n"
+										  "in vec2 TexCoord;\n"
+										  "in float A;\n"
+										  ""
+										  "uniform sampler2D mainTexture;\n"
+										  ""
+										  "out vec4 FragColor;\n"
+										  ""
+										  "void main(){\n"
+										  "FragColor = texture(mainTexture,TexCoord);\n"
+										  "FragColor.a *= A;\n"
+										  "}\n");
 
 	ShaderManager::INSTANCE()->getProgram(0)->setUniformValue("mainTexture", 0);
 	ShaderManager::INSTANCE()->getProgram(1)->setUniformValue("mainTexture", 0);
 	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("mainTexture", 0);
 	ShaderManager::INSTANCE()->getProgram(3)->setUniformValue("mainTexture", 0);
+	ShaderManager::INSTANCE()->getProgram(4)->setUniformValue("mainTexture", 0);
 
 	QImage image;
 	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(MAIN_GAME_BG_PNG))->loadData(image);
@@ -180,12 +205,15 @@ ItemManager::ItemManager(QObject *parent) : QObject(parent)
 	TextureManager::INSTANCE()->setTexture(TextureManager::BALL, new QOpenGLTexture(image.mirrored(false, true)));
 	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(MARISA_LINE_PNG))->loadData(image);
 	TextureManager::INSTANCE()->setTexture(TextureManager::MARISA_LINE, new QOpenGLTexture(image.mirrored(false, true)));
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(MARISA_BULLET_PNG))->loadData(image);
+	TextureManager::INSTANCE()->setTexture(TextureManager::MY_BULLET, new QOpenGLTexture(image.mirrored(false, true)));
 }
 
 ItemManager *ItemManager::in = nullptr;
 
 ItemManager::~ItemManager()//别忘了删event
 {
+	DFS_delete1(typeSplayTree->getRoot());
 	for(int i = 0; i < ITEM_NUMBER; i++) delete mainSplayTree[i];
 	for(int i = 0; i < ITEM_NUMBER; i++) delete render[i];
 	delete typeSplayTree;
@@ -274,19 +302,20 @@ void ItemManager::DFS(SplayNode<TreeData> *rt)
 
 void ItemManager::dealWithDel()
 {
-	while (!que.empty()) {
+	while (!que.empty()){
 		SplayNode<TreeData> *nd = que.front();
 		que.pop_front();
-		delete nd->value.event;
-		mainSplayTree[nd->value.type]->del(nd);
-		if(mainSplayTree[nd->value.type]->size() == 0) {
+		if (mainSplayTree[nd->value.type]->size() == 1){
 			typeSplayTree->del(to[nd->value.type]);
 			--numOfType;
 			to[nd->value.type] = nullptr;
 		}
+		delete nd->value.event;
+		mainSplayTree[nd->value.type]->del(nd);
 		--num;
 	}
 }
+
 
 void ItemManager::dealWithNew()
 {
@@ -295,5 +324,21 @@ void ItemManager::dealWithNew()
 		newQue.pop_back();
 		addItem(data.tp, data.depth, data.event);
 	}
+}
+
+void ItemManager::DFS_delete1(SplayNode<ItemManager::ItemType> *rt)
+{
+	if (rt == nullptr) return;
+	DFS_delete1(rt->ch[0]);
+	DFS_delete2(mainSplayTree[rt->value]->getRoot());
+	DFS_delete1(rt->ch[1]);
+}
+
+void ItemManager::DFS_delete2(SplayNode<TreeData> *rt)
+{
+	if (rt == nullptr) return;
+	DFS_delete2(rt->ch[0]);
+	delete rt->value.event;
+	DFS_delete2(rt->ch[1]);
 }
 

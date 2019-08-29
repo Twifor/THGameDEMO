@@ -36,10 +36,32 @@ protected:
 	QOpenGLBuffer *VBO, *IBO;
 	QOpenGLVertexArrayObject *VAO;
 	int num, offsetVBO, offsetIBO;
-	int MAXNUMBER = 35000;
+	int MAXNUMBER = 1;
 	float *VBOOP;
 	unsigned int *IBOOP;
 	unsigned int index;
+	void changeMAX(int s);
+	TextureManager::TextureType t;
+};
+
+class TranslateAlphaRender2D : public RenderBase {//支持alpha的位移渲染器
+	Q_OBJECT
+public:
+	explicit TranslateAlphaRender2D(TextureManager::TextureType type, QObject *parent = nullptr);
+	~TranslateAlphaRender2D();
+	virtual void init() override;
+	virtual void render() override;
+	virtual void setPos(float x, float y, float up, float left, float alpha);
+
+protected:
+	QOpenGLBuffer *VBO, *IBO;
+	QOpenGLVertexArrayObject *VAO;
+	int num, offsetVBO, offsetIBO;
+	int MAXNUMBER = 1;
+	float *VBOOP;
+	unsigned int *IBOOP;
+	unsigned int index;
+	void changeMAX(int s);
 	TextureManager::TextureType t;
 };
 
@@ -56,10 +78,11 @@ protected:
 	QOpenGLBuffer *VBO, *IBO;
 	QOpenGLVertexArrayObject *VAO;
 	int num, offsetVBO, offsetIBO;
-	int MAXNUMBER = 15000;
+	int MAXNUMBER = 1;
 	float *VBOOP;
 	unsigned int *IBOOP;
 	unsigned int index;
+	void changeMAX(int s);
 	TextureManager::TextureType t;
 };
 
@@ -168,6 +191,20 @@ protected:
 	float *VBOOP;
 	unsigned int *IBOOP;
 	unsigned int index;
+};
+
+class NullRender : public RenderBase {
+	Q_OBJECT
+public:
+	NullRender(QObject *parent = nullptr);
+	void init() override;
+	void render() override;
+};
+
+class MyBulletRender : public TranslateAlphaRender2D {
+	Q_OBJECT
+public:
+	MyBulletRender(QObject *parent = nullptr);
 };
 
 #endif // RENDERBASE_H

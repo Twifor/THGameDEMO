@@ -105,6 +105,16 @@ void TranslateRender2D::setPos(float x, float y, float up, float left)
 	index += 4;
 }
 
+void TranslateRender2D::changeMAX(int s)
+{
+	MAXNUMBER = s;
+	delete VBOOP;
+	delete IBOOP;
+
+	VBOOP = new float[MAXNUMBER * 20];
+	IBOOP = new unsigned int[MAXNUMBER * 6];
+}
+
 RotateRender2D::RotateRender2D(TextureManager::TextureType type, QObject *parent) : t(type), RenderBase (parent)
 {
 	VAO = new QOpenGLVertexArrayObject;
@@ -219,12 +229,19 @@ void RotateRender2D::setPos(float x, float y, float up, float left, float angle)
 	index += 4;
 }
 
-BackGroundRender::BackGroundRender(TextureManager::TextureType type, QObject *parent) : TranslateRender2D (type, parent)
+void RotateRender2D::changeMAX(int s)
 {
+	MAXNUMBER = s;
 	delete VBOOP;
 	delete IBOOP;
-	VBOOP = new float[20];
-	IBOOP = new unsigned int[6];
+
+	VBOOP = new float[MAXNUMBER * 32];
+	IBOOP = new unsigned int[MAXNUMBER * 6];
+}
+
+BackGroundRender::BackGroundRender(TextureManager::TextureType type, QObject *parent) : TranslateRender2D (type, parent)
+{
+	changeMAX(1);
 }
 
 void BackGroundRender::setZ(float z)
@@ -256,6 +273,7 @@ void BackGroundRender::render()
 	VBO->allocate(VBOOP, num * 80);
 	IBO->allocate(IBOOP, num * 24);
 
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	while(!que.empty()) {
 		float s = que.front();
 		que.pop();
@@ -289,10 +307,7 @@ void BackGroundRender::init()
 
 StarBackGroundRender::StarBackGroundRender(TextureManager::TextureType type, QObject *parent) : TranslateRender2D (type, parent)
 {
-	delete VBOOP;
-	delete IBOOP;
-	VBOOP = new float[20];
-	IBOOP = new unsigned int[6];
+	changeMAX(1);
 }
 
 void StarBackGroundRender::render()
@@ -668,10 +683,7 @@ void CenterRender::render()
 
 BallRender::BallRender(QObject *parent) : RotateRender2D (TextureManager::BALL, parent)
 {
-	delete VBOOP;
-	delete IBOOP;
-	VBOOP = new float[200];
-	IBOOP = new unsigned int[50];
+	changeMAX(5);
 }
 
 LineRender::LineRender(QObject *parent) : RenderBase (parent)
@@ -769,4 +781,140 @@ void LineRender::setPos(float x, float y, float up, float left, float limit)
 	IBOOP[offsetIBO++] = index + 2;
 	IBOOP[offsetIBO++] = index + 3;
 	index += 4;
+}
+
+NullRender::NullRender(QObject *parent) : RenderBase (parent)
+{
+
+}
+
+void NullRender::init()
+{
+
+}
+
+void NullRender::render()
+{
+
+}
+
+TranslateAlphaRender2D::TranslateAlphaRender2D(TextureManager::TextureType type, QObject *parent) : t(type), RenderBase (parent)
+{
+	VAO = new QOpenGLVertexArrayObject;
+	VAO->create();
+	VBO = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+	VBO->setUsagePattern(QOpenGLBuffer::DynamicDraw);
+	IBO = new QOpenGLBuffer(QOpenGLBuffer::IndexBuffer);
+	IBO->setUsagePattern(QOpenGLBuffer::DynamicDraw);
+
+	VBOOP = new float[MAXNUMBER * 24];
+	IBOOP = new unsigned int[MAXNUMBER * 6];
+}
+
+TranslateAlphaRender2D::~TranslateAlphaRender2D()
+{
+	delete VAO;
+	delete VBO;
+	delete IBO;
+
+	delete []VBOOP;
+	delete []IBOOP;
+}
+
+void TranslateAlphaRender2D::init()
+{
+	num = 0;
+	offsetIBO = offsetVBO = 0;
+	index = 0;
+}
+
+void TranslateAlphaRender2D::render()
+{
+	VBO->destroy();
+	VAO->destroy();
+	IBO->destroy();
+	VAO->create();
+	VAO->bind();
+	VBO->create();
+	VBO->bind();
+	IBO->create();
+	IBO->bind();
+
+	ShaderManager::INSTANCE()->getProgram(4)->bind();
+	ShaderManager::INSTANCE()->getProgram(4)->enableAttributeArray(ShaderManager::INSTANCE()->getProgram(4)->attributeLocation("aPos"));
+	ShaderManager::INSTANCE()->getProgram(4)->setAttributeBuffer(ShaderManager::INSTANCE()->getProgram(4)->attributeLocation("aPos"), GL_FLOAT, 0, 3, sizeof(float) * 6);
+
+	ShaderManager::INSTANCE()->getProgram(4)->enableAttributeArray(ShaderManager::INSTANCE()->getProgram(4)->attributeLocation("aTexCoord"));
+	ShaderManager::INSTANCE()->getProgram(4)->setAttributeBuffer(ShaderManager::INSTANCE()->getProgram(4)->attributeLocation("aTexCoord"), GL_FLOAT, 3 * sizeof(float), 2, sizeof(float) * 6);
+
+	ShaderManager::INSTANCE()->getProgram(4)->enableAttributeArray(ShaderManager::INSTANCE()->getProgram(4)->attributeLocation("alpha"));
+	ShaderManager::INSTANCE()->getProgram(4)->setAttributeBuffer(ShaderManager::INSTANCE()->getProgram(4)->attributeLocation("alpha"), GL_FLOAT, 5 * sizeof(float), 1, sizeof(float) * 6);
+
+	TextureManager::INSTANCE()->getTexture(t)->bind(0);
+
+	VBO->allocate(VBOOP, num * 96);
+	IBO->allocate(IBOOP, num * 24);
+
+	glDrawElements(GL_TRIANGLES, num * 6, GL_UNSIGNED_INT, 0);
+
+	ShaderManager::INSTANCE()->getProgram(4)->release();
+	TextureManager::INSTANCE()->getTexture(t)->release();
+	VAO->release();
+	VBO->release();
+	IBO->release();
+}
+
+void TranslateAlphaRender2D::setPos(float x, float y, float up, float left, float alpha)
+{
+	++num;
+	VBOOP[offsetVBO++] = x - left;
+	VBOOP[offsetVBO++] = y + up;
+	VBOOP[offsetVBO++] = 0.0f;
+	VBOOP[offsetVBO++] = 0.0f;
+	VBOOP[offsetVBO++] = 1.0f;
+	VBOOP[offsetVBO++] = alpha;
+
+	VBOOP[offsetVBO++] = x - left;
+	VBOOP[offsetVBO++] = y - up;
+	VBOOP[offsetVBO++] = 0.0f;
+	VBOOP[offsetVBO++] = 0.0f;
+	VBOOP[offsetVBO++] = 0.0f;
+	VBOOP[offsetVBO++] = alpha;
+
+	VBOOP[offsetVBO++] = x + left;
+	VBOOP[offsetVBO++] = y - up;
+	VBOOP[offsetVBO++] = 0.0f;
+	VBOOP[offsetVBO++] = 1.0f;
+	VBOOP[offsetVBO++] = 0.0f;
+	VBOOP[offsetVBO++] = alpha;
+
+	VBOOP[offsetVBO++] = x + left;
+	VBOOP[offsetVBO++] = y + up;
+	VBOOP[offsetVBO++] = 0.0f;
+	VBOOP[offsetVBO++] = 1.0f;
+	VBOOP[offsetVBO++] = 1.0f;
+	VBOOP[offsetVBO++] = alpha;
+
+	IBOOP[offsetIBO++] = index;
+	IBOOP[offsetIBO++] = index + 1;
+	IBOOP[offsetIBO++] = index + 2;
+	IBOOP[offsetIBO++] = index;
+	IBOOP[offsetIBO++] = index + 2;
+	IBOOP[offsetIBO++] = index + 3;
+	index += 4;
+}
+
+void TranslateAlphaRender2D::changeMAX(int s)
+{
+	MAXNUMBER = s;
+	delete VBOOP;
+	delete IBOOP;
+
+	VBOOP = new float[MAXNUMBER * 24];
+	IBOOP = new unsigned int[MAXNUMBER * 6];
+}
+
+MyBulletRender::MyBulletRender(QObject *parent) : TranslateAlphaRender2D (TextureManager::MY_BULLET, parent)
+{
+	changeMAX(100);
 }

@@ -21,7 +21,7 @@ public:
 	float ballRotate;
 	float ballX[5], ballY[5];
 	int slowEffectTimeLine;
-	int ballTimeLine;
+	int ballTimeLine, bulletTime;
 
 signals:
 
@@ -49,6 +49,7 @@ protected:
 	void drawSlowEffect();
 	void drawBalls();
 	void drawLines();
+	void drawBullets();
 	float backGroundMax, treeLMax, treeRMax;
 	float ballLine;
 };

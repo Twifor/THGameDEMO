@@ -7,7 +7,7 @@
 #include <QQueue>
 #include "renderbase.h"
 
-#define ITEM_NUMBER 10
+#define ITEM_NUMBER 11
 
 struct ItemData;
 struct TreeData;
@@ -28,6 +28,7 @@ public:
 		CENTER,
 		MARISA_LINE,
 		BALL,
+		MY_BULLET
 	};
 	void addItem(ItemType type, int depth, ItemDataEventBase *base);
 	void addNewItem(ItemType type, int depth, ItemDataEventBase *base);
@@ -48,6 +49,9 @@ protected:
 	void DFS(SplayNode<TreeData> *rt);
 	void dealWithDel();
 	void dealWithNew();
+	void DFS_delete1(SplayNode<ItemType> *rt);
+	void DFS_delete2(SplayNode<TreeData> *rt);
+
 
 private:
 	explicit ItemManager(QObject *parent = nullptr);

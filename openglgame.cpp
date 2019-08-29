@@ -1,6 +1,7 @@
 #include "openglgame.h"
 #include "engine/itemmanager.h"
 #include "gamewidget.h"
+#include "musicfactory.h"
 
 OpenGLGame::OpenGLGame(QWidget *parent) : QOpenGLWidget(parent)
 {
@@ -9,6 +10,7 @@ OpenGLGame::OpenGLGame(QWidget *parent) : QOpenGLWidget(parent)
 
 void OpenGLGame::startLeft()
 {
+	if(status & 2) status &= ~2;
 	status |= 1;
 	myPlaneTimeLine = 0;
 	myPlaneOffset = 8;
@@ -18,6 +20,7 @@ OpenGLGame *OpenGLGame::Instance = nullptr;
 
 void OpenGLGame::startRight()
 {
+	if(status & 1) status &= ~1;
 	status |= 2;
 	myPlaneTimeLine = 0;
 	myPlaneOffset = 16;
@@ -36,13 +39,15 @@ void OpenGLGame::startDown()
 void OpenGLGame::endtLeft()
 {
 	status &= ~1;
-	myPlaneOffset = 0;
+	if(status & 2);
+	else myPlaneOffset = 0;
 }
 
 void OpenGLGame::endRight()
 {
 	status &= ~2;
-	myPlaneOffset = 0;
+	if(status & 1);
+	else myPlaneOffset = 0;
 }
 
 void OpenGLGame::endUp()
@@ -108,6 +113,7 @@ void OpenGLGame::initializeGL()
 	slowEffectTimeLine = 0;
 	ballTimeLine = 0;
 	ballLine = 0;
+	bulletTime = 0;
 	//安装渲染器
 	ItemManager::INSTANCE()->installRender(ItemManager::BACKGROUND, new BackGroundRender(TextureManager::BACKGROUND));
 	ItemManager::INSTANCE()->installRender(ItemManager::STAR_BACKGROUND, new StarBackGroundRender(TextureManager::STAR_BACKGROUND));
@@ -119,6 +125,7 @@ void OpenGLGame::initializeGL()
 	ItemManager::INSTANCE()->installRender(ItemManager::CENTER, new CenterRender);
 	ItemManager::INSTANCE()->installRender(ItemManager::BALL, new BallRender);
 	ItemManager::INSTANCE()->installRender(ItemManager::MARISA_LINE, new LineRender);
+	ItemManager::INSTANCE()->installRender(ItemManager::MY_BULLET, new MyBulletRender);
 
 	//注册事件
 	ItemManager::INSTANCE()->addItem(ItemManager::BACKGROUND, 1, new BackGroundEvent(-26.0));
@@ -132,6 +139,7 @@ void OpenGLGame::initializeGL()
 	ItemManager::INSTANCE()->addItem(ItemManager::TREE2, 1, new TreeEvent(-14.0f));
 	ItemManager::INSTANCE()->addItem(ItemManager::BALL, 1, new BallEvent(0));
 
+	glEnable(GL_BLEND);
 }
 
 void OpenGLGame::resizeGL(int w, int h)
@@ -142,8 +150,7 @@ void OpenGLGame::resizeGL(int w, int h)
 void OpenGLGame::paintGL()
 {
 	glClear( GL_COLOR_BUFFER_BIT);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 	drawBackGround();
 	drawMyPlane();
 	ItemManager::INSTANCE()->update();
@@ -204,6 +211,7 @@ void OpenGLGame::drawMyPlane()
 	drawSlowEffect();
 	drawBalls();
 	drawLines();
+	drawBullets();
 }
 
 void OpenGLGame::drawSlowEffect()
@@ -377,4 +385,34 @@ void OpenGLGame::drawLines()
 	}
 	ballLine += 0.05;
 	if(ballLine >= 0.5f / ItemManager::INSTANCE()->getDiv()) ballLine = 0;
+}
+
+void OpenGLGame::drawBullets()
+{
+	++bulletTime;
+	if((status & 32) && bulletTime == 5) {
+		MusicFactory::getInstance()->playFire();
+		if(GameWidget::Instance->getLevel() == 0) {
+			ItemManager::INSTANCE()->addItem(ItemManager::MY_BULLET, 1, new MyBulletEvent(myPlaneX, myPlaneY + 0.001f));
+		}else if(GameWidget::Instance->getLevel() == 1) {
+			ItemManager::INSTANCE()->addItem(ItemManager::MY_BULLET, 1, new MyBulletEvent(myPlaneX - 0.03f, myPlaneY + 0.001f));
+			ItemManager::INSTANCE()->addItem(ItemManager::MY_BULLET, 1, new MyBulletEvent(myPlaneX + 0.03f, myPlaneY + 0.001f));
+		}else if(GameWidget::Instance->getLevel() == 2) {
+			ItemManager::INSTANCE()->addItem(ItemManager::MY_BULLET, 1, new MyBulletEvent(myPlaneX - 0.04f, myPlaneY + 0.001f));
+			ItemManager::INSTANCE()->addItem(ItemManager::MY_BULLET, 1, new MyBulletEvent(myPlaneX + 0.04f, myPlaneY + 0.001f));
+			ItemManager::INSTANCE()->addItem(ItemManager::MY_BULLET, 1, new MyBulletEvent(myPlaneX, myPlaneY + 0.001f));
+		}else if(GameWidget::Instance->getLevel() == 3) {
+			ItemManager::INSTANCE()->addItem(ItemManager::MY_BULLET, 1, new MyBulletEvent(myPlaneX - 0.02f, myPlaneY + 0.001f));
+			ItemManager::INSTANCE()->addItem(ItemManager::MY_BULLET, 1, new MyBulletEvent(myPlaneX + 0.02f, myPlaneY + 0.001f));
+			ItemManager::INSTANCE()->addItem(ItemManager::MY_BULLET, 1, new MyBulletEvent(myPlaneX - 0.06f, myPlaneY + 0.001f));
+			ItemManager::INSTANCE()->addItem(ItemManager::MY_BULLET, 1, new MyBulletEvent(myPlaneX + 0.06f, myPlaneY + 0.001f));
+		}else if(GameWidget::Instance->getLevel() == 4) {
+			ItemManager::INSTANCE()->addItem(ItemManager::MY_BULLET, 1, new MyBulletEvent(myPlaneX - 0.04f, myPlaneY + 0.001f));
+			ItemManager::INSTANCE()->addItem(ItemManager::MY_BULLET, 1, new MyBulletEvent(myPlaneX + 0.04f, myPlaneY + 0.001f));
+			ItemManager::INSTANCE()->addItem(ItemManager::MY_BULLET, 1, new MyBulletEvent(myPlaneX - 0.08f, myPlaneY + 0.001f));
+			ItemManager::INSTANCE()->addItem(ItemManager::MY_BULLET, 1, new MyBulletEvent(myPlaneX + 0.08f, myPlaneY + 0.001f));
+			ItemManager::INSTANCE()->addItem(ItemManager::MY_BULLET, 1, new MyBulletEvent(myPlaneX, myPlaneY + 0.001f));
+		}
+	}
+	if(bulletTime == 5) bulletTime = 0;
 }
