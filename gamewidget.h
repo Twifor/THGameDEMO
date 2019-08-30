@@ -65,10 +65,10 @@ private:
 
 	OpenGLGame *mainOpenGLGame;//主游戏界面对象
 	GameWidgetStatus status;
-	long long last, now;
-	double ans;
-	int fpsTimeLine;
+	int numberOfFrames, ans;
 
+	LARGE_INTEGER nEndTime, nBeginTime, nFrequency;
+	double time;
 };
 
 #endif // GAMEWIDGET_H

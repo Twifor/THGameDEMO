@@ -95,6 +95,7 @@ void MusicFactory::quit()
 	delete player[1];
 	player[0] = nullptr;
 	player[1] = nullptr;
+	killTimer(timeID);
 }
 
 void MusicFactory::setVolume(int volume)

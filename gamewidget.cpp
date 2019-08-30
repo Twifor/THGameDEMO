@@ -2,6 +2,8 @@
 #include "gameresource.h"
 #include <QPainter>
 #include <QDateTime>
+#include <QApplication>
+#include "musicfactory.h"
 
 GameWidget* GameWidget::Instance = nullptr;
 GameWidget::GameWidget(QWidget *parent) : QOpenGLWidget (parent)
@@ -15,15 +17,16 @@ GameWidget::GameWidget(QWidget *parent) : QOpenGLWidget (parent)
 	point = 0;
 	graze = 0;
 	level = 0;
+//	MusicFactory::getInstance()->quit();
+	numberOfFrames = 0;
+	ans = 60;
+	QueryPerformanceCounter(&nBeginTime);
 
 	status = INIT;
 	mainOpenGLGame = new OpenGLGame(this);
 	mainOpenGLGame->setGeometry(41, 22, 487, 557);
 
 	Instance = this;
-	last = 0;
-	now = 1;
-	fpsTimeLine = 0;
 }
 
 GameWidget::~GameWidget()
@@ -361,7 +364,6 @@ void GameWidget::initializeGL()
 	timer.start();
 	connect(&timer, &QTimer::timeout, [ = ](){
 		update();
-		mainOpenGLGame->update();
 	});
 }
 
@@ -372,6 +374,7 @@ void GameWidget::resizeGL(int w, int h)
 
 void GameWidget::paintGL()//这里绘制游戏界面
 {
+	QueryPerformanceFrequency(&nFrequency);
 	if(status == INIT) {
 		if(totAlpha >= 1.0f) {
 			totAlpha = 1.0f;
@@ -379,6 +382,8 @@ void GameWidget::paintGL()//这里绘制游戏界面
 		}
 		else totAlpha += 0.05f;
 	}
+	mainOpenGLGame->update();
+
 	QPainter painter(this);
 	painter.beginNativePainting();
 
@@ -460,13 +465,16 @@ void GameWidget::paintGL()//这里绘制游戏界面
 	if(s == 0) painter.drawPixmap(pp, 210, 24, 28, pixmap[19]);
 	else while(s) painter.drawPixmap(pp, 210, 24, 28, pixmap[19 + s % 10]), s /= 10, pp -= 13;
 
-	now = QDateTime::currentMSecsSinceEpoch();
+	QueryPerformanceCounter(&nEndTime);
 	QPen pen;
 	pen.setColor(Qt::white);
 	painter.setPen(pen);
-	if(fpsTimeLine == 5) ans = 1000.0 / (now - last);
-	painter.drawText(720, 595, QString::number(ans, 'f', 2) + QString("fps"));
-	last = now;
-	++fpsTimeLine;
-	if(fpsTimeLine == 6) fpsTimeLine = 0;
+	++numberOfFrames;
+	time = (double)(nEndTime.QuadPart - nBeginTime.QuadPart) / (double)nFrequency.QuadPart;
+	if(time > 1) {
+		ans = numberOfFrames;
+		nBeginTime = nEndTime;
+		numberOfFrames = 0;
+	}
+	painter.drawText(720, 595, QString::number(ans, 'f', 1) + QString("fps"));
 }
