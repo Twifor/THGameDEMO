@@ -129,6 +129,10 @@ void OpenGLGame::initializeGL()
 	ItemManager::INSTANCE()->installRender(ItemManager::MY_BULLET, new MyBulletRender);
 	ItemManager::INSTANCE()->installRender(ItemManager::POWER, new ItemRender(TextureManager::POWER));
 	ItemManager::INSTANCE()->installRender(ItemManager::POINT, new ItemRender(TextureManager::POINT));
+	ItemManager::INSTANCE()->installRender(ItemManager::EXTEND, new SmallItemRender(TextureManager::EXTEND));
+	ItemManager::INSTANCE()->installRender(ItemManager::SPEXTEND, new SmallItemRender(TextureManager::SPEXTEND));
+	ItemManager::INSTANCE()->installRender(ItemManager::EXTEND_TIP, new TipRender(TextureManager::EXTEND_TIP));
+	ItemManager::INSTANCE()->installRender(ItemManager::SPEXTEND_TIP, new TipRender(TextureManager::SPEXTEND_TIP));
 
 	//注册事件
 	ItemManager::INSTANCE()->addItem(ItemManager::BACKGROUND, 1, new BackGroundEvent(-26.0));
@@ -152,12 +156,6 @@ void OpenGLGame::resizeGL(int w, int h)
 
 void OpenGLGame::paintGL()
 {
-	ItemManager::INSTANCE()->addItem(ItemManager::POWER, 1, new PowerEvent(sin(rand()), 1.0f));
-	ItemManager::INSTANCE()->addItem(ItemManager::POINT, 1, new PointEvent(sin(rand()), 1.0f));
-	ItemManager::INSTANCE()->addItem(ItemManager::POWER, 1, new PowerEvent(sin(rand()), 1.0f));
-	ItemManager::INSTANCE()->addItem(ItemManager::POINT, 1, new PointEvent(sin(rand()), 1.0f));
-	ItemManager::INSTANCE()->addItem(ItemManager::POWER, 1, new PowerEvent(sin(rand()), 1.0f));
-
 	glClear( GL_COLOR_BUFFER_BIT);
 
 	drawBackGround();

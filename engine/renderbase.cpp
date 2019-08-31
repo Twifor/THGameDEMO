@@ -1054,3 +1054,13 @@ ItemRender::ItemRender(TextureManager::TextureType type, QObject *parent) : Rota
 {
 	changeMAX(5000);
 }
+
+SmallItemRender::SmallItemRender(TextureManager::TextureType type, QObject *parent) : RotateRender2D (type, parent)
+{
+	changeMAX(2);
+}
+
+TipRender::TipRender(TextureManager::TextureType type, QObject *parent) : TranslateAlphaRender2D (type, parent)
+{
+	changeMAX(2);
+}

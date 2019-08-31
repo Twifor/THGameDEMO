@@ -243,6 +243,14 @@ ItemManager::ItemManager(QObject *parent) : QObject(parent)
 	TextureManager::INSTANCE()->setTexture(TextureManager::POWER, new QOpenGLTexture(image.mirrored(false, true)));
 	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(POINT_ITEM_PNG))->loadData(image);
 	TextureManager::INSTANCE()->setTexture(TextureManager::POINT, new QOpenGLTexture(image.mirrored(false, true)));
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(UP_ITEM_PNG))->loadData(image);
+	TextureManager::INSTANCE()->setTexture(TextureManager::EXTEND, new QOpenGLTexture(image.mirrored(false, true)));
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(SPELL_ITEM_PNG))->loadData(image);
+	TextureManager::INSTANCE()->setTexture(TextureManager::SPEXTEND, new QOpenGLTexture(image.mirrored(false, true)));
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(EXTEND_PNG))->loadData(image);
+	TextureManager::INSTANCE()->setTexture(TextureManager::EXTEND_TIP, new QOpenGLTexture(image.mirrored(false, true)));
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(SPELL_EXTEND_PNG))->loadData(image);
+	TextureManager::INSTANCE()->setTexture(TextureManager::SPEXTEND_TIP, new QOpenGLTexture(image.mirrored(false, true)));
 }
 
 ItemManager *ItemManager::in = nullptr;

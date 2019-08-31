@@ -126,11 +126,40 @@ public:
 	bool update(RenderBase *render) override;
 };
 
-class PointEvent:public ItemEvent{
+class PointEvent : public ItemEvent {
 	Q_OBJECT
 public:
 	explicit PointEvent(float x, float y, QObject *parent = nullptr);
 	bool update(RenderBase *render) override;
+};
+class ExtendEvent : public ItemEvent {
+	Q_OBJECT
+public:
+	explicit ExtendEvent(float x, float y, QObject *parent = nullptr);
+	bool update(RenderBase *render) override;
+};
+
+class SPExtendEvent : public ItemEvent {
+	Q_OBJECT
+public:
+	explicit SPExtendEvent(float x, float y, QObject *parent = nullptr);
+	bool update(RenderBase *render)override;
+};
+
+class ExtendTipEvent : public ItemDataEventBase {
+public:
+	explicit ExtendTipEvent(QObject *parent = nullptr);
+	bool update(RenderBase *render)override;
+private:
+	int time;
+};
+
+class SPExtendTipEvent:public ItemDataEventBase{
+public:
+	explicit SPExtendTipEvent(QObject *parent = nullptr);
+	bool update(RenderBase *render)override;
+private:
+	int time;
 };
 
 #endif

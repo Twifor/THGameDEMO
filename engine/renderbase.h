@@ -234,4 +234,16 @@ public:
 	ItemRender(TextureManager::TextureType type, QObject *parent = nullptr);
 };
 
+class SmallItemRender : public RotateRender2D {
+	Q_OBJECT
+public:
+	SmallItemRender(TextureManager::TextureType type, QObject *parent = nullptr);
+};
+
+class TipRender : public TranslateAlphaRender2D {
+	Q_OBJECT
+public:
+	explicit TipRender(TextureManager::TextureType type, QObject *parent = nullptr);
+};
+
 #endif // RENDERBASE_H

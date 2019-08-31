@@ -4,6 +4,7 @@
 #include <QDateTime>
 #include <QApplication>
 #include "musicfactory.h"
+#include "engine/itemmanager.h"
 
 GameWidget* GameWidget::Instance = nullptr;
 GameWidget::GameWidget(QWidget *parent) : QOpenGLWidget (parent)
@@ -124,11 +125,15 @@ void GameWidget::addPoint()
 void GameWidget::addSpell()
 {
 	++spellcard;
+	MusicFactory::getInstance()->playExtend();
+	ItemManager::INSTANCE()->addItem(ItemManager::SPEXTEND_TIP, 1, new SPExtendTipEvent);
 }
 
 void GameWidget::addLife()
 {
 	++life;
+	MusicFactory::getInstance()->playExtend();
+	ItemManager::INSTANCE()->addItem(ItemManager::EXTEND_TIP, 1, new ExtendTipEvent);
 }
 
 int GameWidget::getLevel()

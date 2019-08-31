@@ -213,5 +213,92 @@ bool PointEvent::update(RenderBase *render)
 		static_cast<RotateRender2D*>(render)->setPos(x, y * ItemManager::INSTANCE()->getDiv(), 0.035f, 0.035f, 0.0f);
 	}
 	return false;
+}
 
+ExtendEvent::ExtendEvent(float x, float y, QObject *parent) : ItemEvent (x, y, parent)
+{
+
+}
+
+bool ExtendEvent::update(RenderBase *render)
+{
+	if(y < -1.1f) return true;
+	if(isIn()) {
+		GameWidget::Instance->addLife();
+		return true;
+	}else if(isColl()) isActive = true;
+	if(isActive) {
+		float ss = (OpenGLGame::Instance->myPlaneY - y) / (sqrt(dis2()));
+		float cc = (OpenGLGame::Instance->myPlaneX - x) / (sqrt(dis2()));
+		float angle = asin(ss);
+		if(cc < 0) {
+			if(ss >= 0) angle = M_PI - angle;
+			else angle = -M_PI - angle;
+		};
+		x += 0.03f * cc;
+		y += 0.03f * ss;
+		static_cast<RotateRender2D*>(render)->setPos(x, y * ItemManager::INSTANCE()->getDiv(), 0.075f, 0.075f, angle + M_PI / 2);
+	}else{
+		y -= 0.01f;
+		static_cast<RotateRender2D*>(render)->setPos(x, y * ItemManager::INSTANCE()->getDiv(), 0.075f, 0.075f, 0.0f);
+	}
+	return false;
+}
+
+SPExtendEvent::SPExtendEvent(float x, float y, QObject *parent) : ItemEvent (x, y, parent)
+{
+
+}
+
+bool SPExtendEvent::update(RenderBase *render)
+{
+	if(y < -1.1f) return true;
+	if(isIn()) {
+		GameWidget::Instance->addSpell();
+		return true;
+	}else if(isColl()) isActive = true;
+	if(isActive) {
+		float ss = (OpenGLGame::Instance->myPlaneY - y) / (sqrt(dis2()));
+		float cc = (OpenGLGame::Instance->myPlaneX - x) / (sqrt(dis2()));
+		float angle = asin(ss);
+		if(cc < 0) {
+			if(ss >= 0) angle = M_PI - angle;
+			else angle = -M_PI - angle;
+		};
+		x += 0.03f * cc;
+		y += 0.03f * ss;
+		static_cast<RotateRender2D*>(render)->setPos(x, y * ItemManager::INSTANCE()->getDiv(), 0.075f, 0.075f, angle + M_PI / 2);
+	}else{
+		y -= 0.01f;
+		static_cast<RotateRender2D*>(render)->setPos(x, y * ItemManager::INSTANCE()->getDiv(), 0.075f, 0.075f, 0.0f);
+	}
+	return false;
+}
+
+ExtendTipEvent::ExtendTipEvent(QObject *parent) : ItemDataEventBase (parent)
+{
+	time = 0;
+}
+
+bool ExtendTipEvent::update(RenderBase *render)
+{
+	++time;
+	if(time > 90) return true;
+	if(time <= 60) static_cast<TipRender*>(render)->setPos(0.05f, 0.5f * ItemManager::INSTANCE()->getDiv(), 0.1f, 0.3f, 1.0f);
+	else static_cast<TipRender*>(render)->setPos(0.05f, 0.5f * ItemManager::INSTANCE()->getDiv(), 0.1f, 0.3f, (90 - time) / 30.0f);
+	return false;
+}
+
+SPExtendTipEvent::SPExtendTipEvent(QObject *parent) : ItemDataEventBase (parent)
+{
+	time = 0;
+}
+
+bool SPExtendTipEvent::update(RenderBase *render)
+{
+	++time;
+	if(time > 90) return true;
+	if(time <= 60) static_cast<TipRender*>(render)->setPos(0.05f, 0.5f * ItemManager::INSTANCE()->getDiv(), 0.0756f, 0.356f, 1.0f);
+	else static_cast<TipRender*>(render)->setPos(0.05f, 0.5f * ItemManager::INSTANCE()->getDiv(), 0.0756f, 0.356f, (90 - time) / 30.0f);
+	return false;
 }
