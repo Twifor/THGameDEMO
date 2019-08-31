@@ -1,5 +1,7 @@
 #include "shadermanager.h"
 
+#include <QFile>
+
 ShaderManager::ShaderManager(QObject *parent) : QObject(parent)
 {
 
@@ -8,10 +10,10 @@ ShaderManager::ShaderManager(QObject *parent) : QObject(parent)
 void ShaderManager::setProgram(int id, const char *vsCode, const char *fsCode)
 {
 	QOpenGLShader *vs = new QOpenGLShader(QOpenGLShader::Vertex);
-	vs->compileSourceCode(vsCode);
+	vs->compileSourceFile(vsCode);
 
 	QOpenGLShader *fs = new QOpenGLShader(QOpenGLShader::Fragment);
-	fs->compileSourceCode(fsCode);
+	fs->compileSourceFile(fsCode);
 
 	QOpenGLShaderProgram *program = new QOpenGLShaderProgram;
 	program->create();

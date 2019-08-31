@@ -16,4 +16,18 @@
         <file>stars</file>
         <file>particles</file>
     </qresource>
+    <qresource prefix="/opengl">
+        <file>v0.vert</file>
+        <file>f0.frag</file>
+        <file>f1.frag</file>
+        <file>f2.frag</file>
+        <file>f3.frag</file>
+        <file>f4.frag</file>
+        <file>f5.frag</file>
+        <file>v1.vert</file>
+        <file>v2.vert</file>
+        <file>v3.vert</file>
+        <file>v4.vert</file>
+        <file>v5.vert</file>
+    </qresource>
 </RCC>
