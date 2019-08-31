@@ -15,7 +15,7 @@ BackGroundEvent::BackGroundEvent(float begin, QObject *parent) : ItemDataEventBa
 
 bool BackGroundEvent::update(RenderBase *render)
 {
-	s += 0.08f;
+	if(!OpenGLGame::Instance->isPause()) s += 0.08f;
 	static_cast<BackGroundRender*>(render)->setZ(s);
 	if(s >= 9.5f) return true;
 	return false;
@@ -49,7 +49,7 @@ TreeEvent::TreeEvent(float begin, QObject *parent) : ItemDataEventBase (parent)
 
 bool TreeEvent::update(RenderBase *render)
 {
-	s += 0.08f * 1.5f;
+	if(!OpenGLGame::Instance->isPause()) s += 0.08f * 1.5f;
 	static_cast<TreeRender*>(render)->setZ(s);
 	if(s >= 8.5f) return true;
 	return false;
@@ -122,7 +122,7 @@ MyBulletEvent::MyBulletEvent(float x, float y, QObject *parent) : x(x), y(y), It
 bool MyBulletEvent::update(RenderBase *render)
 {
 	if(y >= 1.2f) return true;
-	y += 0.08f;
+	if(!OpenGLGame::Instance->isPause()) y += 0.08f;
 	static_cast<MyBulletRender*>(render)->setPos(x, y * ItemManager::INSTANCE()->getDiv(), 0.06f * 0.8f, 0.035f * 0.8f, 0.5f);
 	return false;
 }
@@ -175,11 +175,13 @@ bool PowerEvent::update(RenderBase *render)
 			if(ss >= 0) angle = M_PI - angle;
 			else angle = -M_PI - angle;
 		};
-		x += 0.03f * cc;
-		y += 0.03f * ss;
+		if(!OpenGLGame::Instance->isPause()) {
+			x += 0.03f * cc;
+			y += 0.03f * ss;
+		}
 		static_cast<RotateRender2D*>(render)->setPos(x, y * ItemManager::INSTANCE()->getDiv(), 0.035f, 0.035f, angle + M_PI / 2);
 	}else{
-		y -= 0.01f;
+		if(!OpenGLGame::Instance->isPause()) y -= 0.01f;
 		static_cast<RotateRender2D*>(render)->setPos(x, y * ItemManager::INSTANCE()->getDiv(), 0.035f, 0.035f, 0.0f);
 	}
 	return false;
@@ -218,11 +220,13 @@ bool PointEvent::update(RenderBase *render)
 			if(ss >= 0) angle = M_PI - angle;
 			else angle = -M_PI - angle;
 		};
-		x += 0.03f * cc;
-		y += 0.03f * ss;
+		if(!OpenGLGame::Instance->isPause()) {
+			x += 0.03f * cc;
+			y += 0.03f * ss;
+		}
 		static_cast<RotateRender2D*>(render)->setPos(x, y * ItemManager::INSTANCE()->getDiv(), 0.035f, 0.035f, angle + M_PI / 2);
 	}else{
-		y -= 0.01f;
+		if(!OpenGLGame::Instance->isPause()) y -= 0.01f;
 		static_cast<RotateRender2D*>(render)->setPos(x, y * ItemManager::INSTANCE()->getDiv(), 0.035f, 0.035f, 0.0f);
 	}
 	return false;
@@ -248,11 +252,13 @@ bool ExtendEvent::update(RenderBase *render)
 			if(ss >= 0) angle = M_PI - angle;
 			else angle = -M_PI - angle;
 		};
-		x += 0.03f * cc;
-		y += 0.03f * ss;
+		if(!OpenGLGame::Instance->isPause()) {
+			x += 0.03f * cc;
+			y += 0.03f * ss;
+		}
 		static_cast<RotateRender2D*>(render)->setPos(x, y * ItemManager::INSTANCE()->getDiv(), 0.075f, 0.075f, angle + M_PI / 2);
 	}else{
-		y -= 0.01f;
+		if(!OpenGLGame::Instance->isPause()) y -= 0.01f;
 		static_cast<RotateRender2D*>(render)->setPos(x, y * ItemManager::INSTANCE()->getDiv(), 0.075f, 0.075f, 0.0f);
 	}
 	return false;
@@ -278,11 +284,13 @@ bool SPExtendEvent::update(RenderBase *render)
 			if(ss >= 0) angle = M_PI - angle;
 			else angle = -M_PI - angle;
 		};
-		x += 0.03f * cc;
-		y += 0.03f * ss;
+		if(!OpenGLGame::Instance->isPause()) {
+			x += 0.03f * cc;
+			y += 0.03f * ss;
+		}
 		static_cast<RotateRender2D*>(render)->setPos(x, y * ItemManager::INSTANCE()->getDiv(), 0.075f, 0.075f, angle + M_PI / 2);
 	}else{
-		y -= 0.01f;
+		if(!OpenGLGame::Instance->isPause())y -= 0.01f;
 		static_cast<RotateRender2D*>(render)->setPos(x, y * ItemManager::INSTANCE()->getDiv(), 0.075f, 0.075f, 0.0f);
 	}
 	return false;
@@ -295,7 +303,7 @@ ExtendTipEvent::ExtendTipEvent(QObject *parent) : ItemDataEventBase (parent)
 
 bool ExtendTipEvent::update(RenderBase *render)
 {
-	++time;
+	if(!OpenGLGame::Instance->isPause())++time;
 	if(time > 90) return true;
 	if(time <= 60) static_cast<TipRender*>(render)->setPos(0.05f, 0.5f * ItemManager::INSTANCE()->getDiv(), 0.1f, 0.3f, 1.0f);
 	else static_cast<TipRender*>(render)->setPos(0.05f, 0.5f * ItemManager::INSTANCE()->getDiv(), 0.1f, 0.3f, (90 - time) / 30.0f);
@@ -309,7 +317,7 @@ SPExtendTipEvent::SPExtendTipEvent(QObject *parent) : ItemDataEventBase (parent)
 
 bool SPExtendTipEvent::update(RenderBase *render)
 {
-	++time;
+	if(!OpenGLGame::Instance->isPause())++time;
 	if(time > 90) return true;
 	if(time <= 60) static_cast<TipRender*>(render)->setPos(0.05f, 0.5f * ItemManager::INSTANCE()->getDiv(), 0.0756f, 0.356f, 1.0f);
 	else static_cast<TipRender*>(render)->setPos(0.05f, 0.5f * ItemManager::INSTANCE()->getDiv(), 0.0756f, 0.356f, (90 - time) / 30.0f);
@@ -323,7 +331,7 @@ ItemGetLineEvent::ItemGetLineEvent(QObject *parent) : ItemDataEventBase (parent)
 
 bool ItemGetLineEvent::update(RenderBase *render)
 {
-	++time;
+	if(!OpenGLGame::Instance->isPause())++time;
 	if(time > 180) return true;
 	static_cast<TipRender*>(render)->setPos(0.0f, 0.6f * ItemManager::INSTANCE()->getDiv(), 0.065f, 1.2f, fabs(sin(time * M_PI / 90.0f)));
 	return false;
@@ -339,8 +347,8 @@ WhiteNumberEvent::WhiteNumberEvent(float x, float y, QObject *parent) : ItemData
 bool WhiteNumberEvent::update(RenderBase *render)
 {
 	if(time >= 40) return true;
-	++time;
-	y += 0.001f;
+	if(!OpenGLGame::Instance->isPause())++time;
+	if(!OpenGLGame::Instance->isPause())y += 0.001f;
 	static_cast<WhiteNumberRender*>(render)->setPos(x, y * ItemManager::INSTANCE()->getDiv(), 0.02, 0.02, (40 - time) / 40.0);
 	return false;
 }

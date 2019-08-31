@@ -10,6 +10,8 @@ MusicFactory::~MusicFactory()
 {
 	delete fire;
 	delete item;
+	delete extend;
+	delete pause;
 }
 
 MusicFactory *MusicFactory::getInstance()
@@ -119,6 +121,21 @@ void MusicFactory::playExtend()
 	extend->play();
 }
 
+void MusicFactory::playPause()
+{
+	pause->play();
+}
+
+void MusicFactory::quickPause()
+{
+	player[who]->pause();
+}
+
+void MusicFactory::continuePlay()
+{
+	player[who]->play();
+}
+
 MusicFactory *MusicFactory::INSTANCE = nullptr;
 
 MusicFactory::MusicFactory(QObject *parent) : QObject(parent)
@@ -130,6 +147,7 @@ MusicFactory::MusicFactory(QObject *parent) : QObject(parent)
 	fire = new QSound(":/std/fire.wav");
 	item = new QSound(":/std/item.wav");
 	extend = new QSound(":/std/extend.wav");
+	pause = new QSound(":/std/pause.wav");
 }
 
 void MusicFactory::newPlayer(int pos)

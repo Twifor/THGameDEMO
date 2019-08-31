@@ -26,6 +26,9 @@ public:
 	void playFire();
 	void playItem();
 	void playExtend();
+	void playPause();
+	void quickPause();
+	void continuePlay();
 
 signals:
 
@@ -43,7 +46,7 @@ private:
 	int now;
 	QBuffer *buffer;
 
-	QSound *fire, *item, *extend;
+	QSound *fire, *item, *extend, *pause;
 
 protected:
 	void timerEvent(QTimerEvent *event) override;

@@ -9,6 +9,7 @@
 GameWidget* GameWidget::Instance = nullptr;
 GameWidget::GameWidget(QWidget *parent) : QOpenGLWidget (parent)
 {
+	setAttribute(Qt::WA_NativeWindow);
 	totAlpha = 0.0f;
 	pixmap = new QPixmap[30];
 	life = 2;
@@ -144,6 +145,21 @@ void GameWidget::addLife()
 int GameWidget::getLevel()
 {
 	return level;
+}
+
+void GameWidget::quit()
+{
+	if(status == MAIN) {
+		MusicFactory::getInstance()->playPause();
+		MusicFactory::getInstance()->quickPause();
+		mainOpenGLGame->pause();
+
+		status = PAUSE;
+	}else {
+		MusicFactory::getInstance()->continuePlay();
+		mainOpenGLGame->endPause();
+		status = MAIN;
+	}
 }
 
 void GameWidget::initializeGL()

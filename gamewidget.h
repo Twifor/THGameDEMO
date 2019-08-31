@@ -19,7 +19,8 @@ class GameWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core//æ¸
 public:
 	enum GameWidgetStatus {
 		INIT,
-		MAIN
+		MAIN,
+		PAUSE,
 	};
 	explicit GameWidget(QWidget *parent = nullptr);
 	~GameWidget();
@@ -42,6 +43,7 @@ public:
 	void addSpell();
 	void addLife();
 	int getLevel();
+	void quit();
 
 public slots:
 

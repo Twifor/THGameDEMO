@@ -106,6 +106,7 @@ void MainWidget::keyPressEvent(QKeyEvent *event)
 		else if(status == GameStart && !event->isAutoRepeat()) gameWidget->startZ();
 	}else if(event->key() == Qt::Key_Escape) {
 		if(status == MENU && !event->isAutoRepeat()) menuWidget->quitWindow();
+		else if(status==GameStart&& !event->isAutoRepeat())gameWidget->quit();
 	}else if(event->key() == Qt::Key_Left) {
 		if(status == MENU && !event->isAutoRepeat()) menuWidget->left();
 		else if(status == GameStart && !event->isAutoRepeat()) gameWidget->startLeft();

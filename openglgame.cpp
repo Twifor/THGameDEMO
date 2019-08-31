@@ -6,10 +6,27 @@
 OpenGLGame::OpenGLGame(QWidget *parent) : QOpenGLWidget(parent)
 {
 	Instance = this;
+	pauseLock = false;
+}
+
+void OpenGLGame::pause()
+{
+	pauseLock = true;
+}
+
+void OpenGLGame::endPause()
+{
+	pauseLock = false;
+}
+
+bool OpenGLGame::isPause()
+{
+	return pauseLock;
 }
 
 void OpenGLGame::startLeft()
 {
+	if(pauseLock) return;
 	if(status & 2) status &= ~2;
 	status |= 1;
 	myPlaneTimeLine = 0;
@@ -20,6 +37,7 @@ OpenGLGame *OpenGLGame::Instance = nullptr;
 
 void OpenGLGame::startRight()
 {
+	if(pauseLock) return;
 	if(status & 1) status &= ~1;
 	status |= 2;
 	myPlaneTimeLine = 0;
@@ -28,11 +46,13 @@ void OpenGLGame::startRight()
 
 void OpenGLGame::startUp()
 {
+	if(pauseLock) return;
 	status |= 4;
 }
 
 void OpenGLGame::startDown()
 {
+	if(pauseLock) return;
 	status |= 8;
 }
 
@@ -62,6 +82,7 @@ void OpenGLGame::endDown()
 
 void OpenGLGame::startShift()
 {
+	if(pauseLock) return;
 	status |= 16;
 	slowEffectTimeLine = 1;
 	slowEffectRotate1 = 0;
@@ -81,6 +102,7 @@ void OpenGLGame::endShift()
 
 void OpenGLGame::startZ()
 {
+	if(pauseLock) return;
 	status |= 32;
 }
 
@@ -170,11 +192,13 @@ void OpenGLGame::resizeGL(int w, int h)
 
 void OpenGLGame::paintGL()
 {
-	if(rand() % 10 == 0) ItemManager::INSTANCE()->addItem(ItemManager::POINT, 1, new PointEvent(sin(rand()), 1.0f));
 	glClear( GL_COLOR_BUFFER_BIT);
 
-	drawBackGround();
-	drawMyPlane();
+	if(!pauseLock) {
+		if(rand() % 10 == 0) ItemManager::INSTANCE()->addItem(ItemManager::POINT, 1, new PointEvent(sin(rand()), 1.0f));
+		drawBackGround();
+		drawMyPlane();
+	}
 	ItemManager::INSTANCE()->update();
 }
 

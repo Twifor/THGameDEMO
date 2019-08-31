@@ -11,6 +11,9 @@ class OpenGLGame : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
 	Q_OBJECT
 public:
 	explicit OpenGLGame(QWidget *parent = nullptr);
+	void pause();
+	void endPause();
+	bool isPause();
 	static OpenGLGame *Instance;
 
 	//以下是数据接口，供event使用
@@ -53,6 +56,7 @@ protected:
 	void drawBullets();
 	float backGroundMax, treeLMax, treeRMax;
 	float ballLine;
+	bool pauseLock;
 };
 
 #endif // OPENGLGAME_H

@@ -10,6 +10,7 @@
         <file>fire.wav</file>
         <file>item.wav</file>
         <file>extend.wav</file>
+        <file>pause.wav</file>
     </qresource>
     <qresource prefix="/data">
         <file>stars</file>
