@@ -1144,6 +1144,6 @@ MainGameLoadingThread::MainGameLoadingThread(QObject *parent)
 
 void MainGameLoadingThread::run()
 {
-	msleep(2000);//这里用来加载游戏资源
+	msleep(1000);//这里用来加载游戏资源
 	GameResource::getInstance()->changeStatus(GameResource::GAME);
 }

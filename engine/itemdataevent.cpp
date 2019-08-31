@@ -302,3 +302,16 @@ bool SPExtendTipEvent::update(RenderBase *render)
 	else static_cast<TipRender*>(render)->setPos(0.05f, 0.5f * ItemManager::INSTANCE()->getDiv(), 0.0756f, 0.356f, (90 - time) / 30.0f);
 	return false;
 }
+
+ItemGetLineEvent::ItemGetLineEvent(QObject *parent) : ItemDataEventBase (parent)
+{
+	time = 0;
+}
+
+bool ItemGetLineEvent::update(RenderBase *render)
+{
+	++time;
+	if(time > 180) return true;
+	static_cast<TipRender*>(render)->setPos(0.0f, 0.6f * ItemManager::INSTANCE()->getDiv(), 0.065f, 1.2f, fabs(sin(time * M_PI / 90.0f)));
+	return false;
+}

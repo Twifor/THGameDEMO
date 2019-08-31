@@ -251,6 +251,8 @@ ItemManager::ItemManager(QObject *parent) : QObject(parent)
 	TextureManager::INSTANCE()->setTexture(TextureManager::EXTEND_TIP, new QOpenGLTexture(image.mirrored(false, true)));
 	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(SPELL_EXTEND_PNG))->loadData(image);
 	TextureManager::INSTANCE()->setTexture(TextureManager::SPEXTEND_TIP, new QOpenGLTexture(image.mirrored(false, true)));
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(ITEM_GET_LINE_PNG))->loadData(image);
+	TextureManager::INSTANCE()->setTexture(TextureManager::ITEM_GET_LINE, new QOpenGLTexture(image.mirrored(false, true)));
 }
 
 ItemManager *ItemManager::in = nullptr;

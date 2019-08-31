@@ -96,6 +96,7 @@ void OpenGLGame::levelUp()
 
 void OpenGLGame::initializeGL()
 {
+	qDebug() << "init";
 	initializeOpenGLFunctions();
 	glViewport(0, 0, 487, 557);
 
@@ -133,6 +134,7 @@ void OpenGLGame::initializeGL()
 	ItemManager::INSTANCE()->installRender(ItemManager::SPEXTEND, new SmallItemRender(TextureManager::SPEXTEND));
 	ItemManager::INSTANCE()->installRender(ItemManager::EXTEND_TIP, new TipRender(TextureManager::EXTEND_TIP));
 	ItemManager::INSTANCE()->installRender(ItemManager::SPEXTEND_TIP, new TipRender(TextureManager::SPEXTEND_TIP));
+	ItemManager::INSTANCE()->installRender(ItemManager::ITEM_GET_LINE, new TipRender(TextureManager::ITEM_GET_LINE));
 
 	//注册事件
 	ItemManager::INSTANCE()->addItem(ItemManager::BACKGROUND, 1, new BackGroundEvent(-26.0));
@@ -145,6 +147,7 @@ void OpenGLGame::initializeGL()
 	ItemManager::INSTANCE()->addItem(ItemManager::TREE2, 1, new TreeEvent(-2.0f));
 	ItemManager::INSTANCE()->addItem(ItemManager::TREE2, 1, new TreeEvent(-14.0f));
 	ItemManager::INSTANCE()->addItem(ItemManager::BALL, 1, new BallEvent(0));
+	ItemManager::INSTANCE()->addItem(ItemManager::ITEM_GET_LINE, 1, new ItemGetLineEvent);
 
 	glEnable(GL_BLEND);
 }
@@ -156,6 +159,8 @@ void OpenGLGame::resizeGL(int w, int h)
 
 void OpenGLGame::paintGL()
 {
+	ItemManager::INSTANCE()->addItem(ItemManager::POWER, 1, new PowerEvent(sin(rand()), 1.0f));
+	ItemManager::INSTANCE()->addItem(ItemManager::POINT, 1, new PointEvent(sin(rand()), 1.0f));
 	glClear( GL_COLOR_BUFFER_BIT);
 
 	drawBackGround();

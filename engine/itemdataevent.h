@@ -154,9 +154,18 @@ private:
 	int time;
 };
 
-class SPExtendTipEvent:public ItemDataEventBase{
+class SPExtendTipEvent : public ItemDataEventBase {
 public:
 	explicit SPExtendTipEvent(QObject *parent = nullptr);
+	bool update(RenderBase *render)override;
+private:
+	int time;
+};
+
+class ItemGetLineEvent : public ItemDataEventBase {
+	Q_OBJECT
+public:
+	explicit ItemGetLineEvent(QObject *parent = nullptr);
 	bool update(RenderBase *render)override;
 private:
 	int time;
