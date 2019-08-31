@@ -114,6 +114,7 @@ void OpenGLGame::initializeGL()
 	ballTimeLine = 0;
 	ballLine = 0;
 	bulletTime = 0;
+	activeItems = false;
 	//安装渲染器
 	ItemManager::INSTANCE()->installRender(ItemManager::BACKGROUND, new BackGroundRender(TextureManager::BACKGROUND));
 	ItemManager::INSTANCE()->installRender(ItemManager::STAR_BACKGROUND, new StarBackGroundRender(TextureManager::STAR_BACKGROUND));
@@ -126,6 +127,8 @@ void OpenGLGame::initializeGL()
 	ItemManager::INSTANCE()->installRender(ItemManager::BALL, new BallRender);
 	ItemManager::INSTANCE()->installRender(ItemManager::MARISA_LINE, new LineRender);
 	ItemManager::INSTANCE()->installRender(ItemManager::MY_BULLET, new MyBulletRender);
+	ItemManager::INSTANCE()->installRender(ItemManager::POWER, new ItemRender(TextureManager::POWER));
+	ItemManager::INSTANCE()->installRender(ItemManager::POINT, new ItemRender(TextureManager::POINT));
 
 	//注册事件
 	ItemManager::INSTANCE()->addItem(ItemManager::BACKGROUND, 1, new BackGroundEvent(-26.0));
@@ -149,6 +152,12 @@ void OpenGLGame::resizeGL(int w, int h)
 
 void OpenGLGame::paintGL()
 {
+	ItemManager::INSTANCE()->addItem(ItemManager::POWER, 1, new PowerEvent(sin(rand()), 1.0f));
+	ItemManager::INSTANCE()->addItem(ItemManager::POINT, 1, new PointEvent(sin(rand()), 1.0f));
+	ItemManager::INSTANCE()->addItem(ItemManager::POWER, 1, new PowerEvent(sin(rand()), 1.0f));
+	ItemManager::INSTANCE()->addItem(ItemManager::POINT, 1, new PointEvent(sin(rand()), 1.0f));
+	ItemManager::INSTANCE()->addItem(ItemManager::POWER, 1, new PowerEvent(sin(rand()), 1.0f));
+
 	glClear( GL_COLOR_BUFFER_BIT);
 
 	drawBackGround();
@@ -177,6 +186,7 @@ void OpenGLGame::drawBackGround()
 
 void OpenGLGame::drawMyPlane()
 {
+	activeItems = myPlaneY > 0.6f;
 	if(status & 1) {
 		if(status & 16) myPlaneX -= 0.0125f;
 		else myPlaneX -= 0.025f;

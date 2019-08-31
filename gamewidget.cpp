@@ -112,11 +112,13 @@ void GameWidget::addPower()
 {
 	power += 5;
 	power %= 400;
+	MusicFactory::getInstance()->playItem();
 }
 
 void GameWidget::addPoint()
 {
 	++point;
+	MusicFactory::getInstance()->playItem();
 }
 
 void GameWidget::addSpell()

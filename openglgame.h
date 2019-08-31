@@ -22,6 +22,7 @@ public:
 	float ballX[5], ballY[5];
 	int slowEffectTimeLine;
 	int ballTimeLine, bulletTime;
+	bool activeItems;//激活自动吸取道具
 
 signals:
 

@@ -89,7 +89,16 @@ private:
 	float x, y, limit;
 };
 
-class MyBulletEvent : public ItemDataEventBase {
+class EmiterEvent : public ItemDataEventBase {//发射器事件[抽象类]
+	Q_OBJECT
+public:
+	explicit EmiterEvent(float x, float y, QObject *parent = nullptr);
+	bool update(RenderBase *render) = 0;
+private:
+	float x, y;
+};
+
+class MyBulletEvent : public ItemDataEventBase {//自机子弹事件
 	Q_OBJECT
 public:
 	explicit MyBulletEvent(float x, float y, QObject *parent = nullptr);
@@ -98,4 +107,30 @@ private:
 	float x, y;
 };
 
-#endif // ITEMDATAEVENT_H
+class ItemEvent : public ItemDataEventBase {//道具事件类[抽象类]
+	Q_OBJECT
+public:
+	explicit ItemEvent(float x, float y, QObject *parent = nullptr);
+	bool isColl();//与自机碰撞事件
+	bool isIn();//自机吸收事件
+	bool update(RenderBase *render) = 0;
+	float x, y;
+	bool isActive;
+	float dis2();
+};
+
+class PowerEvent : public ItemEvent {
+	Q_OBJECT
+public:
+	explicit PowerEvent(float x, float y, QObject *parent = nullptr);
+	bool update(RenderBase *render) override;
+};
+
+class PointEvent:public ItemEvent{
+	Q_OBJECT
+public:
+	explicit PointEvent(float x, float y, QObject *parent = nullptr);
+	bool update(RenderBase *render) override;
+};
+
+#endif

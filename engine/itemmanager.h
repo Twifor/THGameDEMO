@@ -7,7 +7,7 @@
 #include <QQueue>
 #include "renderbase.h"
 
-#define ITEM_NUMBER 11
+#define ITEM_NUMBER 13
 
 struct ItemData;
 struct TreeData;
@@ -28,7 +28,9 @@ public:
 		CENTER,
 		MARISA_LINE,
 		BALL,
-		MY_BULLET
+		MY_BULLET,
+		POWER,
+		POINT
 	};
 	void addItem(ItemType type, int depth, ItemDataEventBase *base);
 	void addNewItem(ItemType type, int depth, ItemDataEventBase *base);

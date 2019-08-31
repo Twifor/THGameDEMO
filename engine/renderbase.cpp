@@ -918,3 +918,139 @@ MyBulletRender::MyBulletRender(QObject *parent) : TranslateAlphaRender2D (Textur
 {
 	changeMAX(100);
 }
+
+RotateAlphaRender2D::RotateAlphaRender2D(TextureManager::TextureType type, QObject *parent) : RenderBase (parent)
+{
+	VAO = new QOpenGLVertexArrayObject;
+	VAO->create();
+	VBO = new QOpenGLBuffer(QOpenGLBuffer::VertexBuffer);
+	VBO->setUsagePattern(QOpenGLBuffer::DynamicDraw);
+	IBO = new QOpenGLBuffer(QOpenGLBuffer::IndexBuffer);
+	IBO->setUsagePattern(QOpenGLBuffer::DynamicDraw);
+
+	VBOOP = new float[MAXNUMBER * 36];
+	IBOOP = new unsigned int[MAXNUMBER * 6];
+}
+
+RotateAlphaRender2D::~RotateAlphaRender2D()
+{
+	delete VAO;
+	delete VBO;
+	delete IBO;
+
+	delete []VBOOP;
+	delete []IBOOP;
+}
+
+void RotateAlphaRender2D::init()
+{
+	num = 0;
+	offsetIBO = offsetVBO = 0;
+	index = 0;
+}
+
+void RotateAlphaRender2D::render()
+{
+	VBO->destroy();
+	VAO->destroy();
+	IBO->destroy();
+	VAO->create();
+	VAO->bind();
+	VBO->create();
+	VBO->bind();
+	IBO->create();
+	IBO->bind();
+
+	ShaderManager::INSTANCE()->getProgram(5)->bind();
+	ShaderManager::INSTANCE()->getProgram(5)->enableAttributeArray(ShaderManager::INSTANCE()->getProgram(5)->attributeLocation("aPos"));
+	ShaderManager::INSTANCE()->getProgram(5)->setAttributeBuffer(ShaderManager::INSTANCE()->getProgram(5)->attributeLocation("aPos"), GL_FLOAT, 0, 3, sizeof(float) * 9);
+
+	ShaderManager::INSTANCE()->getProgram(5)->enableAttributeArray(ShaderManager::INSTANCE()->getProgram(5)->attributeLocation("aTexCoord"));
+	ShaderManager::INSTANCE()->getProgram(5)->setAttributeBuffer(ShaderManager::INSTANCE()->getProgram(5)->attributeLocation("aTexCoord"), GL_FLOAT, 3 * sizeof(float), 2, sizeof(float) * 9);
+
+	ShaderManager::INSTANCE()->getProgram(5)->enableAttributeArray(ShaderManager::INSTANCE()->getProgram(5)->attributeLocation("rotate"));
+	ShaderManager::INSTANCE()->getProgram(5)->setAttributeBuffer(ShaderManager::INSTANCE()->getProgram(5)->attributeLocation("rotate"), GL_FLOAT, 5 * sizeof(float), 3, sizeof(float) * 9);
+	ShaderManager::INSTANCE()->getProgram(5)->enableAttributeArray(ShaderManager::INSTANCE()->getProgram(5)->attributeLocation("alpha"));
+	ShaderManager::INSTANCE()->getProgram(5)->setAttributeBuffer(ShaderManager::INSTANCE()->getProgram(5)->attributeLocation("alpha"), GL_FLOAT, 8 * sizeof(float), 1, sizeof(float) * 9);
+
+	TextureManager::INSTANCE()->getTexture(t)->bind(0);
+
+	VBO->allocate(VBOOP, num * 144);
+	IBO->allocate(IBOOP, num * 24);
+
+	glDrawElements(GL_TRIANGLES, num * 6, GL_UNSIGNED_INT, 0);
+
+	ShaderManager::INSTANCE()->getProgram(1)->release();
+	TextureManager::INSTANCE()->getTexture(t)->release();
+	VAO->release();
+	VBO->release();
+	IBO->release();
+}
+
+void RotateAlphaRender2D::setPos(float x, float y, float up, float left, float angle, float alpha)
+{
+	++num;
+
+	VBOOP[offsetVBO++] = -left;
+	VBOOP[offsetVBO++] = up;
+	VBOOP[offsetVBO++] = 0.0f;
+	VBOOP[offsetVBO++] = 0.0f;
+	VBOOP[offsetVBO++] = 1.0f;
+	VBOOP[offsetVBO++] = x;
+	VBOOP[offsetVBO++] = y;
+	VBOOP[offsetVBO++] = angle;
+	VBOOP[offsetVBO++] = alpha;
+
+	VBOOP[offsetVBO++] = -left;
+	VBOOP[offsetVBO++] = -up;
+	VBOOP[offsetVBO++] = 0.0f;
+	VBOOP[offsetVBO++] = 0.0f;
+	VBOOP[offsetVBO++] = 0.0f;
+	VBOOP[offsetVBO++] = x;
+	VBOOP[offsetVBO++] = y;
+	VBOOP[offsetVBO++] = angle;
+	VBOOP[offsetVBO++] = alpha;
+
+	VBOOP[offsetVBO++] = left;
+	VBOOP[offsetVBO++] = -up;
+	VBOOP[offsetVBO++] = 0.0f;
+	VBOOP[offsetVBO++] = 1.0f;
+	VBOOP[offsetVBO++] = 0.0f;
+	VBOOP[offsetVBO++] = x;
+	VBOOP[offsetVBO++] = y;
+	VBOOP[offsetVBO++] = angle;
+	VBOOP[offsetVBO++] = alpha;
+
+	VBOOP[offsetVBO++] = left;
+	VBOOP[offsetVBO++] = up;
+	VBOOP[offsetVBO++] = 0.0f;
+	VBOOP[offsetVBO++] = 1.0f;
+	VBOOP[offsetVBO++] = 1.0f;
+	VBOOP[offsetVBO++] = x;
+	VBOOP[offsetVBO++] = y;
+	VBOOP[offsetVBO++] = angle;
+	VBOOP[offsetVBO++] = alpha;
+
+	IBOOP[offsetIBO++] = index;
+	IBOOP[offsetIBO++] = index + 1;
+	IBOOP[offsetIBO++] = index + 2;
+	IBOOP[offsetIBO++] = index;
+	IBOOP[offsetIBO++] = index + 2;
+	IBOOP[offsetIBO++] = index + 3;
+	index += 4;
+}
+
+void RotateAlphaRender2D::changeMAX(int s)
+{
+	MAXNUMBER = s;
+	delete VBOOP;
+	delete IBOOP;
+
+	VBOOP = new float[MAXNUMBER * 36];
+	IBOOP = new unsigned int[MAXNUMBER * 6];
+}
+
+ItemRender::ItemRender(TextureManager::TextureType type, QObject *parent) : RotateRender2D (type, parent)
+{
+	changeMAX(5000);
+}

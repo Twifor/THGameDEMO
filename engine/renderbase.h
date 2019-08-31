@@ -85,6 +85,27 @@ protected:
 	void changeMAX(int s);
 	TextureManager::TextureType t;
 };
+class RotateAlphaRender2D : public RenderBase {
+	Q_OBJECT
+public:
+	explicit RotateAlphaRender2D(TextureManager::TextureType type, QObject *parent = nullptr);
+	~RotateAlphaRender2D();
+	void init() override;
+	void render() override;
+	void setPos(float x, float y, float up, float left, float angle, float alpha);
+
+protected:
+	QOpenGLBuffer *VBO, *IBO;
+	QOpenGLVertexArrayObject *VAO;
+	int num, offsetVBO, offsetIBO;
+	int MAXNUMBER = 1;
+	float *VBOOP;
+	unsigned int *IBOOP;
+	unsigned int index;
+	void changeMAX(int s);
+	TextureManager::TextureType t;
+
+};
 
 class BackGroundRender : public TranslateRender2D {
 	Q_OBJECT
@@ -205,6 +226,12 @@ class MyBulletRender : public TranslateAlphaRender2D {
 	Q_OBJECT
 public:
 	MyBulletRender(QObject *parent = nullptr);
+};
+
+class ItemRender : public RotateRender2D {
+	Q_OBJECT
+public:
+	ItemRender(TextureManager::TextureType type, QObject *parent = nullptr);
 };
 
 #endif // RENDERBASE_H

@@ -5,7 +5,7 @@
 #include <QVector>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLShader>
-#define SHADER_NUMBER 5
+#define SHADER_NUMBER 6
 
 class ShaderManager : public QObject
 {

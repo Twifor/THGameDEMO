@@ -133,12 +133,44 @@ ItemManager::ItemManager(QObject *parent) : QObject(parent)
 										  "FragColor = texture(mainTexture,TexCoord);\n"
 										  "FragColor.a *= A;\n"
 										  "}\n");
+	ShaderManager::INSTANCE()->setProgram(5, "#version 330 core\n"
+										  "layout (location = 0) in vec3 aPos;\n"
+										  "layout (location = 1) in vec2 aTexCoord;\n"
+										  "layout (location = 2) in vec3 rotate;\n"
+										  "layout (location = 3) in float alpha;\n"
+										  "\n"
+										  "out vec2 TexCoord;\n"
+										  "out float A;\n"
+										  "\n"
+										  "mat4 getRotateMatrix(){\n"
+										  "mat4 t = mat4(vec4(1.0,0.0,0.0,0.0),vec4(0.0,1.0,0.0,0.0),vec4(0.0,0.0,1.0,0.0),vec4(rotate.x,rotate.y,0.0,1.0));\n"
+										  "mat4 r = mat4(vec4(cos(rotate.z),sin(rotate.z),0.0,0.0),vec4(-sin(rotate.z),cos(rotate.z),0.0,0.0),vec4(0.0,0.0,1.0,0.0),vec4(0.0,0.0,0.0,1.0));\n"
+										  "return t * r;\n"
+										  "}\n"
+										  "\n"
+										  "void main(){\n"
+										  "gl_Position = getRotateMatrix() * vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+										  "TexCoord = aTexCoord;\n"
+										  "A = alpha;\n"
+										  "}\n",
+										  "#version 330 core\n"
+										  "out vec4 FragColor;\n"
+										  "in vec2 TexCoord;\n"
+										  "in float A;\n"
+										  "uniform sampler2D mainTexture;"
+										  ""
+										  "void main()\n"
+										  "{\n"
+										  "FragColor = texture(mainTexture, TexCoord);\n"
+										  "FragColor.a *= A;\n"
+										  "}");
 
 	ShaderManager::INSTANCE()->getProgram(0)->setUniformValue("mainTexture", 0);
 	ShaderManager::INSTANCE()->getProgram(1)->setUniformValue("mainTexture", 0);
 	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("mainTexture", 0);
 	ShaderManager::INSTANCE()->getProgram(3)->setUniformValue("mainTexture", 0);
 	ShaderManager::INSTANCE()->getProgram(4)->setUniformValue("mainTexture", 0);
+	ShaderManager::INSTANCE()->getProgram(5)->setUniformValue("mainTexture", 0);
 
 	QImage image;
 	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(MAIN_GAME_BG_PNG))->loadData(image);
@@ -207,6 +239,10 @@ ItemManager::ItemManager(QObject *parent) : QObject(parent)
 	TextureManager::INSTANCE()->setTexture(TextureManager::MARISA_LINE, new QOpenGLTexture(image.mirrored(false, true)));
 	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(MARISA_BULLET_PNG))->loadData(image);
 	TextureManager::INSTANCE()->setTexture(TextureManager::MY_BULLET, new QOpenGLTexture(image.mirrored(false, true)));
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(POWER_ITEM_PNG))->loadData(image);
+	TextureManager::INSTANCE()->setTexture(TextureManager::POWER, new QOpenGLTexture(image.mirrored(false, true)));
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(POINT_ITEM_PNG))->loadData(image);
+	TextureManager::INSTANCE()->setTexture(TextureManager::POINT, new QOpenGLTexture(image.mirrored(false, true)));
 }
 
 ItemManager *ItemManager::in = nullptr;
@@ -302,10 +338,10 @@ void ItemManager::DFS(SplayNode<TreeData> *rt)
 
 void ItemManager::dealWithDel()
 {
-	while (!que.empty()){
+	while (!que.empty()) {
 		SplayNode<TreeData> *nd = que.front();
 		que.pop_front();
-		if (mainSplayTree[nd->value.type]->size() == 1){
+		if (mainSplayTree[nd->value.type]->size() == 1) {
 			typeSplayTree->del(to[nd->value.type]);
 			--numOfType;
 			to[nd->value.type] = nullptr;

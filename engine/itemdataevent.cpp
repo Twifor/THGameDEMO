@@ -1,6 +1,7 @@
 #include "itemdataevent.h"
 #include "openglgame.h"
 #include "itemmanager.h"
+#include "gamewidget.h"
 
 ItemDataEventBase::ItemDataEventBase(QObject *parent) : QObject(parent)
 {
@@ -124,4 +125,93 @@ bool MyBulletEvent::update(RenderBase *render)
 	y += 0.08f;
 	static_cast<MyBulletRender*>(render)->setPos(x, y * ItemManager::INSTANCE()->getDiv(), 0.06f * 0.8f, 0.035f * 0.8f, 0.5f);
 	return false;
+}
+
+EmiterEvent::EmiterEvent(float x, float y, QObject *parent) : ItemDataEventBase (parent)
+{
+	this->x = x;
+	this->y = y;
+}
+
+ItemEvent::ItemEvent(float x, float y, QObject *parent) : ItemDataEventBase (parent)
+{
+	this->x = x;
+	this->y = y;
+	isActive = false;
+}
+
+bool ItemEvent::isColl()
+{
+	return dis2() <= 0.05f || OpenGLGame::Instance->activeItems;
+}
+
+bool ItemEvent::isIn()
+{
+	return dis2() <= 0.001f;
+}
+
+float ItemEvent::dis2()
+{
+	return (x - OpenGLGame::Instance->myPlaneX) * (x - OpenGLGame::Instance->myPlaneX) + (y - OpenGLGame::Instance->myPlaneY) * (y - OpenGLGame::Instance->myPlaneY);
+}
+
+PowerEvent::PowerEvent(float x, float y, QObject *parent) : ItemEvent (x, y, parent)
+{
+
+}
+
+bool PowerEvent::update(RenderBase *render)
+{
+	if(y < -1.1f) return true;
+	if(isIn()) {
+		GameWidget::Instance->addPower();
+		return true;
+	}else if(isColl()) isActive = true;
+	if(isActive) {
+		float ss = (OpenGLGame::Instance->myPlaneY - y) / (sqrt(dis2()));
+		float cc = (OpenGLGame::Instance->myPlaneX - x) / (sqrt(dis2()));
+		float angle = asin(ss);
+		if(cc < 0) {
+			if(ss >= 0) angle = M_PI - angle;
+			else angle = -M_PI - angle;
+		};
+		x += 0.03f * cc;
+		y += 0.03f * ss;
+		static_cast<RotateRender2D*>(render)->setPos(x, y * ItemManager::INSTANCE()->getDiv(), 0.035f, 0.035f, angle + M_PI / 2);
+	}else{
+		y -= 0.01f;
+		static_cast<RotateRender2D*>(render)->setPos(x, y * ItemManager::INSTANCE()->getDiv(), 0.035f, 0.035f, 0.0f);
+	}
+	return false;
+}
+
+PointEvent::PointEvent(float x, float y, QObject *parent) : ItemEvent (x, y, parent)
+{
+
+}
+
+bool PointEvent::update(RenderBase *render)
+{
+	if(y < -1.1f) return true;
+	if(isIn()) {
+		GameWidget::Instance->addPoint();
+		return true;
+	}else if(isColl()) isActive = true;
+	if(isActive) {
+		float ss = (OpenGLGame::Instance->myPlaneY - y) / (sqrt(dis2()));
+		float cc = (OpenGLGame::Instance->myPlaneX - x) / (sqrt(dis2()));
+		float angle = asin(ss);
+		if(cc < 0) {
+			if(ss >= 0) angle = M_PI - angle;
+			else angle = -M_PI - angle;
+		};
+		x += 0.03f * cc;
+		y += 0.03f * ss;
+		static_cast<RotateRender2D*>(render)->setPos(x, y * ItemManager::INSTANCE()->getDiv(), 0.035f, 0.035f, angle + M_PI / 2);
+	}else{
+		y -= 0.01f;
+		static_cast<RotateRender2D*>(render)->setPos(x, y * ItemManager::INSTANCE()->getDiv(), 0.035f, 0.035f, 0.0f);
+	}
+	return false;
+
 }
