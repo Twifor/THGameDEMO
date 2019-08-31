@@ -1064,3 +1064,8 @@ TipRender::TipRender(TextureManager::TextureType type, QObject *parent) : Transl
 {
 	changeMAX(2);
 }
+
+WhiteNumberRender::WhiteNumberRender(TextureManager::TextureType type, QObject *parent) : TranslateAlphaRender2D (type, parent)
+{
+	changeMAX(100);
+}

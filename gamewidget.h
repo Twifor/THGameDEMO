@@ -36,6 +36,7 @@ public:
 	void startZ();
 	void endZ();
 	static GameWidget *Instance;
+	void addScore(int add);
 	void addPower();
 	void addPoint();
 	void addSpell();

@@ -5,6 +5,7 @@
 #include <gameresource.h>
 #include "gamerule.h"
 #include "musicfactory.h"
+#include "mainwidget.h"
 
 #define SCALE 0.5f
 #define MIN(x, y) ((x) < (y) ? (x) : (y))

@@ -7,7 +7,7 @@
 #include <QQueue>
 #include "renderbase.h"
 
-#define ITEM_NUMBER 18
+#define ITEM_NUMBER 29
 
 struct ItemData;
 struct TreeData;
@@ -35,7 +35,18 @@ public:
 		SPEXTEND,
 		EXTEND_TIP,
 		SPEXTEND_TIP,
-		ITEM_GET_LINE
+		ITEM_GET_LINE,
+		W_PLUS,
+		W0,
+		W1,
+		W2,
+		W3,
+		W4,
+		W5,
+		W6,
+		W7,
+		W8,
+		W9,
 	};
 	void addItem(ItemType type, int depth, ItemDataEventBase *base);
 	void addNewItem(ItemType type, int depth, ItemDataEventBase *base);

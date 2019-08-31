@@ -253,6 +253,28 @@ ItemManager::ItemManager(QObject *parent) : QObject(parent)
 	TextureManager::INSTANCE()->setTexture(TextureManager::SPEXTEND_TIP, new QOpenGLTexture(image.mirrored(false, true)));
 	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(ITEM_GET_LINE_PNG))->loadData(image);
 	TextureManager::INSTANCE()->setTexture(TextureManager::ITEM_GET_LINE, new QOpenGLTexture(image.mirrored(false, true)));
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(W_PLUS_PNG))->loadData(image);
+	TextureManager::INSTANCE()->setTexture(TextureManager::W_PLUS, new QOpenGLTexture(image.mirrored(false, true)));
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(W_0_PNG))->loadData(image);
+	TextureManager::INSTANCE()->setTexture(TextureManager::W0, new QOpenGLTexture(image.mirrored(false, true)));
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(W_1_PNG))->loadData(image);
+	TextureManager::INSTANCE()->setTexture(TextureManager::W1, new QOpenGLTexture(image.mirrored(false, true)));
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(W_2_PNG))->loadData(image);
+	TextureManager::INSTANCE()->setTexture(TextureManager::W2, new QOpenGLTexture(image.mirrored(false, true)));
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(W_3_PNG))->loadData(image);
+	TextureManager::INSTANCE()->setTexture(TextureManager::W3, new QOpenGLTexture(image.mirrored(false, true)));
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(W_4_PNG))->loadData(image);
+	TextureManager::INSTANCE()->setTexture(TextureManager::W4, new QOpenGLTexture(image.mirrored(false, true)));
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(W_5_PNG))->loadData(image);
+	TextureManager::INSTANCE()->setTexture(TextureManager::W5, new QOpenGLTexture(image.mirrored(false, true)));
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(W_6_PNG))->loadData(image);
+	TextureManager::INSTANCE()->setTexture(TextureManager::W6, new QOpenGLTexture(image.mirrored(false, true)));
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(W_7_PNG))->loadData(image);
+	TextureManager::INSTANCE()->setTexture(TextureManager::W7, new QOpenGLTexture(image.mirrored(false, true)));
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(W_8_PNG))->loadData(image);
+	TextureManager::INSTANCE()->setTexture(TextureManager::W8, new QOpenGLTexture(image.mirrored(false, true)));
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(W_9_PNG))->loadData(image);
+	TextureManager::INSTANCE()->setTexture(TextureManager::W9, new QOpenGLTexture(image.mirrored(false, true)));
 }
 
 ItemManager *ItemManager::in = nullptr;
@@ -282,7 +304,7 @@ void ItemManager::addNewItem(ItemManager::ItemType type, int depth, ItemDataEven
 	data.tp = type;
 	data.depth = depth;
 	data.event = base;
-	newQue.push_back(data);
+	newQue.enqueue(data);
 }
 
 void ItemManager::update()
@@ -342,15 +364,14 @@ void ItemManager::DFS(SplayNode<TreeData> *rt)
 {
 	if(rt == nullptr) return;
 	DFS(rt->ch[0]);
-	if(rt->value.event->update(render[rt->value.type])) que.push_back(rt);
+	if(rt->value.event->update(render[rt->value.type])) que.enqueue(rt);
 	DFS(rt->ch[1]);
 }
 
 void ItemManager::dealWithDel()
 {
 	while (!que.empty()) {
-		SplayNode<TreeData> *nd = que.front();
-		que.pop_front();
+		SplayNode<TreeData> *nd = que.dequeue();
 		if (mainSplayTree[nd->value.type]->size() == 1) {
 			typeSplayTree->del(to[nd->value.type]);
 			--numOfType;
@@ -366,8 +387,7 @@ void ItemManager::dealWithDel()
 void ItemManager::dealWithNew()
 {
 	while(!newQue.empty()) {
-		UserData data = newQue.front();
-		newQue.pop_back();
+		UserData data = newQue.dequeue();
 		addItem(data.tp, data.depth, data.event);
 	}
 }

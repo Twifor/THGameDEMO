@@ -246,4 +246,10 @@ public:
 	explicit TipRender(TextureManager::TextureType type, QObject *parent = nullptr);
 };
 
+class WhiteNumberRender : public TranslateAlphaRender2D {
+	Q_OBJECT
+public:
+	explicit WhiteNumberRender(TextureManager::TextureType type, QObject *parent = nullptr);
+};
+
 #endif // RENDERBASE_H

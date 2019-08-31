@@ -135,6 +135,17 @@ void OpenGLGame::initializeGL()
 	ItemManager::INSTANCE()->installRender(ItemManager::EXTEND_TIP, new TipRender(TextureManager::EXTEND_TIP));
 	ItemManager::INSTANCE()->installRender(ItemManager::SPEXTEND_TIP, new TipRender(TextureManager::SPEXTEND_TIP));
 	ItemManager::INSTANCE()->installRender(ItemManager::ITEM_GET_LINE, new TipRender(TextureManager::ITEM_GET_LINE));
+	ItemManager::INSTANCE()->installRender(ItemManager::W_PLUS, new WhiteNumberRender(TextureManager::W_PLUS));
+	ItemManager::INSTANCE()->installRender(ItemManager::W0, new WhiteNumberRender(TextureManager::W0));
+	ItemManager::INSTANCE()->installRender(ItemManager::W1, new WhiteNumberRender(TextureManager::W1));
+	ItemManager::INSTANCE()->installRender(ItemManager::W2, new WhiteNumberRender(TextureManager::W2));
+	ItemManager::INSTANCE()->installRender(ItemManager::W3, new WhiteNumberRender(TextureManager::W3));
+	ItemManager::INSTANCE()->installRender(ItemManager::W4, new WhiteNumberRender(TextureManager::W4));
+	ItemManager::INSTANCE()->installRender(ItemManager::W5, new WhiteNumberRender(TextureManager::W5));
+	ItemManager::INSTANCE()->installRender(ItemManager::W6, new WhiteNumberRender(TextureManager::W6));
+	ItemManager::INSTANCE()->installRender(ItemManager::W7, new WhiteNumberRender(TextureManager::W7));
+	ItemManager::INSTANCE()->installRender(ItemManager::W8, new WhiteNumberRender(TextureManager::W8));
+	ItemManager::INSTANCE()->installRender(ItemManager::W9, new WhiteNumberRender(TextureManager::W9));
 
 	//注册事件
 	ItemManager::INSTANCE()->addItem(ItemManager::BACKGROUND, 1, new BackGroundEvent(-26.0));
@@ -159,8 +170,7 @@ void OpenGLGame::resizeGL(int w, int h)
 
 void OpenGLGame::paintGL()
 {
-	ItemManager::INSTANCE()->addItem(ItemManager::POWER, 1, new PowerEvent(sin(rand()), 1.0f));
-	ItemManager::INSTANCE()->addItem(ItemManager::POINT, 1, new PointEvent(sin(rand()), 1.0f));
+	if(rand() % 10 == 0) ItemManager::INSTANCE()->addItem(ItemManager::POINT, 1, new PointEvent(sin(rand()), 1.0f));
 	glClear( GL_COLOR_BUFFER_BIT);
 
 	drawBackGround();

@@ -109,6 +109,11 @@ void GameWidget::endZ()
 	mainOpenGLGame->endZ();
 }
 
+void GameWidget::addScore(int add)
+{
+	score += add;
+}
+
 void GameWidget::addPower()
 {
 	power += 5;

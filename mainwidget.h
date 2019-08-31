@@ -25,6 +25,7 @@ public slots:
 public:
 	MainWidget(QWidget *parent = 0);
 	~MainWidget()override;
+	static MainWidget *Instance;
 
 	// QWidget interface
 protected:

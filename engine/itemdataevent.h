@@ -171,4 +171,14 @@ private:
 	int time;
 };
 
+class WhiteNumberEvent : public ItemDataEventBase {
+	Q_OBJECT
+public:
+	explicit WhiteNumberEvent(float x, float y, QObject *parent = nullptr);
+	bool update(RenderBase *render)override;
+private:
+	int time;
+	float x, y;
+};
+
 #endif

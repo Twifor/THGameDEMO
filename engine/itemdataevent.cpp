@@ -194,6 +194,19 @@ bool PointEvent::update(RenderBase *render)
 {
 	if(y < -1.1f) return true;
 	if(isIn()) {
+		int score;
+		if(y >= 0.7f) score = 10000;
+		else if(y <= -0.4f) score = 0;
+		else score = (y + 0.4) / 1.2f * 8000;
+		float ss = OpenGLGame::Instance->myPlaneX + 0.05f;
+		GameWidget::Instance->addScore(score);
+		for(int i = 0; i < 5; i++) {
+			ItemManager::INSTANCE()->addNewItem(static_cast<ItemManager::ItemType>(ItemManager::W0 + score % 10), 1, new WhiteNumberEvent(ss, OpenGLGame::Instance->myPlaneY + 0.1f));
+			score /= 10;
+			ss -= 0.03f;
+		}
+		ItemManager::INSTANCE()->addNewItem(ItemManager::W_PLUS, 1, new WhiteNumberEvent(ss, OpenGLGame::Instance->myPlaneY + 0.1f));
+		GameWidget::Instance->addScore(score);
 		GameWidget::Instance->addPoint();
 		return true;
 	}else if(isColl()) isActive = true;
@@ -313,5 +326,21 @@ bool ItemGetLineEvent::update(RenderBase *render)
 	++time;
 	if(time > 180) return true;
 	static_cast<TipRender*>(render)->setPos(0.0f, 0.6f * ItemManager::INSTANCE()->getDiv(), 0.065f, 1.2f, fabs(sin(time * M_PI / 90.0f)));
+	return false;
+}
+
+WhiteNumberEvent::WhiteNumberEvent(float x, float y, QObject *parent) : ItemDataEventBase (parent)
+{
+	this->x = x;
+	this->y = y;
+	time = 0;
+}
+
+bool WhiteNumberEvent::update(RenderBase *render)
+{
+	if(time >= 40) return true;
+	++time;
+	y += 0.001f;
+	static_cast<WhiteNumberRender*>(render)->setPos(x, y * ItemManager::INSTANCE()->getDiv(), 0.02, 0.02, (40 - time) / 40.0);
 	return false;
 }

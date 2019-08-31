@@ -25,6 +25,7 @@ void MainWidget::gameStart()//开始游戏函数
 	status = GameStart;//修改状态机状态
 	gameWidget = new GameWidget(this);
 	gameWidget->setGeometry(0, 0, 800, 600);
+
 	gameWidget->show();
 
 	MusicFactory::getInstance()->quit();//放bgm
@@ -36,9 +37,12 @@ void MainWidget::gameStart()//开始游戏函数
 	});
 }
 
+MainWidget *MainWidget::Instance = nullptr;
+
 MainWidget::MainWidget(QWidget *parent)
 	: QWidget(parent)
 {
+	Instance = this;
 	loadingWidget = new LoadingOpenGLWidget(this);
 
 	setFixedSize(800, 600);

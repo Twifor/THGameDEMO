@@ -6,7 +6,7 @@
 #include <QImage>
 #include <QFile>
 
-const int RESOURCE_NUM = 118;
+const int RESOURCE_NUM = 129;
 enum ResourceID {//游戏资源ID，所有游戏资源必须在这里进行注册才能够使用
 	P_PNG,//粒子,1
 	P2_PNG,//另一个粒子,2
@@ -125,7 +125,18 @@ enum ResourceID {//游戏资源ID，所有游戏资源必须在这里进行注�
 	SCORE_PNG,//115
 	SPELL_EXTEND_PNG,//116
 	EXTEND_PNG,//117
-	ITEM_GET_LINE_PNG//118
+	ITEM_GET_LINE_PNG,//118
+	W_PLUS_PNG,//119
+	W_0_PNG,//120
+	W_1_PNG,//121
+	W_2_PNG,//122
+	W_3_PNG,//123
+	W_4_PNG,//124
+	W_5_PNG,//125
+	W_6_PNG,//126
+	W_7_PNG,//127
+	W_8_PNG,//128
+	W_9_PNG,//129
 };
 
 class GameResourceData {//游戏资源数据基类
