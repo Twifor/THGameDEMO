@@ -181,4 +181,43 @@ private:
 	float x, y;
 };
 
+const float X[] = {1, -1, 1, -1, 1, -1, 1, -1};//颤抖动画
+const float Y[] = {1, 1, -1, -1, 1, 1, -1, -1};
+
+class PauseMenuEvent : public ItemDataEventBase {
+	Q_OBJECT
+public:
+	explicit PauseMenuEvent(int id, float beginY, bool lock, QObject *parent = nullptr);
+	bool update(RenderBase *render)override;
+protected:
+	int time, id, offset;
+	float x, y, k, by;
+	bool lk;
+};
+
+class PauseMenuEndEvent : public ItemDataEventBase {
+	Q_OBJECT
+public:
+	explicit PauseMenuEndEvent(int id, float beginY, bool lock, QObject *parent = nullptr);
+	bool update(RenderBase *render)override;
+protected:
+	int time, id, offset;
+	float x, y, k, by;
+	bool lk;
+};
+
+class PauseMenu2Event : public PauseMenuEvent {
+	Q_OBJECT
+public:
+	explicit PauseMenu2Event(int id, float beginY, bool lock, QObject *parent = nullptr);
+	bool update(RenderBase *render)override;
+};
+
+class PauseMenu2EndEvent:public PauseMenuEndEvent{
+	Q_OBJECT
+public:
+	explicit PauseMenu2EndEvent(int id, float beginY, bool lock, QObject *parent = nullptr);
+	bool update(RenderBase *render)override;
+};
+
 #endif

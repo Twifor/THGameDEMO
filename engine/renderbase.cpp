@@ -1,6 +1,7 @@
 #include "renderbase.h"
 #include "shadermanager.h"
 #include "itemmanager.h"
+#include "openglgame.h"
 
 RenderBase::RenderBase(QObject *parent) : QObject(parent)
 {
@@ -56,6 +57,7 @@ void TranslateRender2D::render()
 	ShaderManager::INSTANCE()->getProgram(0)->enableAttributeArray(ShaderManager::INSTANCE()->getProgram(0)->attributeLocation("aTexCoord"));
 	ShaderManager::INSTANCE()->getProgram(0)->setAttributeBuffer(ShaderManager::INSTANCE()->getProgram(0)->attributeLocation("aTexCoord"), GL_FLOAT, 3 * sizeof(float), 2, sizeof(float) * 5);
 	TextureManager::INSTANCE()->getTexture(t)->bind(0);
+	ShaderManager::INSTANCE()->getProgram(0)->setUniformValue("isBlur", OpenGLGame::Instance->isPause());
 
 	VBO->allocate(VBOOP, num * 80);
 	IBO->allocate(IBOOP, num * 24);
@@ -167,6 +169,7 @@ void RotateRender2D::render()
 	ShaderManager::INSTANCE()->getProgram(1)->enableAttributeArray(ShaderManager::INSTANCE()->getProgram(1)->attributeLocation("rotate"));
 	ShaderManager::INSTANCE()->getProgram(1)->setAttributeBuffer(ShaderManager::INSTANCE()->getProgram(1)->attributeLocation("rotate"), GL_FLOAT, 5 * sizeof(float), 3, sizeof(float) * 8);
 	TextureManager::INSTANCE()->getTexture(t)->bind(0);
+	ShaderManager::INSTANCE()->getProgram(1)->setUniformValue("isBlur", OpenGLGame::Instance->isPause());
 
 	VBO->allocate(VBOOP, num * 128);
 	IBO->allocate(IBOOP, num * 24);
@@ -270,6 +273,7 @@ void BackGroundRender::render()
 
 	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("div", ItemManager::INSTANCE()->getDiv());
 	TextureManager::INSTANCE()->getTexture(t)->bind(0);
+	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("isBlur", OpenGLGame::Instance->isPause());
 	VBO->allocate(VBOOP, num * 80);
 	IBO->allocate(IBOOP, num * 24);
 
@@ -331,6 +335,7 @@ void StarBackGroundRender::render()
 
 	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("div", ItemManager::INSTANCE()->getDiv());
 	TextureManager::INSTANCE()->getTexture(t)->bind(0);
+	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("isBlur", OpenGLGame::Instance->isPause());
 	VBO->allocate(VBOOP, num * 80);
 	IBO->allocate(IBOOP, num * 24);
 
@@ -395,6 +400,7 @@ void PlaneRender::render()
 	ShaderManager::INSTANCE()->getProgram(0)->enableAttributeArray(ShaderManager::INSTANCE()->getProgram(0)->attributeLocation("aTexCoord"));
 	ShaderManager::INSTANCE()->getProgram(0)->setAttributeBuffer(ShaderManager::INSTANCE()->getProgram(0)->attributeLocation("aTexCoord"), GL_FLOAT, 3 * sizeof(float), 2, sizeof(float) * 5);
 	TextureManager::INSTANCE()->getTexture(t)->bind(0);
+	ShaderManager::INSTANCE()->getProgram(0)->setUniformValue("isBlur", OpenGLGame::Instance->isPause());
 
 	VBO->allocate(VBOOP, num * 80);
 	IBO->allocate(IBOOP, num * 24);
@@ -474,6 +480,7 @@ void TreeRender::render()
 
 	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("div", ItemManager::INSTANCE()->getDiv());
 	TextureManager::INSTANCE()->getTexture(t)->bind(0);
+	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("isBlur", OpenGLGame::Instance->isPause());
 	VBO->allocate(VBOOP, num * 80);
 	IBO->allocate(IBOOP, num * 24);
 
@@ -529,6 +536,7 @@ void TreeRender2::render()
 
 	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("div", ItemManager::INSTANCE()->getDiv());
 	TextureManager::INSTANCE()->getTexture(t)->bind(0);
+	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("isBlur", OpenGLGame::Instance->isPause());
 	VBO->allocate(VBOOP, num * 80);
 	IBO->allocate(IBOOP, num * 24);
 
@@ -588,6 +596,7 @@ SlowEffectRender1::SlowEffectRender1(QObject *parent) : RenderBase (parent)
 
 	ShaderManager::INSTANCE()->getProgram(2)->enableAttributeArray(ShaderManager::INSTANCE()->getProgram(2)->attributeLocation("aTexCoord"));
 	ShaderManager::INSTANCE()->getProgram(2)->setAttributeBuffer(ShaderManager::INSTANCE()->getProgram(2)->attributeLocation("aTexCoord"), GL_FLOAT, 3 * sizeof(float), 2, sizeof(float) * 5);
+	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("isBlur", OpenGLGame::Instance->isPause());
 	VAO->release();
 	VBO->release();
 	IBO->release();
@@ -622,6 +631,7 @@ void SlowEffectRender1::render()
 	TextureManager::INSTANCE()->getTexture(TextureManager::SLOWEFFECT1_PNG)->bind(0);
 
 	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("alpha", alpha0, 0.0f);
+	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("isBlur", OpenGLGame::Instance->isPause());
 	QMatrix4x4 matrix;
 	matrix.translate(x0, y0 * ItemManager::INSTANCE()->getDiv(), 0);
 	matrix.rotate(angle0, 0.0, 0.0, 1.0);
@@ -646,6 +656,7 @@ void SlowEffectRender2::render()
 	TextureManager::INSTANCE()->getTexture(TextureManager::SLOWEFFECT2_PNG)->bind(0);
 
 	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("alpha", alpha0, 0.0f);
+	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("isBlur", OpenGLGame::Instance->isPause());
 	QMatrix4x4 matrix;
 	matrix.translate(x0, y0 * ItemManager::INSTANCE()->getDiv(), 0);
 	matrix.rotate(angle0, 0.0, 0.0, 1.0);
@@ -667,6 +678,7 @@ void CenterRender::render()
 	VAO->bind();
 	ShaderManager::INSTANCE()->getProgram(2)->bind();
 	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("div", 1.0f);
+	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("isBlur", OpenGLGame::Instance->isPause());
 	TextureManager::INSTANCE()->getTexture(TextureManager::CENTER)->bind(0);
 
 	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("alpha", alpha0, 0.0f);
@@ -730,6 +742,7 @@ void LineRender::render()
 
 	TextureManager::INSTANCE()->getTexture(TextureManager::MARISA_LINE)->bind(0);
 	ShaderManager::INSTANCE()->getProgram(3)->setUniformValue("alpha", 0.6f, 0.0f);
+	ShaderManager::INSTANCE()->getProgram(3)->setUniformValue("isBlur", OpenGLGame::Instance->isPause());
 
 	VBO->allocate(VBOOP, num * 96);
 	IBO->allocate(IBOOP, num * 24);
@@ -849,6 +862,7 @@ void TranslateAlphaRender2D::render()
 
 	ShaderManager::INSTANCE()->getProgram(4)->enableAttributeArray(ShaderManager::INSTANCE()->getProgram(4)->attributeLocation("alpha"));
 	ShaderManager::INSTANCE()->getProgram(4)->setAttributeBuffer(ShaderManager::INSTANCE()->getProgram(4)->attributeLocation("alpha"), GL_FLOAT, 5 * sizeof(float), 1, sizeof(float) * 6);
+	ShaderManager::INSTANCE()->getProgram(4)->setUniformValue("isBlur", OpenGLGame::Instance->isPause());
 
 	TextureManager::INSTANCE()->getTexture(t)->bind(0);
 
@@ -972,6 +986,7 @@ void RotateAlphaRender2D::render()
 	ShaderManager::INSTANCE()->getProgram(5)->setAttributeBuffer(ShaderManager::INSTANCE()->getProgram(5)->attributeLocation("rotate"), GL_FLOAT, 5 * sizeof(float), 3, sizeof(float) * 9);
 	ShaderManager::INSTANCE()->getProgram(5)->enableAttributeArray(ShaderManager::INSTANCE()->getProgram(5)->attributeLocation("alpha"));
 	ShaderManager::INSTANCE()->getProgram(5)->setAttributeBuffer(ShaderManager::INSTANCE()->getProgram(5)->attributeLocation("alpha"), GL_FLOAT, 8 * sizeof(float), 1, sizeof(float) * 9);
+	ShaderManager::INSTANCE()->getProgram(5)->setUniformValue("isBlur", OpenGLGame::Instance->isPause());
 
 	TextureManager::INSTANCE()->getTexture(t)->bind(0);
 
@@ -980,7 +995,7 @@ void RotateAlphaRender2D::render()
 
 	glDrawElements(GL_TRIANGLES, num * 6, GL_UNSIGNED_INT, 0);
 
-	ShaderManager::INSTANCE()->getProgram(1)->release();
+	ShaderManager::INSTANCE()->getProgram(5)->release();
 	TextureManager::INSTANCE()->getTexture(t)->release();
 	VAO->release();
 	VBO->release();
@@ -1068,4 +1083,46 @@ TipRender::TipRender(TextureManager::TextureType type, QObject *parent) : Transl
 WhiteNumberRender::WhiteNumberRender(TextureManager::TextureType type, QObject *parent) : TranslateAlphaRender2D (type, parent)
 {
 	changeMAX(100);
+}
+
+PauseMenuRender::PauseMenuRender(TextureManager::TextureType type, QObject *parent) : TranslateAlphaRender2D (type, parent)
+{
+	changeMAX(2);
+}
+
+void PauseMenuRender::render()
+{
+	VBO->destroy();
+	VAO->destroy();
+	IBO->destroy();
+	VAO->create();
+	VAO->bind();
+	VBO->create();
+	VBO->bind();
+	IBO->create();
+	IBO->bind();
+
+	ShaderManager::INSTANCE()->getProgram(4)->bind();
+	ShaderManager::INSTANCE()->getProgram(4)->enableAttributeArray(ShaderManager::INSTANCE()->getProgram(4)->attributeLocation("aPos"));
+	ShaderManager::INSTANCE()->getProgram(4)->setAttributeBuffer(ShaderManager::INSTANCE()->getProgram(4)->attributeLocation("aPos"), GL_FLOAT, 0, 3, sizeof(float) * 6);
+
+	ShaderManager::INSTANCE()->getProgram(4)->enableAttributeArray(ShaderManager::INSTANCE()->getProgram(4)->attributeLocation("aTexCoord"));
+	ShaderManager::INSTANCE()->getProgram(4)->setAttributeBuffer(ShaderManager::INSTANCE()->getProgram(4)->attributeLocation("aTexCoord"), GL_FLOAT, 3 * sizeof(float), 2, sizeof(float) * 6);
+
+	ShaderManager::INSTANCE()->getProgram(4)->enableAttributeArray(ShaderManager::INSTANCE()->getProgram(4)->attributeLocation("alpha"));
+	ShaderManager::INSTANCE()->getProgram(4)->setAttributeBuffer(ShaderManager::INSTANCE()->getProgram(4)->attributeLocation("alpha"), GL_FLOAT, 5 * sizeof(float), 1, sizeof(float) * 6);
+	ShaderManager::INSTANCE()->getProgram(4)->setUniformValue("isBlur", false);
+
+	TextureManager::INSTANCE()->getTexture(t)->bind(0);
+
+	VBO->allocate(VBOOP, num * 96);
+	IBO->allocate(IBOOP, num * 24);
+
+	glDrawElements(GL_TRIANGLES, num * 6, GL_UNSIGNED_INT, 0);
+
+	ShaderManager::INSTANCE()->getProgram(4)->release();
+	TextureManager::INSTANCE()->getTexture(t)->release();
+	VAO->release();
+	VBO->release();
+	IBO->release();
 }

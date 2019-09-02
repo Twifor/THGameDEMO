@@ -197,12 +197,12 @@ bool PointEvent::update(RenderBase *render)
 	if(y < -1.1f) return true;
 	if(isIn()) {
 		int score;
-		if(y >= 0.7f) score = 10000;
+		if(y >= 0.7f) score = 1000;
 		else if(y <= -0.4f) score = 0;
-		else score = (y + 0.4) / 1.2f * 8000;
+		else score = (y + 0.4) / 1.2f * 800;
 		float ss = OpenGLGame::Instance->myPlaneX + 0.05f;
 		GameWidget::Instance->addScore(score);
-		for(int i = 0; i < 5; i++) {
+		for(int i = 0; i < 4; i++) {
 			ItemManager::INSTANCE()->addNewItem(static_cast<ItemManager::ItemType>(ItemManager::W0 + score % 10), 1, new WhiteNumberEvent(ss, OpenGLGame::Instance->myPlaneY + 0.1f));
 			score /= 10;
 			ss -= 0.03f;
@@ -290,7 +290,7 @@ bool SPExtendEvent::update(RenderBase *render)
 		}
 		static_cast<RotateRender2D*>(render)->setPos(x, y * ItemManager::INSTANCE()->getDiv(), 0.075f, 0.075f, angle + M_PI / 2);
 	}else{
-		if(!OpenGLGame::Instance->isPause())y -= 0.01f;
+		if(!OpenGLGame::Instance->isPause()) y -= 0.01f;
 		static_cast<RotateRender2D*>(render)->setPos(x, y * ItemManager::INSTANCE()->getDiv(), 0.075f, 0.075f, 0.0f);
 	}
 	return false;
@@ -303,7 +303,7 @@ ExtendTipEvent::ExtendTipEvent(QObject *parent) : ItemDataEventBase (parent)
 
 bool ExtendTipEvent::update(RenderBase *render)
 {
-	if(!OpenGLGame::Instance->isPause())++time;
+	if(!OpenGLGame::Instance->isPause()) ++time;
 	if(time > 90) return true;
 	if(time <= 60) static_cast<TipRender*>(render)->setPos(0.05f, 0.5f * ItemManager::INSTANCE()->getDiv(), 0.1f, 0.3f, 1.0f);
 	else static_cast<TipRender*>(render)->setPos(0.05f, 0.5f * ItemManager::INSTANCE()->getDiv(), 0.1f, 0.3f, (90 - time) / 30.0f);
@@ -317,7 +317,7 @@ SPExtendTipEvent::SPExtendTipEvent(QObject *parent) : ItemDataEventBase (parent)
 
 bool SPExtendTipEvent::update(RenderBase *render)
 {
-	if(!OpenGLGame::Instance->isPause())++time;
+	if(!OpenGLGame::Instance->isPause()) ++time;
 	if(time > 90) return true;
 	if(time <= 60) static_cast<TipRender*>(render)->setPos(0.05f, 0.5f * ItemManager::INSTANCE()->getDiv(), 0.0756f, 0.356f, 1.0f);
 	else static_cast<TipRender*>(render)->setPos(0.05f, 0.5f * ItemManager::INSTANCE()->getDiv(), 0.0756f, 0.356f, (90 - time) / 30.0f);
@@ -331,7 +331,7 @@ ItemGetLineEvent::ItemGetLineEvent(QObject *parent) : ItemDataEventBase (parent)
 
 bool ItemGetLineEvent::update(RenderBase *render)
 {
-	if(!OpenGLGame::Instance->isPause())++time;
+	if(!OpenGLGame::Instance->isPause()) ++time;
 	if(time > 180) return true;
 	static_cast<TipRender*>(render)->setPos(0.0f, 0.6f * ItemManager::INSTANCE()->getDiv(), 0.065f, 1.2f, fabs(sin(time * M_PI / 90.0f)));
 	return false;
@@ -347,8 +347,155 @@ WhiteNumberEvent::WhiteNumberEvent(float x, float y, QObject *parent) : ItemData
 bool WhiteNumberEvent::update(RenderBase *render)
 {
 	if(time >= 40) return true;
-	if(!OpenGLGame::Instance->isPause())++time;
-	if(!OpenGLGame::Instance->isPause())y += 0.001f;
+	if(!OpenGLGame::Instance->isPause()) ++time;
+	if(!OpenGLGame::Instance->isPause()) y += 0.001f;
 	static_cast<WhiteNumberRender*>(render)->setPos(x, y * ItemManager::INSTANCE()->getDiv(), 0.02, 0.02, (40 - time) / 40.0);
 	return false;
+}
+
+PauseMenuEvent::PauseMenuEvent(int id, float beginY, bool lock, QObject *parent) : ItemDataEventBase (parent)
+{
+	this->id = id;
+	if(!lock) y = -0.2f;
+	else y = beginY;
+	if(!lock) x = -1.0f;
+	else x = -0.5f;
+	if(!lock) time = 0;
+	else time = 100;
+	lk = lock;
+	offset = id * 10;
+	k = (beginY + 0.2f) / 0.5f;
+	by = beginY;
+}
+
+bool PauseMenuEvent::update(RenderBase *render)
+{
+	if(OpenGLGame::Instance->pauseStatus > 4 || OpenGLGame::Instance->pauseStatus <= 0) {
+		if(x >= -1.0f) {
+			x -= 0.02f  / sqrt(1 + k * k);
+			y -= 0.02f * k / sqrt(1 + k * k);
+			static_cast<PauseMenuRender*>(render)->setPos(x, y * ItemManager::INSTANCE()->getDiv(), 0.04f, 0.2857f * ItemManager::INSTANCE()->getDiv(), (x + 1.0f) / 0.5f);
+			return false;
+		}else return true;
+	}
+	if(OpenGLGame::Instance->pauseStatus & (1 << id)) {
+		if(time <= offset) {
+			++time;
+			return false;
+		}
+		if(x < -0.5f) {
+			x += 0.02f / sqrt(1 + k * k);
+			y += 0.02f * k / sqrt(1 + k * k);
+		}else x = -0.5f, y = by;
+		if(lk) {
+			if(time <= 130) {
+				static_cast<PauseMenuRender*>(render)->setPos(x + X[time % 8] / 300.0f, (y + Y[time % 8] / 300.0f) * ItemManager::INSTANCE()->getDiv(), 0.04f, 0.2857f * ItemManager::INSTANCE()->getDiv(), (x + 1.0f) / 0.5f);
+				++time;
+			}
+			else static_cast<PauseMenuRender*>(render)->setPos(x, y * ItemManager::INSTANCE()->getDiv(), 0.04f, 0.2857f * ItemManager::INSTANCE()->getDiv(), (x + 1.0f) / 0.5f);
+		}
+		else static_cast<PauseMenuRender*>(render)->setPos(x, y * ItemManager::INSTANCE()->getDiv(), 0.04f, 0.2857f * ItemManager::INSTANCE()->getDiv(), (x + 1.0f) / 0.5f);
+		return false;
+	}else return true;
+}
+
+PauseMenuEndEvent::PauseMenuEndEvent(int id, float beginY, bool lock, QObject *parent) : ItemDataEventBase (parent)
+{
+	this->id = id;
+	if(!lock) y = -0.2f;
+	else y = beginY;
+	if(!lock) x = -1.0f;
+	else x = -0.5f;
+	if(!lock) time = 0;
+	else time = 100;
+	lk = lock;
+	offset = id * 10;
+	k = (beginY + 0.2f) / 0.5f;
+	by = beginY;
+}
+
+bool PauseMenuEndEvent::update(RenderBase *render)
+{
+	if(OpenGLGame::Instance->pauseStatus > 4 || OpenGLGame::Instance->pauseStatus <= 0) {
+		if(x >= -1.0f) {
+			x -= 0.02f  / sqrt(1 + k * k);
+			y -= 0.02f * k / sqrt(1 + k * k);
+			static_cast<PauseMenuRender*>(render)->setPos(x, y * ItemManager::INSTANCE()->getDiv(), 0.04f, 0.2857f * ItemManager::INSTANCE()->getDiv(), (x + 1.0f) / 0.5f);
+			return false;
+		}else return true;
+	}
+	if((OpenGLGame::Instance->pauseStatus & (1 << id)) == 0) {
+		++time;
+		if(time <= offset) return false;
+		else --time;
+		if(x < -0.5f) {
+			x += 0.02f  / sqrt(1 + k * k);
+			y += 0.02 * k / sqrt(1 + k * k);
+		}else x = -0.5f, y = by;
+		static_cast<PauseMenuRender*>(render)->setPos(x, y * ItemManager::INSTANCE()->getDiv(), 0.04f, 0.2857f * ItemManager::INSTANCE()->getDiv(), (x + 1.0f) / 0.5f);
+		return false;
+	}else return true;
+}
+
+PauseMenu2Event::PauseMenu2Event(int id, float beginY, bool lock, QObject *parent) : PauseMenuEvent (id, beginY, lock, parent)
+{
+
+}
+
+bool PauseMenu2Event::update(RenderBase *render)
+{
+	if(OpenGLGame::Instance->pauseStatus <= 4) {
+		if(x >= -1.0f) {
+			x -= 0.02f  / sqrt(1 + k * k);
+			y -= 0.02f * k / sqrt(1 + k * k);
+			static_cast<PauseMenuRender*>(render)->setPos(x, y * ItemManager::INSTANCE()->getDiv(), 0.04f, 0.2857f * ItemManager::INSTANCE()->getDiv(), (x + 1.0f) / 0.5f);
+			return false;
+		}else return true;
+	}
+	if(OpenGLGame::Instance->pauseStatus & (1 << id)) {
+		++time;
+		if(time <= offset) return false;
+		else --time;
+		if(x < -0.5f) {
+			x += 0.02f / sqrt(1 + k * k);
+			y += 0.02f * k / sqrt(1 + k * k);
+		}else x = -0.5f, y = by;
+		if(lk) {
+			if(time <= 130) {
+				static_cast<PauseMenuRender*>(render)->setPos(x + X[time % 8] / 300.0f, (y + Y[time % 8] / 300.0f) * ItemManager::INSTANCE()->getDiv(), 0.04f, 0.2857f * ItemManager::INSTANCE()->getDiv(), (x + 1.0f) / 0.5f);
+				++time;
+			}
+			else static_cast<PauseMenuRender*>(render)->setPos(x, y * ItemManager::INSTANCE()->getDiv(), 0.04f, 0.2857f * ItemManager::INSTANCE()->getDiv(), (x + 1.0f) / 0.5f);
+		}
+		else static_cast<PauseMenuRender*>(render)->setPos(x, y * ItemManager::INSTANCE()->getDiv(), 0.04f, 0.2857f * ItemManager::INSTANCE()->getDiv(), (x + 1.0f) / 0.5f);
+		return false;
+	}else return true;
+}
+
+PauseMenu2EndEvent::PauseMenu2EndEvent(int id, float beginY, bool lock, QObject *parent) : PauseMenuEndEvent (id, beginY, lock, parent)
+{
+
+}
+
+bool PauseMenu2EndEvent::update(RenderBase *render)
+{
+	if(OpenGLGame::Instance->pauseStatus <= 4) {
+		if(x >= -1.0f) {
+			x -= 0.02f  / sqrt(1 + k * k);
+			y -= 0.02f * k / sqrt(1 + k * k);
+			static_cast<PauseMenuRender*>(render)->setPos(x, y * ItemManager::INSTANCE()->getDiv(), 0.04f, 0.2857f * ItemManager::INSTANCE()->getDiv(), (x + 1.0f) / 0.5f);
+			return false;
+		}else return true;
+	}
+	if((OpenGLGame::Instance->pauseStatus & (1 << id)) == 0) {
+		++time;
+		if(time <= offset) return false;
+		else --time;
+		if(x < -0.5f) {
+			x += 0.02f  / sqrt(1 + k * k);
+			y += 0.02 * k / sqrt(1 + k * k);
+		}else x = -0.5f, y = by;
+		static_cast<PauseMenuRender*>(render)->setPos(x, y * ItemManager::INSTANCE()->getDiv(), 0.04f, 0.2857f * ItemManager::INSTANCE()->getDiv(), (x + 1.0f) / 0.5f);
+		return false;
+	}else return true;
 }

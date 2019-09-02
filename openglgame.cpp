@@ -7,16 +7,33 @@ OpenGLGame::OpenGLGame(QWidget *parent) : QOpenGLWidget(parent)
 {
 	Instance = this;
 	pauseLock = false;
+	pauseStatus = 0;
 }
 
 void OpenGLGame::pause()
 {
 	pauseLock = true;
+	pauseStatus = 1;
+	ItemManager::INSTANCE()->addItem(ItemManager::P1, 1, new PauseMenuEvent(0, -0.45f, false));
+	ItemManager::INSTANCE()->addItem(ItemManager::P2B, 1, new PauseMenuEndEvent(1, -0.55f, false));
+	ItemManager::INSTANCE()->addItem(ItemManager::P3B, 1, new PauseMenuEndEvent(2, -0.65f, false));
 }
 
 void OpenGLGame::endPause()
 {
+	if(pauseStatus > 4) {
+		QSound::play(":/std/cancel.wav");
+		pauseStatus &= ~24;
+		if(pauseStatus == 1) ItemManager::INSTANCE()->addItem(ItemManager::P1, 1, new PauseMenuEvent(0, -0.45f, false));
+		else ItemManager::INSTANCE()->addItem(ItemManager::P1B, 1, new PauseMenuEndEvent(0, -0.45f, false));
+		if(pauseStatus == 2) ItemManager::INSTANCE()->addItem(ItemManager::P2, 1, new PauseMenuEvent(1, -0.55f, false));
+		else ItemManager::INSTANCE()->addItem(ItemManager::P2B, 1, new PauseMenuEndEvent(1, -0.55f, false));
+		if(pauseStatus == 4) ItemManager::INSTANCE()->addItem(ItemManager::P3, 1, new PauseMenuEvent(2, -0.65f, false));
+		else ItemManager::INSTANCE()->addItem(ItemManager::P3B, 1, new PauseMenuEndEvent(2, -0.65f, false));
+		return;
+	}
 	pauseLock = false;
+	pauseStatus = -40;
 }
 
 bool OpenGLGame::isPause()
@@ -46,13 +63,63 @@ void OpenGLGame::startRight()
 
 void OpenGLGame::startUp()
 {
-	if(pauseLock) return;
+	if(pauseLock) {
+		QSound::play(":/std/select.wav");
+		if(pauseStatus <= 4) {
+			if(pauseStatus == 1) ItemManager::INSTANCE()->addItem(ItemManager::P1B, 0, new PauseMenuEndEvent(0, -0.45f, true));
+			else if(pauseStatus == 2) ItemManager::INSTANCE()->addItem(ItemManager::P2B, 0, new PauseMenuEndEvent(1, -0.55f, true));
+			else ItemManager::INSTANCE()->addItem(ItemManager::P3B, 0, new PauseMenuEndEvent(2, -0.65f, true));
+			if(pauseStatus == 1) pauseStatus = 4;
+			else pauseStatus >>= 1;
+			if(pauseStatus == 1) ItemManager::INSTANCE()->addItem(ItemManager::P1, 0, new PauseMenuEvent(0, -0.45f, true));
+			else if(pauseStatus == 2) ItemManager::INSTANCE()->addItem(ItemManager::P2, 0, new PauseMenuEvent(1, -0.55f, true));
+			else ItemManager::INSTANCE()->addItem(ItemManager::P3, 0, new PauseMenuEvent(2, -0.65f, true));
+		}else{
+			if(pauseStatus & (1 << 3)) ItemManager::INSTANCE()->addItem(ItemManager::PNB, 0, new PauseMenu2EndEvent(3, -0.55f, true));
+			else ItemManager::INSTANCE()->addItem(ItemManager::PYB, 0, new PauseMenu2EndEvent(4, -0.65f, true));
+			if(pauseStatus & (1 << 3)) {
+				pauseStatus &= ~(1 << 3);
+				pauseStatus |= 1 << 4;
+				ItemManager::INSTANCE()->addItem(ItemManager::PY, 0, new PauseMenu2Event(4, -0.65f, true));
+			}else{
+				pauseStatus &= ~(1 << 4);
+				pauseStatus |= 1 << 3;
+				ItemManager::INSTANCE()->addItem(ItemManager::PN, 0, new PauseMenu2Event(3, -0.55f, true));
+			}
+		}
+		return;
+	}
 	status |= 4;
 }
 
 void OpenGLGame::startDown()
 {
-	if(pauseLock) return;
+	if(pauseLock) {
+		QSound::play(":/std/select.wav");
+		if(pauseStatus <= 4) {
+			if(pauseStatus == 1) ItemManager::INSTANCE()->addItem(ItemManager::P1B, 0, new PauseMenuEndEvent(0, -0.45f, true));
+			else if(pauseStatus == 2) ItemManager::INSTANCE()->addItem(ItemManager::P2B, 0, new PauseMenuEndEvent(1, -0.55f, true));
+			else ItemManager::INSTANCE()->addItem(ItemManager::P3B, 0, new PauseMenuEndEvent(2, -0.65f, true));
+			if(pauseStatus == 4) pauseStatus = 1;
+			else pauseStatus <<= 1;
+			if(pauseStatus == 1) ItemManager::INSTANCE()->addItem(ItemManager::P1, 0, new PauseMenuEvent(0, -0.45f, true));
+			else if(pauseStatus == 2) ItemManager::INSTANCE()->addItem(ItemManager::P2, 0, new PauseMenuEvent(1, -0.55f, true));
+			else ItemManager::INSTANCE()->addItem(ItemManager::P3, 0, new PauseMenuEvent(2, -0.65f, true));
+		}else{
+			if(pauseStatus & (1 << 3)) ItemManager::INSTANCE()->addItem(ItemManager::PNB, 0, new PauseMenu2EndEvent(3, -0.55f, true));
+			else ItemManager::INSTANCE()->addItem(ItemManager::PYB, 0, new PauseMenu2EndEvent(4, -0.65f, true));
+			if(pauseStatus & (1 << 3)) {
+				pauseStatus &= ~(1 << 3);
+				pauseStatus |= 1 << 4;
+				ItemManager::INSTANCE()->addItem(ItemManager::PY, 0, new PauseMenu2Event(4, -0.65f, true));
+			}else{
+				pauseStatus &= ~(1 << 4);
+				pauseStatus |= 1 << 3;
+				ItemManager::INSTANCE()->addItem(ItemManager::PN, 0, new PauseMenu2Event(3, -0.55f, true));
+			}
+		}
+		return;
+	}
 	status |= 8;
 }
 
@@ -102,7 +169,32 @@ void OpenGLGame::endShift()
 
 void OpenGLGame::startZ()
 {
-	if(pauseLock) return;
+	if(pauseLock) {
+		QSound::play(":/std/ok.wav");
+		if(pauseStatus == 1) {
+			GameWidget::Instance->quit();
+		}else if(pauseStatus == 2) {
+			pauseStatus |= 8;
+			ItemManager::INSTANCE()->addItem(ItemManager::PS, 1, new PauseMenu2Event(1, -0.45f, false));
+			ItemManager::INSTANCE()->addItem(ItemManager::PN, 1, new PauseMenu2Event(3, -0.55f, false));
+			ItemManager::INSTANCE()->addItem(ItemManager::PYB, 1, new PauseMenu2EndEvent(4, -0.65f, false));
+
+		}else if(pauseStatus == 4) {
+			pauseStatus |= 8;
+			ItemManager::INSTANCE()->addItem(ItemManager::PS, 1, new PauseMenu2Event(2, -0.45f, false));
+			ItemManager::INSTANCE()->addItem(ItemManager::PN, 1, new PauseMenu2Event(3, -0.55f, false));
+			ItemManager::INSTANCE()->addItem(ItemManager::PYB, 1, new PauseMenu2EndEvent(4, -0.65f, false));
+		}else if(pauseStatus & 8) {
+			pauseStatus &= ~24;
+			if(pauseStatus == 1) ItemManager::INSTANCE()->addItem(ItemManager::P1, 1, new PauseMenuEvent(0, -0.45f, false));
+			else ItemManager::INSTANCE()->addItem(ItemManager::P1B, 1, new PauseMenuEndEvent(0, -0.45f, false));
+			if(pauseStatus == 2) ItemManager::INSTANCE()->addItem(ItemManager::P2, 1, new PauseMenuEvent(1, -0.55f, false));
+			else ItemManager::INSTANCE()->addItem(ItemManager::P2B, 1, new PauseMenuEndEvent(1, -0.55f, false));
+			if(pauseStatus == 4) ItemManager::INSTANCE()->addItem(ItemManager::P3, 1, new PauseMenuEvent(2, -0.65f, false));
+			else ItemManager::INSTANCE()->addItem(ItemManager::P3B, 1, new PauseMenuEndEvent(2, -0.65f, false));
+		}
+		return;
+	}
 	status |= 32;
 }
 
@@ -138,6 +230,7 @@ void OpenGLGame::initializeGL()
 	ballLine = 0;
 	bulletTime = 0;
 	activeItems = false;
+	ballRotate = 0;
 	//安装渲染器
 	ItemManager::INSTANCE()->installRender(ItemManager::BACKGROUND, new BackGroundRender(TextureManager::BACKGROUND));
 	ItemManager::INSTANCE()->installRender(ItemManager::STAR_BACKGROUND, new StarBackGroundRender(TextureManager::STAR_BACKGROUND));
@@ -168,6 +261,19 @@ void OpenGLGame::initializeGL()
 	ItemManager::INSTANCE()->installRender(ItemManager::W7, new WhiteNumberRender(TextureManager::W7));
 	ItemManager::INSTANCE()->installRender(ItemManager::W8, new WhiteNumberRender(TextureManager::W8));
 	ItemManager::INSTANCE()->installRender(ItemManager::W9, new WhiteNumberRender(TextureManager::W9));
+	ItemManager::INSTANCE()->installRender(ItemManager::W9, new WhiteNumberRender(TextureManager::W9));
+	ItemManager::INSTANCE()->installRender(ItemManager::P1, new PauseMenuRender(TextureManager::P1));
+	ItemManager::INSTANCE()->installRender(ItemManager::P2, new PauseMenuRender(TextureManager::P2));
+	ItemManager::INSTANCE()->installRender(ItemManager::P3, new PauseMenuRender(TextureManager::P3));
+	ItemManager::INSTANCE()->installRender(ItemManager::P1B, new PauseMenuRender(TextureManager::P1B));
+	ItemManager::INSTANCE()->installRender(ItemManager::P2B, new PauseMenuRender(TextureManager::P2B));
+	ItemManager::INSTANCE()->installRender(ItemManager::P3B, new PauseMenuRender(TextureManager::P3B));
+	ItemManager::INSTANCE()->installRender(ItemManager::P3B, new PauseMenuRender(TextureManager::P3B));
+	ItemManager::INSTANCE()->installRender(ItemManager::PS, new PauseMenuRender(TextureManager::PS));
+	ItemManager::INSTANCE()->installRender(ItemManager::PY, new PauseMenuRender(TextureManager::PY));
+	ItemManager::INSTANCE()->installRender(ItemManager::PN, new PauseMenuRender(TextureManager::PN));
+	ItemManager::INSTANCE()->installRender(ItemManager::PYB, new PauseMenuRender(TextureManager::PYB));
+	ItemManager::INSTANCE()->installRender(ItemManager::PNB, new PauseMenuRender(TextureManager::PNB));
 
 	//注册事件
 	ItemManager::INSTANCE()->addItem(ItemManager::BACKGROUND, 1, new BackGroundEvent(-26.0));
@@ -193,6 +299,7 @@ void OpenGLGame::resizeGL(int w, int h)
 void OpenGLGame::paintGL()
 {
 	glClear( GL_COLOR_BUFFER_BIT);
+	dealSomeThing();
 
 	if(!pauseLock) {
 		if(rand() % 10 == 0) ItemManager::INSTANCE()->addItem(ItemManager::POINT, 1, new PointEvent(sin(rand()), 1.0f));
@@ -462,4 +569,9 @@ void OpenGLGame::drawBullets()
 		}
 	}
 	if(bulletTime == 5) bulletTime = 0;
+}
+
+void OpenGLGame::dealSomeThing()
+{
+	if(pauseStatus < 0) ++pauseStatus;
 }

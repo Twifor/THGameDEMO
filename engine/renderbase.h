@@ -252,4 +252,11 @@ public:
 	explicit WhiteNumberRender(TextureManager::TextureType type, QObject *parent = nullptr);
 };
 
+class PauseMenuRender : public TranslateAlphaRender2D {
+	Q_OBJECT
+public:
+	explicit PauseMenuRender(TextureManager::TextureType type, QObject *parent = nullptr);
+	void render() override;
+};
+
 #endif // RENDERBASE_H

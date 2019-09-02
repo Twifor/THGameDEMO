@@ -150,15 +150,17 @@ int GameWidget::getLevel()
 void GameWidget::quit()
 {
 	if(status == MAIN) {
+		if(mainOpenGLGame->pauseStatus < 0) return;
 		MusicFactory::getInstance()->playPause();
 		MusicFactory::getInstance()->quickPause();
 		mainOpenGLGame->pause();
-
 		status = PAUSE;
 	}else {
-		MusicFactory::getInstance()->continuePlay();
-		mainOpenGLGame->endPause();
-		status = MAIN;
+		if(mainOpenGLGame->pauseStatus <= 4) {
+			MusicFactory::getInstance()->continuePlay();
+			mainOpenGLGame->endPause();
+			status = MAIN;
+		}else mainOpenGLGame->endPause();
 	}
 }
 

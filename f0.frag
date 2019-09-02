@@ -6,7 +6,7 @@ uniform bool isBlur;
 
 vec4 blur(vec2 _uv) {
     float disp = 0.;
-    float intensity = .2;
+    float intensity = .8;
     const int passes = 6;
     vec4 c1 = vec4(0.0);
     disp = intensity*(0.5-distance(0.5, .1));
@@ -26,6 +26,6 @@ vec4 blur(vec2 _uv) {
 
 void main()
 {
-    FragColor = texture(mainTexture, TexCoord);
     if(isBlur)FragColor = blur(TexCoord);
+    else FragColor = texture(mainTexture, TexCoord);
 }

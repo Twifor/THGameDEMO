@@ -7,7 +7,7 @@
 #include <QQueue>
 #include "renderbase.h"
 
-#define ITEM_NUMBER 29
+#define ITEM_NUMBER 40
 
 struct ItemData;
 struct TreeData;
@@ -47,6 +47,17 @@ public:
 		W7,
 		W8,
 		W9,
+		P1,
+		P2,
+		P3,
+		P1B,
+		P2B,
+		P3B,
+		PS,
+		PY,
+		PN,
+		PYB,
+		PNB
 	};
 	void addItem(ItemType type, int depth, ItemDataEventBase *base);
 	void addNewItem(ItemType type, int depth, ItemDataEventBase *base);

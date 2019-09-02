@@ -26,6 +26,7 @@ public:
 	int slowEffectTimeLine;
 	int ballTimeLine, bulletTime;
 	bool activeItems;//激活自动吸取道具
+	int pauseStatus;
 
 signals:
 
@@ -54,6 +55,7 @@ protected:
 	void drawBalls();
 	void drawLines();
 	void drawBullets();
+	void dealSomeThing();
 	float backGroundMax, treeLMax, treeRMax;
 	float ballLine;
 	bool pauseLock;
