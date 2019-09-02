@@ -28,6 +28,7 @@ TextureManager *TextureManager::INSTANCE()
 void TextureManager::destroy()
 {
 	if(in != nullptr) delete in;
+	in = nullptr;
 }
 
 TextureManager *TextureManager::in = nullptr;

@@ -158,6 +158,8 @@ ItemManager *ItemManager::in = nullptr;
 
 ItemManager::~ItemManager()//别忘了删event
 {
+	ShaderManager::INSTANCE()->destory();
+	TextureManager::INSTANCE()->destroy();
 	DFS_delete1(typeSplayTree->getRoot());
 	for(int i = 0; i < ITEM_NUMBER; i++) delete mainSplayTree[i];
 	for(int i = 0; i < ITEM_NUMBER; i++) delete render[i];
@@ -215,6 +217,7 @@ ItemManager *ItemManager::INSTANCE()
 void ItemManager::destroy()
 {
 	delete in;
+	in = nullptr;
 }
 
 void ItemManager::setDiv(float d)

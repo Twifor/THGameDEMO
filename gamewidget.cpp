@@ -10,8 +10,8 @@ GameWidget* GameWidget::Instance = nullptr;
 GameWidget::GameWidget(QWidget *parent) : QOpenGLWidget (parent)
 {
 	setAttribute(Qt::WA_NativeWindow);
-	totAlpha = 0.0f;
 	pixmap = new QPixmap[30];
+	totAlpha = 0.0f;
 	life = 2;
 	spellcard = 2;
 	score = 0;
@@ -162,6 +162,34 @@ void GameWidget::quit()
 			status = MAIN;
 		}else mainOpenGLGame->endPause();
 	}
+}
+
+void GameWidget::reset()
+{
+	timer.stop();
+	totAlpha = 0.0f;
+	life = 2;
+	spellcard = 2;
+	score = 0;
+	power = 0;
+	point = 0;
+	graze = 0;
+	level = 0;
+//	MusicFactory::getInstance()->quit();
+	numberOfFrames = 0;
+	ans = 60;
+	QueryPerformanceCounter(&nBeginTime);
+	status = INIT;
+
+	delete mainOpenGLGame;
+	MusicFactory::getInstance()->quit();
+	MusicFactory::getInstance()->play(1);
+
+	mainOpenGLGame = new OpenGLGame(this);
+	mainOpenGLGame->setGeometry(41, 22, 487, 557);
+	mainOpenGLGame->show();
+	timer.start(16);
+	Instance = this;
 }
 
 void GameWidget::initializeGL()

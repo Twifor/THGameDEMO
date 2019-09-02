@@ -10,6 +10,11 @@ OpenGLGame::OpenGLGame(QWidget *parent) : QOpenGLWidget(parent)
 	pauseStatus = 0;
 }
 
+OpenGLGame::~OpenGLGame()
+{
+	ItemManager::INSTANCE()->destroy();
+}
+
 void OpenGLGame::pause()
 {
 	pauseLock = true;
@@ -192,6 +197,11 @@ void OpenGLGame::startZ()
 			else ItemManager::INSTANCE()->addItem(ItemManager::P2B, 1, new PauseMenuEndEvent(1, -0.55f, false));
 			if(pauseStatus == 4) ItemManager::INSTANCE()->addItem(ItemManager::P3, 1, new PauseMenuEvent(2, -0.65f, false));
 			else ItemManager::INSTANCE()->addItem(ItemManager::P3B, 1, new PauseMenuEndEvent(2, -0.65f, false));
+		}else if(pauseStatus & 16) {
+			pauseStatus &= ~24;
+			if(pauseStatus == 2) QTimer::singleShot(200, [&](){
+					GameWidget::Instance->reset();
+				});
 		}
 		return;
 	}

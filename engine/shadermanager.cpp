@@ -44,6 +44,7 @@ ShaderManager *ShaderManager::INSTANCE()
 void ShaderManager::destory()
 {
 	if(in != nullptr) delete in;
+	in = nullptr;
 }
 
 ShaderManager* ShaderManager::in = nullptr;

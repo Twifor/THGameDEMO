@@ -44,6 +44,7 @@ public:
 	void addLife();
 	int getLevel();
 	void quit();
+	void reset();
 
 public slots:
 

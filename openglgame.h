@@ -11,6 +11,7 @@ class OpenGLGame : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
 	Q_OBJECT
 public:
 	explicit OpenGLGame(QWidget *parent = nullptr);
+	~OpenGLGame();
 	void pause();
 	void endPause();
 	bool isPause();
