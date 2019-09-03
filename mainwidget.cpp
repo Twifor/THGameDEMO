@@ -23,18 +23,35 @@ void MainWidget::gameStart()//开始游戏函数
 {
 	qDebug() << "Game Start";
 	status = GameStart;//修改状态机状态
-	gameWidget = new GameWidget(this);
-	gameWidget->setGeometry(0, 0, 800, 600);
-
 	gameWidget->show();
 
 	MusicFactory::getInstance()->quit();//放bgm
 	GameRule::bgmVolume = GameRule::defaultBgmVolume;
 	GameRule::update();
 	MusicFactory::getInstance()->play(1);
-	QTimer::singleShot(1000, [&](){
-		delete menuWidget;//释放菜单界面对象
-	});
+	menuWidget->deleteLater();
+}
+
+void MainWidget::preGame()
+{
+	gameWidget = new GameWidget(this);
+	connect(gameWidget, &GameWidget::done, this, &MainWidget::returnToMenu);
+
+	gameWidget->setGeometry(0, 0, 800, 600);
+	gameWidget->hide();
+}
+
+void MainWidget::returnToMenu()
+{
+	qDebug() << "Return to menu";
+	status = MENU;
+	menuWidget = new MenuWidget(this);
+	connect(menuWidget, &MenuWidget::close, this, &MainWidget::close);
+	connect(menuWidget, &MenuWidget::start, this, &MainWidget::gameStart);
+	menuWidget->setGeometry(0, 0, 800, 600);
+	menuWidget->show();
+
+	gameWidget->deleteLater();
 }
 
 MainWidget *MainWidget::Instance = nullptr;
@@ -67,11 +84,9 @@ MainWidget::MainWidget(QWidget *parent)
 	connect(loadingThread, &LoadingThread::done, this, &MainWidget::stopLoading);
 	connect(loadingWidget, &LoadingOpenGLWidget::done, [ = ](){
 		loadingWidget->stop();
-		QTimer::singleShot(0, [ = ](){
-			delete loadingWidget;
-			menuWidget->show();
-			status = MENU;
-		});
+		loadingWidget->deleteLater();
+		menuWidget->show();
+		status = MENU;
 	});
 
 	status = START_LOADING;
@@ -106,7 +121,7 @@ void MainWidget::keyPressEvent(QKeyEvent *event)
 		else if(status == GameStart && !event->isAutoRepeat()) gameWidget->startZ();
 	}else if(event->key() == Qt::Key_Escape) {
 		if(status == MENU && !event->isAutoRepeat()) menuWidget->quitWindow();
-		else if(status==GameStart&& !event->isAutoRepeat())gameWidget->quit();
+		else if(status == GameStart && !event->isAutoRepeat()) gameWidget->quit();
 	}else if(event->key() == Qt::Key_Left) {
 		if(status == MENU && !event->isAutoRepeat()) menuWidget->left();
 		else if(status == GameStart && !event->isAutoRepeat()) gameWidget->startLeft();

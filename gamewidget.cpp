@@ -37,6 +37,7 @@ GameWidget::~GameWidget()
 	delete bg_VBO;
 	delete bg_VAO;
 	delete bg_texture;
+	delete menu_texture;
 	delete bg_vs;
 	delete bg_program;
 	delete []pixmap;
@@ -48,6 +49,7 @@ GameWidget::~GameWidget()
 	delete matrix;
 
 	delete mainOpenGLGame;
+
 }
 
 void GameWidget::startUp()
@@ -192,6 +194,91 @@ void GameWidget::reset()
 	Instance = this;
 }
 
+void GameWidget::preGame()
+{
+	QImage image;
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(PLAYER_PNG))->loadData(image);
+	pixmap[0].convertFromImage(image);
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(SPELLCARD_PNG))->loadData(image);
+	pixmap[1].convertFromImage(image);
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(REDSTAR_PNG))->loadData(image);
+	pixmap[2].convertFromImage(image);
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(BLUESTAR_PNG))->loadData(image);
+	pixmap[3].convertFromImage(image);
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(LINGLI_PNG))->loadData(image);
+	pixmap[4].convertFromImage(image);
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(DEDIAN_PNG))->loadData(image);
+	pixmap[5].convertFromImage(image);
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(GRAZE_PNG))->loadData(image);
+	pixmap[6].convertFromImage(image);
+
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(RED0_PNG))->loadData(image);
+	pixmap[7].convertFromImage(image);
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(RED1_PNG))->loadData(image);
+	pixmap[8].convertFromImage(image);
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(RED2_PNG))->loadData(image);
+	pixmap[9].convertFromImage(image);
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(RED3_PNG))->loadData(image);
+	pixmap[10].convertFromImage(image);
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(RED4_PNG))->loadData(image);
+	pixmap[11].convertFromImage(image);
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(RED5_PNG))->loadData(image);
+	pixmap[12].convertFromImage(image);
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(RED6_PNG))->loadData(image);
+	pixmap[13].convertFromImage(image);
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(RED7_PNG))->loadData(image);
+	pixmap[14].convertFromImage(image);
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(RED8_PNG))->loadData(image);
+	pixmap[15].convertFromImage(image);
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(RED9_PNG))->loadData(image);
+	pixmap[16].convertFromImage(image);
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(REDPOINT_PNG))->loadData(image);
+	pixmap[17].convertFromImage(image);
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(REDXIE_PNG))->loadData(image);
+	pixmap[18].convertFromImage(image);
+
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(BLUE0_PNG))->loadData(image);
+	pixmap[19].convertFromImage(image);
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(BLUE1_PNG))->loadData(image);
+	pixmap[20].convertFromImage(image);
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(BLUE2_PNG))->loadData(image);
+	pixmap[21].convertFromImage(image);
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(BLUE3_PNG))->loadData(image);
+	pixmap[22].convertFromImage(image);
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(BLUE4_PNG))->loadData(image);
+	pixmap[23].convertFromImage(image);
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(BLUE5_PNG))->loadData(image);
+	pixmap[24].convertFromImage(image);
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(BLUE6_PNG))->loadData(image);
+	pixmap[25].convertFromImage(image);
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(BLUE7_PNG))->loadData(image);
+	pixmap[26].convertFromImage(image);
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(BLUE8_PNG))->loadData(image);
+	pixmap[27].convertFromImage(image);
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(BLUE9_PNG))->loadData(image);
+	pixmap[28].convertFromImage(image);
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(SCORE_PNG))->loadData(image);
+	pixmap[29].convertFromImage(image);
+}
+
+void GameWidget::back()
+{
+	status = BACK;
+	loadingAlpha = 1.0f;
+	backThread = new BackThread;
+	connect(backThread, &QThread::finished, [&](){
+		qDebug() << "Back loading successfully";
+		backThread->deleteLater();
+		status = BACK2;
+	});
+	backThread->start();
+}
+
+float GameWidget::getAlpha()
+{
+	return totAlpha;
+}
+
 void GameWidget::initializeGL()
 {
 	initializeOpenGLFunctions();//全是套路
@@ -225,10 +312,13 @@ void GameWidget::initializeGL()
 	bg_IBO->allocate(indices, sizeof(indices));
 
 	QImage image(":/std/menubg.png");
+	menu_texture = new QOpenGLTexture(image.mirrored(false, true));
+
 	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(GAME_BG_PNG))->loadData(image);
 	image.scaled(800, 600);
 	bg_texture = new QOpenGLTexture(image.mirrored(false, true));
 	bg_texture->bind();
+
 
 	bg_vs = new QOpenGLShader(QOpenGLShader::Vertex);
 	bg_vs->compileSourceCode("#version 330 core\n"
@@ -355,68 +445,6 @@ void GameWidget::initializeGL()
 	bluestar_texture->release();
 	redstar_texture->release();
 
-	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(PLAYER_PNG))->loadData(image);
-	pixmap[0].convertFromImage(image);
-	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(SPELLCARD_PNG))->loadData(image);
-	pixmap[1].convertFromImage(image);
-	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(REDSTAR_PNG))->loadData(image);
-	pixmap[2].convertFromImage(image);
-	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(BLUESTAR_PNG))->loadData(image);
-	pixmap[3].convertFromImage(image);
-	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(LINGLI_PNG))->loadData(image);
-	pixmap[4].convertFromImage(image);
-	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(DEDIAN_PNG))->loadData(image);
-	pixmap[5].convertFromImage(image);
-	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(GRAZE_PNG))->loadData(image);
-	pixmap[6].convertFromImage(image);
-
-	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(RED0_PNG))->loadData(image);
-	pixmap[7].convertFromImage(image);
-	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(RED1_PNG))->loadData(image);
-	pixmap[8].convertFromImage(image);
-	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(RED2_PNG))->loadData(image);
-	pixmap[9].convertFromImage(image);
-	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(RED3_PNG))->loadData(image);
-	pixmap[10].convertFromImage(image);
-	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(RED4_PNG))->loadData(image);
-	pixmap[11].convertFromImage(image);
-	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(RED5_PNG))->loadData(image);
-	pixmap[12].convertFromImage(image);
-	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(RED6_PNG))->loadData(image);
-	pixmap[13].convertFromImage(image);
-	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(RED7_PNG))->loadData(image);
-	pixmap[14].convertFromImage(image);
-	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(RED8_PNG))->loadData(image);
-	pixmap[15].convertFromImage(image);
-	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(RED9_PNG))->loadData(image);
-	pixmap[16].convertFromImage(image);
-	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(REDPOINT_PNG))->loadData(image);
-	pixmap[17].convertFromImage(image);
-	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(REDXIE_PNG))->loadData(image);
-	pixmap[18].convertFromImage(image);
-
-	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(BLUE0_PNG))->loadData(image);
-	pixmap[19].convertFromImage(image);
-	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(BLUE1_PNG))->loadData(image);
-	pixmap[20].convertFromImage(image);
-	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(BLUE2_PNG))->loadData(image);
-	pixmap[21].convertFromImage(image);
-	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(BLUE3_PNG))->loadData(image);
-	pixmap[22].convertFromImage(image);
-	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(BLUE4_PNG))->loadData(image);
-	pixmap[23].convertFromImage(image);
-	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(BLUE5_PNG))->loadData(image);
-	pixmap[24].convertFromImage(image);
-	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(BLUE6_PNG))->loadData(image);
-	pixmap[25].convertFromImage(image);
-	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(BLUE7_PNG))->loadData(image);
-	pixmap[26].convertFromImage(image);
-	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(BLUE8_PNG))->loadData(image);
-	pixmap[27].convertFromImage(image);
-	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(BLUE9_PNG))->loadData(image);
-	pixmap[28].convertFromImage(image);
-	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(SCORE_PNG))->loadData(image);
-	pixmap[29].convertFromImage(image);
 
 	timer.setInterval(16);
 	timer.start();
@@ -432,6 +460,17 @@ void GameWidget::resizeGL(int w, int h)
 
 void GameWidget::paintGL()//这里绘制游戏界面
 {
+	if(status == BACK2) {
+		if(totAlpha >= 1.0f) {
+			MusicFactory::getInstance()->quit();
+			MusicFactory::getInstance()->play(0);
+		}
+		if(totAlpha <= 0.0f){
+			timer.stop();
+			emit done();
+		}
+		else totAlpha -= 0.005f;
+	}
 	QueryPerformanceFrequency(&nFrequency);
 	if(status == INIT) {
 		if(totAlpha >= 1.0f) {
@@ -450,6 +489,7 @@ void GameWidget::paintGL()//这里绘制游戏界面
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	bg_texture->bind(0);
+	if(status == BACK2) menu_texture->bind(1);
 	bg_VAO->bind();
 	bg_program->bind();
 	bg_program->setUniformValue("alpha", totAlpha, 0.0f);
@@ -523,16 +563,35 @@ void GameWidget::paintGL()//这里绘制游戏界面
 	if(s == 0) painter.drawPixmap(pp, 210, 24, 28, pixmap[19]);
 	else while(s) painter.drawPixmap(pp, 210, 24, 28, pixmap[19 + s % 10]), s /= 10, pp -= 13;
 
-	QueryPerformanceCounter(&nEndTime);
-	QPen pen;
-	pen.setColor(Qt::white);
-	painter.setPen(pen);
-	++numberOfFrames;
-	time = (double)(nEndTime.QuadPart - nBeginTime.QuadPart) / (double)nFrequency.QuadPart;
-	if(time > 1) {
-		ans = numberOfFrames;
-		nBeginTime = nEndTime;
-		numberOfFrames = 0;
+	if(status != BACK && status != BACK2) {
+		QueryPerformanceCounter(&nEndTime);
+		QPen pen;
+		pen.setColor(Qt::white);
+		painter.setPen(pen);
+		++numberOfFrames;
+		time = (double)(nEndTime.QuadPart - nBeginTime.QuadPart) / (double)nFrequency.QuadPart;
+		if(time > 1) {
+			ans = numberOfFrames;
+			nBeginTime = nEndTime;
+			numberOfFrames = 0;
+		}
+		painter.drawText(720, 595, QString::number(ans, 'f', 1) + QString("fps"));
+	}else if(status == BACK) {
+		loadingAlpha += 0.02f;
+		if(fabs(loadingAlpha - 2.0f) <= 1e-5) loadingAlpha = 0.0f;
+		if(loadingAlpha >= 1.0f) painter.setOpacity(((2.0f - loadingAlpha) / 1.25f + 0.2f));
+		else painter.setOpacity((loadingAlpha / 1.25f + 0.2f));
+		painter.drawPixmap(650, 520, 120, 60, QPixmap(":/std/loading.png"));
 	}
-	painter.drawText(720, 595, QString::number(ans, 'f', 1) + QString("fps"));
+}
+
+BackThread::BackThread(QObject *parent) : QThread (parent)
+{
+
+}
+
+void BackThread::run()
+{
+	msleep(1000);
+	GameResource::getInstance()->changeStatus(GameResource::MENU);
 }

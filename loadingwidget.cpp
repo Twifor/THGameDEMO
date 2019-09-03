@@ -346,7 +346,7 @@ void Star::draw()
 		}
 	}else{
 		alpha -= sp;
-		if(alpha <= 0.0) delete this;
+		if(alpha <= 0.0) this->deleteLater();
 	}
 }
 

@@ -21,6 +21,8 @@ class MainWidget : public QWidget//主控件，负责与用户交互，并向各
 public slots:
 	void stopLoading();
 	void gameStart();
+	void preGame();
+	void returnToMenu();
 
 public:
 	MainWidget(QWidget *parent = 0);

@@ -3,15 +3,19 @@
 #include "gamewidget.h"
 #include "musicfactory.h"
 
+#include <QGraphicsOpacityEffect>
+
 OpenGLGame::OpenGLGame(QWidget *parent) : QOpenGLWidget(parent)
 {
 	Instance = this;
 	pauseLock = false;
 	pauseStatus = 0;
+	setAttribute(Qt::WA_AlwaysStackOnTop);
 }
 
 OpenGLGame::~OpenGLGame()
 {
+	makeCurrent();
 	ItemManager::INSTANCE()->destroy();
 }
 
@@ -199,9 +203,14 @@ void OpenGLGame::startZ()
 			else ItemManager::INSTANCE()->addItem(ItemManager::P3B, 1, new PauseMenuEndEvent(2, -0.65f, false));
 		}else if(pauseStatus & 16) {
 			pauseStatus &= ~24;
-			if(pauseStatus == 2) QTimer::singleShot(200, [&](){
+			if(pauseStatus == 2) QTimer::singleShot(800, [&](){
 					GameWidget::Instance->reset();
 				});
+			else {
+				QTimer::singleShot(0, [&](){
+					GameWidget::Instance->back();
+				});
+			}
 		}
 		return;
 	}

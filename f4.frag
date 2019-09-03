@@ -3,6 +3,7 @@ in vec2 TexCoord;
 in float A;
 
 uniform sampler2D mainTexture;
+uniform float totAlpha;
 
 out vec4 FragColor;
 uniform bool isBlur;
@@ -29,4 +30,5 @@ void main(){
     if(isBlur)FragColor = blur(TexCoord);
     else FragColor = texture(mainTexture,TexCoord);
     FragColor.a *= A;
+    FragColor.a *= totAlpha;
 }

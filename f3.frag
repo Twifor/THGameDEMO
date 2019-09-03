@@ -5,6 +5,7 @@ in float lock;
 uniform sampler2D mainTexture;
 uniform vec2 alpha;
 uniform bool isBlur;
+uniform float totAlpha;
 vec4 blur(vec2 _uv) {
     float disp = 0.;
     float intensity = .8;
@@ -31,4 +32,5 @@ void main(){
     else FragColor = texture(mainTexture,TexCoord);
     FragColor.a = FragColor.a * alpha.x;
     if(lock < 0.0)FragColor.a = 0;
+    FragColor.a *= totAlpha;
 }

@@ -521,6 +521,7 @@ void MenuWidget:: paintGL()
 			GameRule::update();
 		}else{
 			if(thread == nullptr) {
+				MainWidget::Instance->preGame();
 				thread = new MainGameLoadingThread;
 				connect(thread, &MainGameLoadingThread::finished, this, &MenuWidget::dealWithLoading);
 				thread->start();
@@ -1145,6 +1146,7 @@ MainGameLoadingThread::MainGameLoadingThread(QObject *parent)
 
 void MainGameLoadingThread::run()
 {
-	msleep(1000);//这里用来加载游戏资源
+	msleep(800);//这里用来加载游戏资源
 	GameResource::getInstance()->changeStatus(GameResource::GAME);
+	GameWidget::Instance->preGame();
 }

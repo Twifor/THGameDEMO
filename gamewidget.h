@@ -12,6 +12,17 @@
 #include <QTimer>
 #include <QMatrix4x4>
 #include "openglgame.h"
+#include <QThread>
+
+class BackThread : public QThread {
+	Q_OBJECT
+public:
+	BackThread(QObject *parent = nullptr);
+
+	// QThread interface
+protected:
+	void run() override;
+};
 
 class GameWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core//游戏界面核心类
 {
@@ -21,6 +32,8 @@ public:
 		INIT,
 		MAIN,
 		PAUSE,
+		BACK,
+		BACK2
 	};
 	explicit GameWidget(QWidget *parent = nullptr);
 	~GameWidget();
@@ -45,8 +58,13 @@ public:
 	int getLevel();
 	void quit();
 	void reset();
+	void preGame();
+	void back();
+	float getAlpha();
 
 public slots:
+signals:
+	void done();
 
 protected:
 	void initializeGL() override;
@@ -60,9 +78,9 @@ private:
 	QOpenGLVertexArrayObject *bg_VAO, *ma_VAO;
 	QOpenGLBuffer *bg_IBO, *bg_VBO, *ma_VBO;
 	QOpenGLShader *bg_vs, *bg_fs, *ma_vs, *ma_fs;
-	QOpenGLTexture *bg_texture, *bluestar_texture, *redstar_texture;
+	QOpenGLTexture *bg_texture, *bluestar_texture, *redstar_texture, *menu_texture;
 	QOpenGLShaderProgram *bg_program, *ma_program;
-	float totAlpha;
+	float totAlpha, loadingAlpha;
 	QTimer timer;//控制游戏循环
 	QPixmap *pixmap;//存放游戏元素贴图
 	QMatrix4x4 *matrix;
@@ -73,6 +91,7 @@ private:
 
 	LARGE_INTEGER nEndTime, nBeginTime, nFrequency;
 	double time;
+	BackThread *backThread;
 };
 
 #endif // GAMEWIDGET_H
