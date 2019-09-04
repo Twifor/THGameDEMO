@@ -30,7 +30,6 @@ LoadingOpenGLWidget::~LoadingOpenGLWidget()
 	delete texture1;
 	delete texture2;
 	delete VAO;
-	delete transform;
 
 	delete map;
 

@@ -86,7 +86,6 @@ private:
 	QOpenGLShaderProgram *program;
 	QOpenGLTexture *texture1, *texture2;
 	QOpenGLVertexArrayObject *VAO;
-	QMatrix4x4 *transform;
 	QMap<int, Star::Data> *map;
 	double alpha, totAlpha;
 	bool flag, isOK;
