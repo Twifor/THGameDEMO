@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
 
 	if(GameRule::isFullScreen) changeWindow();
 	MainWidget w;
-	if(GameRule::isFullScreen) w.showFullScreen();
+	if(GameRule::isFullScreen)w.showFullScreen();
 	else w.show();
 
 	return a.exec();

@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QOpenGLTexture>
 #include <QVector>
-#define TEXTURE_NUMBER 62
+#define TEXTURE_NUMBER 64
 
 class TextureManager : public QObject
 {
@@ -73,7 +73,9 @@ public:
 		PY,
 		PN,
 		PYB,
-		PNB
+		PNB,
+		SPP,
+		MASTER
 	};
 	QOpenGLTexture *getTexture(TextureType type);
 	void setTexture(TextureType type, QOpenGLTexture *texture);

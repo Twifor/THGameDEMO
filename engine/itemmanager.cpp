@@ -152,6 +152,11 @@ ItemManager::ItemManager(QObject *parent) : QObject(parent)
 	TextureManager::INSTANCE()->setTexture(TextureManager::PYB, new QOpenGLTexture(image.mirrored(false, true)));
 	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(PAUSE_NO_B_PNG))->loadData(image);
 	TextureManager::INSTANCE()->setTexture(TextureManager::PNB, new QOpenGLTexture(image.mirrored(false, true)));
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(P2_PNG))->loadData(image);
+	TextureManager::INSTANCE()->setTexture(TextureManager::SPP, new QOpenGLTexture(image.mirrored(false, true)));
+	static_cast<GameResourcePNGData*>(GameResource::getInstance()->getData(MASTER_PNG))->loadData(image);
+	TextureManager::INSTANCE()->setTexture(TextureManager::MASTER, new QOpenGLTexture(image.mirrored(false, true)));
+
 }
 
 ItemManager *ItemManager::in = nullptr;

@@ -128,6 +128,8 @@ void MainWidget::keyPressEvent(QKeyEvent *event)
 	}else if(event->key() == Qt::Key_Right) {
 		if(status == MENU && !event->isAutoRepeat()) menuWidget->right();
 		else if(status == GameStart && !event->isAutoRepeat()) gameWidget->startRight();
+	}else if(event->key() == Qt::Key_X) {
+		if(status == GameStart && !event->isAutoRepeat())gameWidget->startX();
 	}
 }
 

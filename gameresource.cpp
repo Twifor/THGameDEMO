@@ -92,8 +92,9 @@ void GameResource::update()//这里需要修改
 	}else if(status == GAME) {
 		for(int i = 0; i < RESOURCE_NUM; i++) {
 			if(i <= 31 || (i >= 35 && i < 47)) pop(static_cast<ResourceID>(i)); //释放之前的资源
-			else if(i >= 47 && i <= 139) load(static_cast<ResourceID>(i)); //加载游戏所需的资源文件
+			else if(i >= 47 && i <= 140) load(static_cast<ResourceID>(i)); //加载游戏所需的资源文件
 		}
+		load(static_cast<ResourceID>(1));
 	}
 }
 

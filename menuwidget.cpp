@@ -386,10 +386,10 @@ void MenuWidget:: paintGL()
 {
 	QPainter painter(this);
 	painter.beginNativePainting();
-	if(map->find(now) != map->end() && (status == MAIN || status == CONFIG)) loadParticles(now); //加载粒子
+//	if(map->find(now) != map->end() && (status == MAIN || status == CONFIG)) loadParticles(now); //加载粒子
 	++now;
 	now %= 30;
-	if(!lock && now % 5 == 0 && status == MAIN) newBlueParticle();
+	if(!lock && now % 4 == 0 && status == MAIN) newBlueParticle();
 
 	glClear(GL_COLOR_BUFFER_BIT);
 	glEnable(GL_BLEND);

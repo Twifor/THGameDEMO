@@ -7,7 +7,7 @@
 #include <QQueue>
 #include "renderbase.h"
 
-#define ITEM_NUMBER 40
+#define ITEM_NUMBER 42
 
 struct ItemData;
 struct TreeData;
@@ -57,7 +57,9 @@ public:
 		PY,
 		PN,
 		PYB,
-		PNB
+		PNB,
+		SPP,
+		MASTER
 	};
 	void addItem(ItemType type, int depth, ItemDataEventBase *base);
 	void addNewItem(ItemType type, int depth, ItemDataEventBase *base);
@@ -102,8 +104,8 @@ struct TreeData {
 	ItemDataEventBase *event;
 	TreeData(ItemManager::ItemType p, int dp, ItemDataEventBase *b) : type(p), depth(dp), event(b){
 	}
-	bool operator<(const TreeData&s){
-		return depth < s.depth;
+	bool operator<=(const TreeData&s){
+		return depth <= s.depth;
 	}
 };
 

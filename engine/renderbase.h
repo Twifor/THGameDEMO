@@ -17,6 +17,7 @@ public:
 	explicit RenderBase(QObject *parent = nullptr);
 	virtual void init() = 0;
 	virtual void render() = 0;
+	virtual void offset(float &x, float &y);
 
 signals:
 
@@ -257,6 +258,19 @@ class PauseMenuRender : public TranslateAlphaRender2D {
 public:
 	explicit PauseMenuRender(TextureManager::TextureType type, QObject *parent = nullptr);
 	void render() override;
+};
+
+class SPPRender : public TranslateRender2D {
+	Q_OBJECT
+public:
+	explicit SPPRender(TextureManager::TextureType type, QObject * parent = nullptr);
+};
+
+class MasterRender : public TranslateAlphaRender2D {
+	Q_OBJECT
+public:
+	explicit MasterRender(TextureManager::TextureType type, QObject * parent = nullptr);
+	void render()override;
 };
 
 #endif // RENDERBASE_H

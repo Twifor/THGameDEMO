@@ -5,6 +5,8 @@ in vec2 fog;
 uniform sampler2D mainTexture;
 uniform vec2 alpha;
 uniform bool isBlur;
+uniform bool isBlack;
+
 uniform float totAlpha;
 vec4 blur(vec2 _uv) {
     float disp = 0.;
@@ -32,4 +34,10 @@ void main()
     else FragColor = texture(mainTexture, TexCoord);
     FragColor = mix(FragColor,vec4(0.0,0.0,0.0,0.0),fog.x)*alpha.x;
     FragColor.a *= totAlpha;
+    if(isBlack){
+        FragColor.r = FragColor.r * 0.5f;
+        FragColor.g = FragColor.g * 0.5f;
+        FragColor.b = FragColor.b * 0.5f;
+    }
+
 }

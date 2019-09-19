@@ -499,3 +499,55 @@ bool PauseMenu2EndEvent::update(RenderBase *render)
 		return false;
 	}else return true;
 }
+
+SPPEvent::SPPEvent(float x, float y, QObject *parent) : ItemDataEventBase (parent)
+{
+	this->x = x;
+	this->y = y;
+}
+
+bool SPPEvent::update(RenderBase *render)
+{
+	if(isIn()) return true;
+	float ss = (OpenGLGame::Instance->myPlaneY - y) / (sqrt(dis2()));
+	float cc = (OpenGLGame::Instance->myPlaneX - x) / (sqrt(dis2()));
+	if(!OpenGLGame::Instance->isPause()) {
+		x += 0.01f * cc;
+		y += 0.01f * ss;
+	}
+	static_cast<SPPRender*>(render)->setPos(x, y * ItemManager::INSTANCE()->getDiv(), 0.035f * (dis2() + 0.02) / 0.12f, 0.035f * (dis2() + 0.02) / 0.12f);
+	return false;
+}
+
+bool SPPEvent::isIn()
+{
+	return dis2() <= 0.001f;
+}
+
+double SPPEvent::dis2()
+{
+	return (x - OpenGLGame::Instance->myPlaneX) * (x - OpenGLGame::Instance->myPlaneX) + (y - OpenGLGame::Instance->myPlaneY) * (y - OpenGLGame::Instance->myPlaneY);
+}
+
+MasterEvent::MasterEvent(QObject *parent) : ItemDataEventBase (parent)
+{
+	time = -20;
+}
+
+bool MasterEvent::update(RenderBase *render)
+{
+	if(time <= 0) {
+		if(!OpenGLGame::Instance->isPause()) ++time;
+		if(time < -10) static_cast<MasterRender*>(render)->setPos(OpenGLGame::Instance->myPlaneX, ItemManager::INSTANCE()->getDiv() * (OpenGLGame::Instance->myPlaneY + (time + 20) / 10.0f * 1.4f), (time + 20) / 10.0f * 2.0f, 0.1f, 0.75f);
+		else static_cast<MasterRender*>(render)->setPos(OpenGLGame::Instance->myPlaneX, ItemManager::INSTANCE()->getDiv() * (OpenGLGame::Instance->myPlaneY + 1.4f), 2.0f, 1.21f * (time + 10) / 10.0f, 0.75f);
+		return false;
+	}
+	if(time >= 300) {
+		if(time == 330) return true;
+		static_cast<MasterRender*>(render)->setPos(OpenGLGame::Instance->myPlaneX, ItemManager::INSTANCE()->getDiv() * (OpenGLGame::Instance->myPlaneY + 1.4f), 2.0f, 1.21f, 0.75f * (330 - time) / 30.0f);
+	}else{
+		static_cast<MasterRender*>(render)->setPos(OpenGLGame::Instance->myPlaneX, ItemManager::INSTANCE()->getDiv() * (OpenGLGame::Instance->myPlaneY + 1.4f), 2.0f, 1.21f, 0.75f);
+	}
+	if(!OpenGLGame::Instance->isPause()) ++time;
+	return false;
+}

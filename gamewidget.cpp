@@ -112,6 +112,14 @@ void GameWidget::endZ()
 	mainOpenGLGame->endZ();
 }
 
+void GameWidget::startX()
+{
+	if(mainOpenGLGame->spellCard != 0) return;
+	if(spellcard > 0) --spellcard;
+	else return;
+	mainOpenGLGame->startX();
+}
+
 void GameWidget::addScore(int add)
 {
 	score += add;
@@ -151,8 +159,8 @@ int GameWidget::getLevel()
 
 void GameWidget::quit()
 {
+	if(!mainOpenGLGame->isPauseResponse() || status == BACK || status == BACK2) return; //不能应答，不考虑
 	if(status == MAIN) {
-		if(mainOpenGLGame->pauseStatus < 0) return;
 		MusicFactory::getInstance()->playPause();
 		MusicFactory::getInstance()->quickPause();
 		mainOpenGLGame->pause();
@@ -465,7 +473,7 @@ void GameWidget::paintGL()//这里绘制游戏界面
 			MusicFactory::getInstance()->quit();
 			MusicFactory::getInstance()->play(0);
 		}
-		if(totAlpha <= 0.0f){
+		if(totAlpha <= 0.0f) {
 			timer.stop();
 			emit done();
 		}

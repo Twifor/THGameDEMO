@@ -59,7 +59,7 @@ void MusicFactory::play(int s)
 	now = s;
 	last = 0;
 	if(s == 0) {
-		setBack(101055);
+		setBack(101100);
 		GameResource::getInstance()->load(BGM1_WAV);
 		static_cast<GameResourceWAVData*>(GameResource::getInstance()->getData(BGM1_WAV))->loadData(buffer);
 		player[0]->setMedia(QMediaContent(), buffer);

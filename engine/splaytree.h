@@ -80,10 +80,10 @@ public:
 		}else{
 			SplayNode<T> *cur = root, *next = nullptr;
 			for(;;) {
-				if(p->value < cur->value) next = cur->ch[0];
+				if(p->value <= cur->value) next = cur->ch[0];
 				else next = cur->ch[1];
 				if(next == nullptr) {
-					if(p->value < cur->value) change(cur, p, 0);
+					if(p->value <= cur->value) change(cur, p, 0);
 					else change(cur, p, 1);
 					break;
 				}else cur = next;

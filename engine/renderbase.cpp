@@ -9,6 +9,12 @@ RenderBase::RenderBase(QObject *parent) : QObject(parent)
 	initializeOpenGLFunctions();
 }
 
+void RenderBase::offset(float &x, float &y)
+{
+	x += OpenGLGame::Instance->offsetX;
+	y += OpenGLGame::Instance->offsetY;
+}
+
 TranslateRender2D::TranslateRender2D(TextureManager::TextureType type, QObject *parent) : RenderBase (parent), t(type)
 {
 	VAO = new QOpenGLVertexArrayObject;
@@ -59,7 +65,8 @@ void TranslateRender2D::render()
 	ShaderManager::INSTANCE()->getProgram(0)->setAttributeBuffer(ShaderManager::INSTANCE()->getProgram(0)->attributeLocation("aTexCoord"), GL_FLOAT, 3 * sizeof(float), 2, sizeof(float) * 5);
 	TextureManager::INSTANCE()->getTexture(t)->bind(0);
 	ShaderManager::INSTANCE()->getProgram(0)->setUniformValue("isBlur", OpenGLGame::Instance->isPause());
-	ShaderManager::INSTANCE()->getProgram(0)->setUniformValue("totAlpha",GameWidget::Instance->getAlpha());
+	ShaderManager::INSTANCE()->getProgram(0)->setUniformValue("totAlpha", GameWidget::Instance->getAlpha());
+	ShaderManager::INSTANCE()->getProgram(0)->setUniformValue("isBlack", OpenGLGame::Instance->isBlack);
 
 	VBO->allocate(VBOOP, num * 80);
 	IBO->allocate(IBOOP, num * 24);
@@ -75,6 +82,7 @@ void TranslateRender2D::render()
 
 void TranslateRender2D::setPos(float x, float y, float up, float left)
 {
+	offset(x, y);
 	++num;
 	VBOOP[offsetVBO++] = x - left;
 	VBOOP[offsetVBO++] = y + up;
@@ -172,7 +180,7 @@ void RotateRender2D::render()
 	ShaderManager::INSTANCE()->getProgram(1)->setAttributeBuffer(ShaderManager::INSTANCE()->getProgram(1)->attributeLocation("rotate"), GL_FLOAT, 5 * sizeof(float), 3, sizeof(float) * 8);
 	TextureManager::INSTANCE()->getTexture(t)->bind(0);
 	ShaderManager::INSTANCE()->getProgram(1)->setUniformValue("isBlur", OpenGLGame::Instance->isPause());
-	ShaderManager::INSTANCE()->getProgram(1)->setUniformValue("totAlpha",GameWidget::Instance->getAlpha());
+	ShaderManager::INSTANCE()->getProgram(1)->setUniformValue("totAlpha", GameWidget::Instance->getAlpha());
 
 	VBO->allocate(VBOOP, num * 128);
 	IBO->allocate(IBOOP, num * 24);
@@ -188,6 +196,7 @@ void RotateRender2D::render()
 
 void RotateRender2D::setPos(float x, float y, float up, float left, float angle)
 {
+	offset(x, y);
 	++num;
 
 	VBOOP[offsetVBO++] = -left;
@@ -277,7 +286,8 @@ void BackGroundRender::render()
 	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("div", ItemManager::INSTANCE()->getDiv());
 	TextureManager::INSTANCE()->getTexture(t)->bind(0);
 	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("isBlur", OpenGLGame::Instance->isPause());
-	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("totAlpha",GameWidget::Instance->getAlpha());
+	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("isBlack", OpenGLGame::Instance->isBlack);
+	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("totAlpha", GameWidget::Instance->getAlpha());
 
 	VBO->allocate(VBOOP, num * 80);
 	IBO->allocate(IBOOP, num * 24);
@@ -341,7 +351,8 @@ void StarBackGroundRender::render()
 	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("div", ItemManager::INSTANCE()->getDiv());
 	TextureManager::INSTANCE()->getTexture(t)->bind(0);
 	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("isBlur", OpenGLGame::Instance->isPause());
-	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("totAlpha",GameWidget::Instance->getAlpha());
+	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("isBlack", OpenGLGame::Instance->isBlack);
+	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("totAlpha", GameWidget::Instance->getAlpha());
 
 	VBO->allocate(VBOOP, num * 80);
 	IBO->allocate(IBOOP, num * 24);
@@ -408,7 +419,8 @@ void PlaneRender::render()
 	ShaderManager::INSTANCE()->getProgram(0)->setAttributeBuffer(ShaderManager::INSTANCE()->getProgram(0)->attributeLocation("aTexCoord"), GL_FLOAT, 3 * sizeof(float), 2, sizeof(float) * 5);
 	TextureManager::INSTANCE()->getTexture(t)->bind(0);
 	ShaderManager::INSTANCE()->getProgram(0)->setUniformValue("isBlur", OpenGLGame::Instance->isPause());
-	ShaderManager::INSTANCE()->getProgram(0)->setUniformValue("totAlpha",GameWidget::Instance->getAlpha());
+	ShaderManager::INSTANCE()->getProgram(0)->setUniformValue("totAlpha", GameWidget::Instance->getAlpha());
+	ShaderManager::INSTANCE()->getProgram(0)->setUniformValue("isBlack", OpenGLGame::Instance->isBlack);
 
 	VBO->allocate(VBOOP, num * 80);
 	IBO->allocate(IBOOP, num * 24);
@@ -424,6 +436,7 @@ void PlaneRender::render()
 
 void PlaneRender::setStatus(float x, float y, float up, float left, TextureManager::TextureType type)
 {
+	offset(x, y);
 	++num;
 	VBOOP[offsetVBO++] = x - left;
 	VBOOP[offsetVBO++] = (y + up) * ItemManager::INSTANCE()->getDiv();
@@ -489,10 +502,12 @@ void TreeRender::render()
 	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("div", ItemManager::INSTANCE()->getDiv());
 	TextureManager::INSTANCE()->getTexture(t)->bind(0);
 	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("isBlur", OpenGLGame::Instance->isPause());
-	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("totAlpha",GameWidget::Instance->getAlpha());
+	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("isBlack", OpenGLGame::Instance->isBlack);
+	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("totAlpha", GameWidget::Instance->getAlpha());
 
 	VBO->allocate(VBOOP, num * 80);
 	IBO->allocate(IBOOP, num * 24);
+//	glBlendFunc(GL_ONE, GL_ZERO);
 
 	while(!que.empty()) {
 		float s = que.front();
@@ -505,7 +520,7 @@ void TreeRender::render()
 		matrix.scale(2.8f, 2.8f);
 		camera.setPos(QVector3D(0, 1.5f, 6.0f));
 		camera.setPitch(0);
-		ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("alpha", 1.0f, 0.0f);
+		ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("alpha", 1.3f, 0.0f);
 		ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("projection", pr * camera.getMatrix() * matrix);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	}
@@ -547,10 +562,12 @@ void TreeRender2::render()
 	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("div", ItemManager::INSTANCE()->getDiv());
 	TextureManager::INSTANCE()->getTexture(t)->bind(0);
 	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("isBlur", OpenGLGame::Instance->isPause());
-	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("totAlpha",GameWidget::Instance->getAlpha());
+	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("isBlack", OpenGLGame::Instance->isBlack);
+	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("totAlpha", GameWidget::Instance->getAlpha());
 
 	VBO->allocate(VBOOP, num * 80);
 	IBO->allocate(IBOOP, num * 24);
+//	glBlendFunc(GL_ONE, GL_ZERO);
 
 	while(!que.empty()) {
 		float s = que.front();
@@ -563,7 +580,7 @@ void TreeRender2::render()
 		matrix.scale(2.8f, 2.8f);
 		camera.setPos(QVector3D(0, 1.5f, 6.0f));
 		camera.setPitch(0);
-		ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("alpha", 1.0f, 0.0f);
+		ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("alpha", 1.3f, 0.0f);
 		ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("projection", pr * camera.getMatrix() * matrix);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	}
@@ -609,7 +626,8 @@ SlowEffectRender1::SlowEffectRender1(QObject *parent) : RenderBase (parent)
 	ShaderManager::INSTANCE()->getProgram(2)->enableAttributeArray(ShaderManager::INSTANCE()->getProgram(2)->attributeLocation("aTexCoord"));
 	ShaderManager::INSTANCE()->getProgram(2)->setAttributeBuffer(ShaderManager::INSTANCE()->getProgram(2)->attributeLocation("aTexCoord"), GL_FLOAT, 3 * sizeof(float), 2, sizeof(float) * 5);
 	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("isBlur", OpenGLGame::Instance->isPause());
-	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("totAlpha",GameWidget::Instance->getAlpha());
+	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("isBlack", OpenGLGame::Instance->isBlack);
+	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("totAlpha", GameWidget::Instance->getAlpha());
 
 	VAO->release();
 	VBO->release();
@@ -651,8 +669,8 @@ void SlowEffectRender1::render()
 	matrix.rotate(angle0, 0.0, 0.0, 1.0);
 	matrix.scale(0.1f * 1.4f, 0.1f * 1.4f);
 	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("projection", matrix);
-	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("totAlpha",GameWidget::Instance->getAlpha());
-
+	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("totAlpha", GameWidget::Instance->getAlpha());
+	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("isBlack", OpenGLGame::Instance->isBlack);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	VAO->release();
 	ShaderManager::INSTANCE()->getProgram(2)->release();
@@ -672,13 +690,14 @@ void SlowEffectRender2::render()
 
 	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("alpha", alpha0, 0.0f);
 	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("isBlur", OpenGLGame::Instance->isPause());
-	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("totAlpha",GameWidget::Instance->getAlpha());
+	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("totAlpha", GameWidget::Instance->getAlpha());
 
 	QMatrix4x4 matrix;
 	matrix.translate(x0, y0 * ItemManager::INSTANCE()->getDiv(), 0);
 	matrix.rotate(angle0, 0.0, 0.0, 1.0);
 	matrix.scale(0.1f * 1.4f, 0.1f * 1.4f);
 	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("projection", matrix);
+	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("isBlack", OpenGLGame::Instance->isBlack);
 
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	VAO->release();
@@ -699,11 +718,12 @@ void CenterRender::render()
 	TextureManager::INSTANCE()->getTexture(TextureManager::CENTER)->bind(0);
 
 	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("alpha", alpha0, 0.0f);
-	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("totAlpha",GameWidget::Instance->getAlpha());
+	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("totAlpha", GameWidget::Instance->getAlpha());
 	QMatrix4x4 matrix;
 	matrix.translate(x0, y0 * ItemManager::INSTANCE()->getDiv(), 0);
 	matrix.rotate(angle0, 0.0, 0.0, 1.0);
 	matrix.scale(0.035f, 0.035f);
+	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("isBlack", OpenGLGame::Instance->isBlack);
 	ShaderManager::INSTANCE()->getProgram(2)->setUniformValue("projection", matrix);
 
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -761,7 +781,8 @@ void LineRender::render()
 	TextureManager::INSTANCE()->getTexture(TextureManager::MARISA_LINE)->bind(0);
 	ShaderManager::INSTANCE()->getProgram(3)->setUniformValue("alpha", 0.6f, 0.0f);
 	ShaderManager::INSTANCE()->getProgram(3)->setUniformValue("isBlur", OpenGLGame::Instance->isPause());
-	ShaderManager::INSTANCE()->getProgram(3)->setUniformValue("totAlpha",GameWidget::Instance->getAlpha());
+	ShaderManager::INSTANCE()->getProgram(3)->setUniformValue("isBlack", OpenGLGame::Instance->isBlack);
+	ShaderManager::INSTANCE()->getProgram(3)->setUniformValue("totAlpha", GameWidget::Instance->getAlpha());
 
 	VBO->allocate(VBOOP, num * 96);
 	IBO->allocate(IBOOP, num * 24);
@@ -777,6 +798,7 @@ void LineRender::render()
 
 void LineRender::setPos(float x, float y, float up, float left, float limit)
 {
+	offset(x, y);
 	++num;
 	VBOOP[offsetVBO++] = x - left;
 	VBOOP[offsetVBO++] = y + up;
@@ -882,7 +904,8 @@ void TranslateAlphaRender2D::render()
 	ShaderManager::INSTANCE()->getProgram(4)->enableAttributeArray(ShaderManager::INSTANCE()->getProgram(4)->attributeLocation("alpha"));
 	ShaderManager::INSTANCE()->getProgram(4)->setAttributeBuffer(ShaderManager::INSTANCE()->getProgram(4)->attributeLocation("alpha"), GL_FLOAT, 5 * sizeof(float), 1, sizeof(float) * 6);
 	ShaderManager::INSTANCE()->getProgram(4)->setUniformValue("isBlur", OpenGLGame::Instance->isPause());
-	ShaderManager::INSTANCE()->getProgram(4)->setUniformValue("totAlpha",GameWidget::Instance->getAlpha());
+	ShaderManager::INSTANCE()->getProgram(4)->setUniformValue("totAlpha", GameWidget::Instance->getAlpha());
+	ShaderManager::INSTANCE()->getProgram(4)->setUniformValue("isBlack", OpenGLGame::Instance->isBlack);
 
 	TextureManager::INSTANCE()->getTexture(t)->bind(0);
 
@@ -900,6 +923,7 @@ void TranslateAlphaRender2D::render()
 
 void TranslateAlphaRender2D::setPos(float x, float y, float up, float left, float alpha)
 {
+	offset(x, y);
 	++num;
 	VBOOP[offsetVBO++] = x - left;
 	VBOOP[offsetVBO++] = y + up;
@@ -1007,7 +1031,8 @@ void RotateAlphaRender2D::render()
 	ShaderManager::INSTANCE()->getProgram(5)->enableAttributeArray(ShaderManager::INSTANCE()->getProgram(5)->attributeLocation("alpha"));
 	ShaderManager::INSTANCE()->getProgram(5)->setAttributeBuffer(ShaderManager::INSTANCE()->getProgram(5)->attributeLocation("alpha"), GL_FLOAT, 8 * sizeof(float), 1, sizeof(float) * 9);
 	ShaderManager::INSTANCE()->getProgram(5)->setUniformValue("isBlur", OpenGLGame::Instance->isPause());
-	ShaderManager::INSTANCE()->getProgram(5)->setUniformValue("totAlpha",GameWidget::Instance->getAlpha());
+	ShaderManager::INSTANCE()->getProgram(5)->setUniformValue("totAlpha", GameWidget::Instance->getAlpha());
+	ShaderManager::INSTANCE()->getProgram(5)->setUniformValue("isBlack", OpenGLGame::Instance->isBlack);
 
 	TextureManager::INSTANCE()->getTexture(t)->bind(0);
 
@@ -1025,6 +1050,7 @@ void RotateAlphaRender2D::render()
 
 void RotateAlphaRender2D::setPos(float x, float y, float up, float left, float angle, float alpha)
 {
+	offset(x, y);
 	++num;
 
 	VBOOP[offsetVBO++] = -left;
@@ -1108,7 +1134,7 @@ WhiteNumberRender::WhiteNumberRender(TextureManager::TextureType type, QObject *
 
 PauseMenuRender::PauseMenuRender(TextureManager::TextureType type, QObject *parent) : TranslateAlphaRender2D (type, parent)
 {
-	changeMAX(2);
+	changeMAX(1);
 }
 
 void PauseMenuRender::render()
@@ -1133,7 +1159,8 @@ void PauseMenuRender::render()
 	ShaderManager::INSTANCE()->getProgram(4)->enableAttributeArray(ShaderManager::INSTANCE()->getProgram(4)->attributeLocation("alpha"));
 	ShaderManager::INSTANCE()->getProgram(4)->setAttributeBuffer(ShaderManager::INSTANCE()->getProgram(4)->attributeLocation("alpha"), GL_FLOAT, 5 * sizeof(float), 1, sizeof(float) * 6);
 	ShaderManager::INSTANCE()->getProgram(4)->setUniformValue("isBlur", false);
-	ShaderManager::INSTANCE()->getProgram(4)->setUniformValue("totAlpha",GameWidget::Instance->getAlpha());
+	ShaderManager::INSTANCE()->getProgram(4)->setUniformValue("isBlack", false);
+	ShaderManager::INSTANCE()->getProgram(4)->setUniformValue("totAlpha", GameWidget::Instance->getAlpha());
 
 	TextureManager::INSTANCE()->getTexture(t)->bind(0);
 
@@ -1148,3 +1175,53 @@ void PauseMenuRender::render()
 	VBO->release();
 	IBO->release();
 }
+
+SPPRender::SPPRender(TextureManager::TextureType type, QObject *parent) : TranslateRender2D (type, parent)
+{
+	changeMAX(15);
+}
+
+MasterRender::MasterRender(TextureManager::TextureType type, QObject *parent) : TranslateAlphaRender2D (type, parent)
+{
+	changeMAX(1);
+}
+
+void MasterRender::render()
+{
+	VBO->destroy();
+	VAO->destroy();
+	IBO->destroy();
+	VAO->create();
+	VAO->bind();
+	VBO->create();
+	VBO->bind();
+	IBO->create();
+	IBO->bind();
+
+	ShaderManager::INSTANCE()->getProgram(4)->bind();
+	ShaderManager::INSTANCE()->getProgram(4)->enableAttributeArray(ShaderManager::INSTANCE()->getProgram(4)->attributeLocation("aPos"));
+	ShaderManager::INSTANCE()->getProgram(4)->setAttributeBuffer(ShaderManager::INSTANCE()->getProgram(4)->attributeLocation("aPos"), GL_FLOAT, 0, 3, sizeof(float) * 6);
+
+	ShaderManager::INSTANCE()->getProgram(4)->enableAttributeArray(ShaderManager::INSTANCE()->getProgram(4)->attributeLocation("aTexCoord"));
+	ShaderManager::INSTANCE()->getProgram(4)->setAttributeBuffer(ShaderManager::INSTANCE()->getProgram(4)->attributeLocation("aTexCoord"), GL_FLOAT, 3 * sizeof(float), 2, sizeof(float) * 6);
+
+	ShaderManager::INSTANCE()->getProgram(4)->enableAttributeArray(ShaderManager::INSTANCE()->getProgram(4)->attributeLocation("alpha"));
+	ShaderManager::INSTANCE()->getProgram(4)->setAttributeBuffer(ShaderManager::INSTANCE()->getProgram(4)->attributeLocation("alpha"), GL_FLOAT, 5 * sizeof(float), 1, sizeof(float) * 6);
+	ShaderManager::INSTANCE()->getProgram(4)->setUniformValue("isBlur", OpenGLGame::Instance->isPause());
+	ShaderManager::INSTANCE()->getProgram(4)->setUniformValue("totAlpha", GameWidget::Instance->getAlpha());
+	ShaderManager::INSTANCE()->getProgram(4)->setUniformValue("isBlack", false);
+
+	TextureManager::INSTANCE()->getTexture(t)->bind(0);
+
+	VBO->allocate(VBOOP, num * 96);
+	IBO->allocate(IBOOP, num * 24);
+
+	glDrawElements(GL_TRIANGLES, num * 6, GL_UNSIGNED_INT, 0);
+
+	ShaderManager::INSTANCE()->getProgram(4)->release();
+	TextureManager::INSTANCE()->getTexture(t)->release();
+	VAO->release();
+	VBO->release();
+	IBO->release();
+}
+

@@ -213,11 +213,32 @@ public:
 	bool update(RenderBase *render)override;
 };
 
-class PauseMenu2EndEvent:public PauseMenuEndEvent{
+class PauseMenu2EndEvent : public PauseMenuEndEvent {
 	Q_OBJECT
 public:
 	explicit PauseMenu2EndEvent(int id, float beginY, bool lock, QObject *parent = nullptr);
 	bool update(RenderBase *render)override;
+};
+class SPPEvent : public ItemDataEventBase {
+	Q_OBJECT
+public:
+	explicit SPPEvent(float x, float y, QObject *parent = nullptr);
+	bool update(RenderBase *render)override;
+protected:
+	bool isIn();
+	double dis2();
+
+private:
+	float x, y;
+};
+
+class MasterEvent : public ItemDataEventBase {
+public:
+	explicit MasterEvent(QObject *parent = nullptr);
+	bool update(RenderBase *render)override;
+
+private:
+	int time;
 };
 
 #endif

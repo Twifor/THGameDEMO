@@ -49,6 +49,7 @@ public:
 	void endShift();
 	void startZ();
 	void endZ();
+	void startX();
 	static GameWidget *Instance;
 	void addScore(int add);
 	void addPower();

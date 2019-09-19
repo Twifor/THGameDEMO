@@ -4,6 +4,7 @@
 #include "musicfactory.h"
 
 #include <QGraphicsOpacityEffect>
+#define SPEED 0.025f
 
 OpenGLGame::OpenGLGame(QWidget *parent) : QOpenGLWidget(parent)
 {
@@ -21,6 +22,8 @@ OpenGLGame::~OpenGLGame()
 
 void OpenGLGame::pause()
 {
+	qDebug() << "Pause";
+	pauseTimeOut = 60;
 	pauseLock = true;
 	pauseStatus = 1;
 	ItemManager::INSTANCE()->addItem(ItemManager::P1, 1, new PauseMenuEvent(0, -0.45f, false));
@@ -30,6 +33,7 @@ void OpenGLGame::pause()
 
 void OpenGLGame::endPause()
 {
+	qDebug() << "EndPause";
 	if(pauseStatus > 4) {
 		QSound::play(":/std/cancel.wav");
 		pauseStatus &= ~24;
@@ -39,15 +43,21 @@ void OpenGLGame::endPause()
 		else ItemManager::INSTANCE()->addItem(ItemManager::P2B, 1, new PauseMenuEndEvent(1, -0.55f, false));
 		if(pauseStatus == 4) ItemManager::INSTANCE()->addItem(ItemManager::P3, 1, new PauseMenuEvent(2, -0.65f, false));
 		else ItemManager::INSTANCE()->addItem(ItemManager::P3B, 1, new PauseMenuEndEvent(2, -0.65f, false));
-		return;
+	}else{
+		pauseLock = false;
+		pauseStatus = -40;
 	}
-	pauseLock = false;
-	pauseStatus = -40;
+	pauseTimeOut = 60;
 }
 
 bool OpenGLGame::isPause()
 {
 	return pauseLock;
+}
+
+bool OpenGLGame::isPauseResponse()
+{
+	return pauseTimeOut == 0;
 }
 
 void OpenGLGame::startLeft()
@@ -158,7 +168,7 @@ void OpenGLGame::endDown()
 
 void OpenGLGame::startShift()
 {
-	if(pauseLock) return;
+	if(pauseLock || spellCard != 0) return;
 	status |= 16;
 	slowEffectTimeLine = 1;
 	slowEffectRotate1 = 0;
@@ -179,7 +189,9 @@ void OpenGLGame::endShift()
 void OpenGLGame::startZ()
 {
 	if(pauseLock) {
+		if(pauseTimeOut > 0) return;
 		QSound::play(":/std/ok.wav");
+		qDebug() << QString("PauseStatus: %1").arg(pauseStatus);
 		if(pauseStatus == 1) {
 			GameWidget::Instance->quit();
 		}else if(pauseStatus == 2) {
@@ -212,14 +224,24 @@ void OpenGLGame::startZ()
 				});
 			}
 		}
+		pauseTimeOut = 60;
 		return;
 	}
+	if(spellCard != 0) return;
 	status |= 32;
 }
 
 void OpenGLGame::endZ()
 {
 	status &= ~32;
+}
+
+void OpenGLGame::startX()
+{
+	qDebug() << "start Spell Card";
+	spellCard = -70;
+	isBlack = true;
+	QSound::play(":/std/premaster.wav");
 }
 
 void OpenGLGame::levelUp()
@@ -250,6 +272,10 @@ void OpenGLGame::initializeGL()
 	bulletTime = 0;
 	activeItems = false;
 	ballRotate = 0;
+	pauseTimeOut = 0;
+	isBlack = false;
+	spellCard = 0;
+	offsetX = offsetY = 0;
 	//安装渲染器
 	ItemManager::INSTANCE()->installRender(ItemManager::BACKGROUND, new BackGroundRender(TextureManager::BACKGROUND));
 	ItemManager::INSTANCE()->installRender(ItemManager::STAR_BACKGROUND, new StarBackGroundRender(TextureManager::STAR_BACKGROUND));
@@ -293,6 +319,8 @@ void OpenGLGame::initializeGL()
 	ItemManager::INSTANCE()->installRender(ItemManager::PN, new PauseMenuRender(TextureManager::PN));
 	ItemManager::INSTANCE()->installRender(ItemManager::PYB, new PauseMenuRender(TextureManager::PYB));
 	ItemManager::INSTANCE()->installRender(ItemManager::PNB, new PauseMenuRender(TextureManager::PNB));
+	ItemManager::INSTANCE()->installRender(ItemManager::SPP, new SPPRender(TextureManager::SPP));
+	ItemManager::INSTANCE()->installRender(ItemManager::MASTER, new MasterRender(TextureManager::MASTER));
 
 	//注册事件
 	ItemManager::INSTANCE()->addItem(ItemManager::BACKGROUND, 1, new BackGroundEvent(-26.0));
@@ -351,23 +379,27 @@ void OpenGLGame::drawMyPlane()
 {
 	activeItems = myPlaneY > 0.6f;
 	if(status & 1) {
-		if(status & 16) myPlaneX -= 0.0125f;
-		else myPlaneX -= 0.025f;
+		if(spellCard != 0) myPlaneX -= SPEED / 8.0f;
+		else if(status & 16) myPlaneX -= SPEED / 2.0f;
+		else myPlaneX -= SPEED;
 		if(myPlaneX <= -0.915f) myPlaneX = -0.915f;
 	}
 	if(status & 2) {
-		if(status & 16) myPlaneX += 0.0125f;
-		else myPlaneX += 0.025f;
+		if(spellCard != 0) myPlaneX += SPEED / 8.0f;
+		else if(status & 16) myPlaneX += SPEED / 2.0f;
+		else myPlaneX += SPEED;
 		if(myPlaneX >= 0.915f) myPlaneX = 0.915f;
 	}
 	if(status & 4) {
-		if(status & 16) myPlaneY += 0.0125f;
-		else myPlaneY += 0.025f;
+		if(spellCard != 0) myPlaneY += SPEED / 8.0f;
+		else if(status & 16) myPlaneY += SPEED / 2.0f;
+		else myPlaneY += SPEED;
 		if(myPlaneY >= 0.81f) myPlaneY = 0.81f;
 	}
 	if(status & 8) {
-		if(status & 16) myPlaneY -= 0.0125f;
-		else myPlaneY -= 0.025f;
+		if(spellCard != 0) myPlaneY -= SPEED / 8.0f;
+		else if(status & 16) myPlaneY -= SPEED / 2.0f;
+		else myPlaneY -= SPEED;
 		if(myPlaneY <= -0.79f) myPlaneY = -0.79f;
 	}
 	++myPlaneTimeLine;
@@ -385,6 +417,7 @@ void OpenGLGame::drawMyPlane()
 	drawBalls();
 	drawLines();
 	drawBullets();
+	drawSpellCard();
 }
 
 void OpenGLGame::drawSlowEffect()
@@ -592,5 +625,44 @@ void OpenGLGame::drawBullets()
 
 void OpenGLGame::dealSomeThing()
 {
+	if(pauseTimeOut > 0) --pauseTimeOut;
 	if(pauseStatus < 0) ++pauseStatus;
+	if(spellCard != 0) {
+		status &= ~32;
+		if(status & 16) {
+			status &= ~16;
+			slowEffectTimeLine = -20;
+			ballTimeLine = -ballTimeLine;
+		}
+	}
+}
+
+void OpenGLGame::drawSpellCard()
+{
+	if(spellCard == 0) return;
+	if(spellCard < 0) {
+		++spellCard;
+		if(spellCard == 0) {
+			spellCard = 1;
+			return;
+		}
+		if((-spellCard) % 5 == 0) {
+			float x = myPlaneX + 0.3 * cos(spellCard);
+			float y = myPlaneY + 0.3 * sin(spellCard);
+			ItemManager::INSTANCE()->addItem(ItemManager::SPP, 1, new SPPEvent(x, y));
+		}
+	}else if(spellCard == 1) {
+		ItemManager::INSTANCE()->addItem(ItemManager::MASTER, 1, new MasterEvent);
+		QSound::play(":/std/master.wav");
+		++spellCard;
+	}else{
+		++spellCard;
+		activeItems = true;
+		offsetX = 0.02f * X[spellCard % 8];
+		offsetY = 0.02f * Y[spellCard % 8];
+		if(spellCard == 330) {
+			spellCard = 0;
+			isBlack = false;
+		}
+	}
 }

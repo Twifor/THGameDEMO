@@ -4,6 +4,7 @@ in float A;
 
 uniform sampler2D mainTexture;
 uniform float totAlpha;
+uniform bool isBlack;
 
 out vec4 FragColor;
 uniform bool isBlur;
@@ -31,4 +32,10 @@ void main(){
     else FragColor = texture(mainTexture,TexCoord);
     FragColor.a *= A;
     FragColor.a *= totAlpha;
+    if(isBlack){
+        FragColor.r = FragColor.r * 0.5f;
+        FragColor.g = FragColor.g * 0.5f;
+        FragColor.b = FragColor.b * 0.5f;
+    }
+
 }
