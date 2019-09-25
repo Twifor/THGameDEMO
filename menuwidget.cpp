@@ -9,6 +9,7 @@
 
 #define SCALE 0.5f
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
+#define MAX(x, y) ((x) > (y) ? (x) : (y))
 
 QMatrix4x4 *MenuWidget::matrix = nullptr;
 QOpenGLShaderProgram *MenuWidget::getProgram = nullptr;
@@ -46,6 +47,7 @@ MenuWidget::MenuWidget(QWidget *parent) : QOpenGLWidget(parent)
 	lock2 = true;
 	degree = 0.0f;
 	loadingAlpha = 0.0f;
+	chooseStatus = 0;
 
 	status = MAIN;
 }
@@ -146,6 +148,7 @@ void MenuWidget::ok()
 
 void MenuWidget::quitWindow()
 {
+
 	if(status == MAIN && sparkTime == -1) {
 		atAnimation = at = 3;
 		QSound::play(":/std/cancel.wav");
@@ -156,6 +159,29 @@ void MenuWidget::quitWindow()
 	}else if(status == CONFIG && configStatus != 0 && configStatus != 1) {
 		configStatus = 2;
 		QSound::play(":/std/cancel.wav");
+	}else if(status == CHOOSE && chooseStatus == 31) {
+		QSound::play(":/std/cancel.wav");
+		lock = true;
+		at = 0;
+		atAnimation = -1;
+		sparkTime = -1;
+		totAlpha = 1.0f;
+		now = 0;
+		pos[0] = -1.5f;
+		pos[1] = -1.5f;
+		pos[2] = -1.5f;
+		pos[3] = -1.5f;
+
+		pos2[0] = -0.10f;
+		pos2[1] = -0.10f;
+		pos2[2] = -0.10f;
+		pos2[3] = -0.10f;
+
+		magicTime = 0;
+		lock2 = true;
+		degree = 0.0f;
+		status = MAIN;
+		chooseStatus = 0;
 	}
 
 }
@@ -397,7 +423,7 @@ void MenuWidget:: paintGL()
 
 	VAO->bind();
 	texture->bind(0);
-	if(status != GAMESTART) musicRoom_bg->bind(2);
+	if(status != GAMESTART) musicRoom_bg->bind(2); //否则不绑定，就是渐黑加载
 	program->bind();
 	program->setUniformValue("alpha", totAlpha, 0.0f);
 
@@ -416,70 +442,129 @@ void MenuWidget:: paintGL()
 	emit draw(totAlpha);
 	texture2->release();
 //	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	magic->bind(1);
-	matrix->setToIdentity();
-	matrix->translate(0.5f - MIN(magicTime, 30) / 150.0f, -0.1f);
-	matrix->scale(0.75f * 1.8f, 1.8f);
-	matrix->rotate(degree, 0.0f, 0.0f, 1.0f);
-	matrix->translate(-0.5f, -0.5f, 0.0f);
-	MenuWidget::getProgram->setUniformValue("projection", *MenuWidget::matrix);
-	MenuWidget::getProgram->setUniformValue("alpha", totAlpha * MIN(magicTime, 30) / 60.0f, 0.0f);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-
-	magic->release();
 //	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	if(magicTime > 45) {
+	if(status != CHOOSE) {
+		magic->bind(1);
+		matrix->setToIdentity();
+		matrix->translate(0.5f - MIN(magicTime, 30) / 150.0f, -0.1f);
+		matrix->scale(0.75f * 1.8f, 1.8f);
+		matrix->rotate(degree, 0.0f, 0.0f, 1.0f);
+		matrix->translate(-0.5f, -0.5f, 0.0f);
+		MenuWidget::getProgram->setUniformValue("projection", *MenuWidget::matrix);
+		MenuWidget::getProgram->setUniformValue("alpha", totAlpha * MIN(magicTime, 30) / 60.0f, 0.0f);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+
+		magic->release();
+
+		if(magicTime > 45) {//画三个立绘
+			startN->bind(1);
+			matrix->setToIdentity();
+			matrix->translate(-0.55f + (MIN(magicTime, 60) - 45.0f) / 150.0f, -0.5f, 0.0f);
+			matrix->scale(0.75f * 1.2f, 1.2f);
+			MenuWidget::getProgram->setUniformValue("projection", *MenuWidget::matrix);
+			MenuWidget::getProgram->setUniformValue("alpha", totAlpha * (MIN(magicTime, 60) - 45.0f) / 25.0f, 0.0f);
+			glDrawArrays(GL_TRIANGLES, 0, 6);
+
+			startN->release();
+		}
+
+		if(magicTime > 30) {
+			startK->bind(1);
+			matrix->setToIdentity();
+			matrix->translate(-0.2f, -0.6f + (MIN(magicTime, 45) - 30.0f) / 150.0f, 0.0f);
+			matrix->scale(0.75f * 1.2f, 1.2f);
+			MenuWidget::getProgram->setUniformValue("projection", *MenuWidget::matrix);
+			MenuWidget::getProgram->setUniformValue("alpha", totAlpha * (MIN(magicTime, 45) - 30.0f) / 28.0f, 0.0f);
+			glDrawArrays(GL_TRIANGLES, 0, 6);
+			startK->release();
+		}
+
+		if(magicTime > 60) {
+			startF->bind(1);
+			matrix->setToIdentity();
+			matrix->translate(0.22f - (MIN(magicTime, 75) - 60.0f) / 150.0f, -0.5f, 0.0f);
+			matrix->scale(0.75f * 1.2f, 1.2f);
+			MenuWidget::getProgram->setUniformValue("projection", *MenuWidget::matrix);
+			MenuWidget::getProgram->setUniformValue("alpha", totAlpha *  (MIN(magicTime, 75) - 60.0f) / 25.0f, 0.0f);
+			glDrawArrays(GL_TRIANGLES, 0, 6);
+
+			startF->release();
+		}
+		if(magicTime > 75) {
+			title->bind(1);
+			matrix->setToIdentity();
+			matrix->translate(-0.38f, (MIN(magicTime, 90.0f) - 90.0f) / 60.0f - 0.70f, 0.0f);
+			matrix->scale(1.8f * 0.75f, 0.15f * 1.8f);
+			MenuWidget::getProgram->setUniformValue("projection", *MenuWidget::matrix);
+			MenuWidget::getProgram->setUniformValue("alpha", 0.95f * totAlpha *  1.0f * (MIN(magicTime, 90) - 75.0f) / 25.0f, 0.0f);
+			glDrawArrays(GL_TRIANGLES, 0, 6);
+
+			title->release();
+		}
+		if(lock2) {//开场动画开关
+			++magicTime;
+			if(magicTime == 90) lock2 = false;
+		}
+	}else{//做一个过场动画
+		magic->bind(1);        //你说硬核不硬核？
+		matrix->setToIdentity();
+		matrix->translate(0.3f + chooseStatus / 30.0 * 0.2f, -0.1f);
+		matrix->scale(0.75f * 1.8f, 1.8f);
+		matrix->rotate(degree, 0.0f, 0.0f, 1.0f);
+		matrix->translate(-0.5f, -0.5f, 0.0f);
+		MenuWidget::getProgram->setUniformValue("projection", *MenuWidget::matrix);
+		if(chooseStatus > 0) MenuWidget::getProgram->setUniformValue("alpha", totAlpha * 0.5f * (30 - chooseStatus) / 30.0f, 0.0f);
+		else MenuWidget::getProgram->setUniformValue("alpha", totAlpha * 0.5f * (-chooseStatus) / 30.0f, 0.0f);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		magic->release();
+
 		startN->bind(1);
 		matrix->setToIdentity();
-		matrix->translate(-0.55f + (MIN(magicTime, 60) - 45.0f) / 150.0f, -0.5f, 0.0f);
+		matrix->translate(-0.45f + chooseStatus / 30.0 * 0.2f, -0.5f, 0.0f);
 		matrix->scale(0.75f * 1.2f, 1.2f);
 		MenuWidget::getProgram->setUniformValue("projection", *MenuWidget::matrix);
-		MenuWidget::getProgram->setUniformValue("alpha", totAlpha * (MIN(magicTime, 60) - 45.0f) / 25.0f, 0.0f);
+		if(chooseStatus > 0) MenuWidget::getProgram->setUniformValue("alpha", totAlpha * 0.6f * (30 - chooseStatus) / 30.0f, 0.0f);
+		else MenuWidget::getProgram->setUniformValue("alpha", totAlpha * 0.6f * (-chooseStatus) / 30.0f, 0.0f);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
-
 		startN->release();
-	}
 
-	if(magicTime > 30) {
 		startK->bind(1);
 		matrix->setToIdentity();
-		matrix->translate(-0.2f, -0.6f + (MIN(magicTime, 45) - 30.0f) / 150.0f, 0.0f);
+		matrix->translate(-0.2f + chooseStatus / 30.0 * 0.2f, -0.5f, 0.0f);
 		matrix->scale(0.75f * 1.2f, 1.2f);
 		MenuWidget::getProgram->setUniformValue("projection", *MenuWidget::matrix);
-		MenuWidget::getProgram->setUniformValue("alpha", totAlpha * (MIN(magicTime, 45) - 30.0f) / 28.0f, 0.0f);
+		if(chooseStatus > 0) MenuWidget::getProgram->setUniformValue("alpha", totAlpha * 15.0f / 28.0f * (30 - chooseStatus) / 30.0f, 0.0f);
+		else MenuWidget::getProgram->setUniformValue("alpha", totAlpha * 15.0f / 28.0f * (-chooseStatus) / 30.0f, 0.0f);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		startK->release();
-	}
 
-	if(magicTime > 60) {
 		startF->bind(1);
 		matrix->setToIdentity();
-		matrix->translate(0.22f - (MIN(magicTime, 75) - 60.0f) / 150.0f, -0.5f, 0.0f);
+		matrix->translate(0.12f + chooseStatus / 30.0 * 0.2f, -0.5f, 0.0f);
 		matrix->scale(0.75f * 1.2f, 1.2f);
 		MenuWidget::getProgram->setUniformValue("projection", *MenuWidget::matrix);
-		MenuWidget::getProgram->setUniformValue("alpha", totAlpha *  (MIN(magicTime, 75) - 60.0f) / 25.0f, 0.0f);
+		if(chooseStatus > 0) MenuWidget::getProgram->setUniformValue("alpha", totAlpha *  0.6f * (30 - chooseStatus) / 30.0f, 0.0f);
+		else MenuWidget::getProgram->setUniformValue("alpha", totAlpha *  0.6f * (-chooseStatus) / 30.0f, 0.0f);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
-
 		startF->release();
-	}
-	if(magicTime > 75) {
+
 		title->bind(1);
 		matrix->setToIdentity();
-		matrix->translate(-0.38f, (MIN(magicTime, 90.0f) - 90.0f) / 60.0f - 0.70f, 0.0f);
+		matrix->translate(-0.38f + chooseStatus / 30.0 * 0.2f, -0.70f, 0.0f);
 		matrix->scale(1.8f * 0.75f, 0.15f * 1.8f);
 		MenuWidget::getProgram->setUniformValue("projection", *MenuWidget::matrix);
-		MenuWidget::getProgram->setUniformValue("alpha", 0.95f * totAlpha *  1.0f * (MIN(magicTime, 90) - 75.0f) / 25.0f, 0.0f);
+		if(chooseStatus > 0) MenuWidget::getProgram->setUniformValue("alpha", 0.95f * totAlpha * 0.6f * (30 - chooseStatus) / 30.0f, 0.0f);
+		else MenuWidget::getProgram->setUniformValue("alpha", 0.95f * totAlpha * 0.6f * (-chooseStatus) / 30.0f, 0.0f);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
-
 		title->release();
+
+		if(chooseStatus > 0) {
+			++chooseStatus;
+			if(chooseStatus > 31) chooseStatus = 31;
+		}
 	}
 
-	if(lock2) {
-		++magicTime;
-		if(magicTime == 90) lock2 = false;
-	}
 	degree += 0.2f;
 	if(degree > 360.0f) degree = 0.0f;
 
@@ -489,6 +574,7 @@ void MenuWidget:: paintGL()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	drawMenu();
+	drawChoose();
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 	p2->bind(1);
@@ -527,6 +613,8 @@ void MenuWidget:: paintGL()
 				thread->start();
 			}
 		}
+	}else if(status == CHOOSE) {
+
 	}
 }
 
@@ -752,10 +840,15 @@ void MenuWidget::drawMenu()
 			}else gameStart_b->bind(1);
 			menuMatrix->setToIdentity();
 			if(atAnimation == 0) menuMatrix->translate(-0.686331f + X[animationTime % 8] * ANIMATION, -0.201709f + Y[animationTime % 8] * ANIMATION);
-			else menuMatrix->translate(-0.686331f, -0.201709f);
+			else if(status == CHOOSE) {
+				if(chooseStatus > 0) {
+					menuMatrix->translate(-0.686331f - MIN(chooseStatus, 30) / 30.0f * 0.2f, -0.201709f);
+				}
+			}else menuMatrix->translate(-0.686331f, -0.201709f);
 			menuMatrix->scale(SCALE, SCALE);
 			program3->setUniformValue("projection", *menuMatrix);
-			program3->setUniformValue("alpha", totAlpha, 0.0f);
+			if(status == CHOOSE && chooseStatus > 0) program3->setUniformValue("alpha", totAlpha * (30 - MIN(chooseStatus, 30)) / 30.0f, 0.0f);
+			else program3->setUniformValue("alpha", totAlpha, 0.0f);
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 			if(at == 0) {
 				if(sparkTime == -1) gameStart->release();
@@ -770,10 +863,15 @@ void MenuWidget::drawMenu()
 			}else musicRoom_b->bind(1);
 			menuMatrix->setToIdentity();
 			if(atAnimation == 1) menuMatrix->translate(-0.70969f + X[animationTime % 8] * ANIMATION, -0.346972f + Y[animationTime % 8] * ANIMATION);
-			else menuMatrix->translate(-0.70969f, -0.346972f);
+			else if(status == CHOOSE) {
+				if(chooseStatus > 0) {
+					menuMatrix->translate(-0.70969f - MIN(chooseStatus, 30) / 30.0f * 0.2f, -0.346972f);
+				}
+			}else menuMatrix->translate(-0.70969f, -0.346972f);
 			menuMatrix->scale(SCALE, SCALE);
 			program3->setUniformValue("projection", *menuMatrix);
-			program3->setUniformValue("alpha", totAlpha, 0.0f);
+			if(status == CHOOSE && chooseStatus > 0) program3->setUniformValue("alpha", totAlpha * (30 - MIN(chooseStatus, 30)) / 30.0f, 0.0f);
+			else program3->setUniformValue("alpha", totAlpha, 0.0f);
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 			if(at == 1) {
 				if(sparkTime == -1) musicRoom->release();
@@ -788,10 +886,15 @@ void MenuWidget::drawMenu()
 			}else config_b->bind(1);
 			menuMatrix->setToIdentity();
 			if(atAnimation == 2) menuMatrix->translate(-0.669971f + X[animationTime % 8] * ANIMATION, -0.515014f + Y[animationTime % 8] * ANIMATION);
-			else menuMatrix->translate(-0.669971f, -0.515014f);
+			else if(status == CHOOSE) {
+				if(chooseStatus > 0) {
+					menuMatrix->translate(-0.669971f - MIN(chooseStatus, 30) / 30.0f * 0.2f, -0.515014f);
+				}
+			}else menuMatrix->translate(-0.669971f, -0.515014f);
 			menuMatrix->scale(SCALE, SCALE);
 			program3->setUniformValue("projection", *menuMatrix);
-			program3->setUniformValue("alpha", totAlpha, 0.0f);
+			if(status == CHOOSE && chooseStatus > 0) program3->setUniformValue("alpha", totAlpha * (30 - MIN(chooseStatus, 30)) / 30.0f, 0.0f);
+			else program3->setUniformValue("alpha", totAlpha, 0.0f);
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 			if(at == 2) {
 				if(sparkTime == -1) config->release();
@@ -806,10 +909,15 @@ void MenuWidget::drawMenu()
 			}else quit_b->bind(1);
 			menuMatrix->setToIdentity();
 			if(atAnimation == 3) menuMatrix->translate(-0.702958f + X[animationTime % 8] * ANIMATION, -0.658439f + Y[animationTime % 8] * ANIMATION);
-			else menuMatrix->translate(-0.702958f, -0.658439f);
+			else if(status == CHOOSE) {
+				if(chooseStatus > 0) {
+					menuMatrix->translate(-0.702958f - MIN(chooseStatus, 30) / 30.0f * 0.2f, -0.658439f);
+				}
+			}else menuMatrix->translate(-0.702958f, -0.658439f);
 			menuMatrix->scale(SCALE, SCALE);
 			program3->setUniformValue("projection", *menuMatrix);
-			program3->setUniformValue("alpha", totAlpha, 0.0f);
+			if(status == CHOOSE && chooseStatus > 0) program3->setUniformValue("alpha", totAlpha * (30 - MIN(chooseStatus, 30)) / 30.0f, 0.0f);
+			else program3->setUniformValue("alpha", totAlpha, 0.0f);
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 			if(at == 3) {
 				if(sparkTime == -1) quit->release();
@@ -1005,6 +1113,16 @@ void MenuWidget::drawMenu()
 	}
 }
 
+void MenuWidget::drawChoose()
+{
+	if(status != CHOOSE) return;
+	program3->bind();
+	VAO3->bind();
+
+	program3->release();
+	VAO3->release();
+}
+
 
 void MenuWidget::solve()
 {
@@ -1035,6 +1153,7 @@ void MenuWidget::solve()
 				magicTime = 0;
 				lock2 = true;
 				degree = 0.0f;
+				chooseStatus = 0;
 
 				this->show();
 				timer->setInterval(1000 / 60);
@@ -1053,7 +1172,8 @@ void MenuWidget::solve()
 			break;
 		}
 		case 0: {
-			status = GAMESTART;
+			status = CHOOSE;
+			chooseStatus = 1;//1表示离开的开始指标
 			break;
 		}
 	}

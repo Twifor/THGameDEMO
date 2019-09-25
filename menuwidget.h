@@ -76,6 +76,7 @@ class MenuWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core//�
 		MUSICROOM,
 		MUSICROOMING,
 		CONFIG,
+		CHOOSE,
 		GAMESTART//游戏开始加载的状态
 	};
 
@@ -132,6 +133,7 @@ private:
 	void loadData();
 	void loadParticles(int t);
 	void drawMenu();
+	void drawChoose();
 	float pos[4];
 	float pos2[4];
 	float degree;//旋转角度
@@ -143,6 +145,7 @@ private:
 	MenuStatus status;//菜单状态，其实想好好写的，但是想起状态机模型时已经基本写完了:P
 	int configStatus;//控制config时的动画过程
 	float posConfigX, posConfigY;//控制config选项的飞入
+	int chooseStatus;//choose界面调控参数
 
 	MusicRoom *musicRoomWidget;
 

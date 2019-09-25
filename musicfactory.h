@@ -8,7 +8,7 @@
 #include <QBuffer>
 #include <QSound>
 
-class MusicFactory : public QObject//单例模式，调控游戏全局的BGM
+class MusicFactory : public QObject//单例模式（为什么起名像工厂？我也不知道XD。调控游戏全局的BGM
 {
 	Q_OBJECT
 public:

@@ -662,6 +662,7 @@ void OpenGLGame::drawSpellCard()
 		offsetY = 0.02f * Y[spellCard % 8];
 		if(spellCard == 330) {
 			spellCard = 0;
+			offsetX = offsetY = 0;
 			isBlack = false;
 		}
 	}
